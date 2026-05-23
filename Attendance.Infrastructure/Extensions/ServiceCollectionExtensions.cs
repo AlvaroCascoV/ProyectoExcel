@@ -20,8 +20,10 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
+        services.Configure<DatabaseSettings>(configuration.GetSection(DatabaseSettings.SectionName));
+
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetActiveSqlConnectionString()));
 
         services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {

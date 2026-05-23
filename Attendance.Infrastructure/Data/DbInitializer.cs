@@ -31,7 +31,7 @@ public static class DbInitializer
             logger.LogError(
                 ex,
                 "Database initialization failed. Run script.sql against ProyectoExcel, then restart the API. " +
-                "See ApiProyectoExcel/appsettings.Development.json for the connection string.");
+                "See ApiProyectoExcel/appsettings.json (ConnectionStrings + Database:ActiveConnection).");
             throw;
         }
     }
