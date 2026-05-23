@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ApiProyectoExcel/ApiProyectoExcel.csproj" />
+  <Project Path="ProyectoExcel/MvcProyectoExcel.csproj" />
+</Solution>
