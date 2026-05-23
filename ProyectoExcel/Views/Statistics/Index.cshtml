@@ -1,0 +1,327 @@
+@model MvcProyectoExcel.ViewModels.StatisticsDashboardViewModel
+@using System.Text.Json
+@inject IWebHostEnvironment HostEnvironment
+@{
+    ViewData["Title"] = "Statistics";
+    var chartJsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var chartJson = JsonSerializer.Serialize(Model.ChartData, chartJsonOptions);
+    var successMessage = TempData["SuccessMessage"] as string;
+    var seedErrorMessage = TempData["ErrorMessage"] as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Statistics</h1>
+    @if (HostEnvironment.IsDevelopment() && Model.SelectedCourseId.HasValue)
+    {
+        <form asp-action="SeedPresentWeek" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="courseId" value="@Model.SelectedCourseId" />
+            <button type="submit" class="btn btn-sm btn-outline-secondary"
+                    onclick="return confirm('Mark all students Present for the last 7 days? Existing records for those days will be overwritten.');">
+                Seed test data (last 7 days)
+            </button>
+        </form>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(seedErrorMessage))
+{
+    <div class="alert alert-danger">@seedErrorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-4">
+        <label class="form-label" for="courseId">Course</label>
+        <select class="form-select" id="courseId" name="courseId" onchange="this.form.submit()">
+            @foreach (var course in Model.Courses)
+            {
+                if (Model.SelectedCourseId == course.Id)
+                {
+                    <option value="@course.Id" selected="selected">@course.Name</option>
+                }
+                else
+                {
+                    <option value="@course.Id">@course.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label" for="month">Month</label>
+        <select class="form-select" id="month" name="month" onchange="this.form.submit()">
+            <option value="">All</option>
+            @for (var m = 1; m <= 12; m++)
+            {
+                if (Model.SelectedMonth == m)
+                {
+                    <option value="@m" selected="selected">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+                }
+                else
+                {
+                    <option value="@m">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label" for="year">Year</label>
+        <input class="form-control" type="number" id="year" name="year" min="2020" max="2030"
+               value="@Model.SelectedYear" onchange="this.form.submit()" placeholder="All" />
+    </div>
+    <div class="col-md-1">
+        <label class="form-label" for="minPercent">Min %</label>
+        <input class="form-control" type="number" step="0.1" id="minPercent" name="minPercent" value="@Model.MinPercent" />
+    </div>
+    <div class="col-md-1">
+        <label class="form-label" for="maxPercent">Max %</label>
+        <input class="form-control" type="number" step="0.1" id="maxPercent" name="maxPercent" value="@Model.MaxPercent" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Load</button>
+    </div>
+</form>
+
+@if (Model.Statistics is not null)
+{
+    var stats = Model.Statistics;
+
+    <p class="text-muted mb-3">
+        Course: <strong>@stats.CourseName</strong> —
+        Lective days: <strong>@stats.TotalClassDays</strong>@(stats.TotalClassDays == Attendance.Infrastructure.Services.LectiveDayCalendar.LectiveDaysPerYear ? " (full year)" : string.Empty)
+    </p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-6 text-primary">@stats.AverageRealAttendancePercentage%</div>
+                    <div class="small text-muted">Average real attendance</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="h4 mb-0 text-warning">@stats.AtRiskCount</div>
+                    <div class="small text-muted">Below 80% (diploma)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="h4 mb-0 text-danger">@stats.BelowDropThresholdCount</div>
+                    <div class="small text-muted">Below 75% (at risk)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="h4 mb-0">@stats.Students.Count</div>
+                    <div class="small text-muted">Students</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-3">Status distribution</h2>
+                    <canvas id="statusChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-3">Attendance buckets</h2>
+                    <canvas id="bucketChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 mb-3">Top 5 students</h2>
+                    <canvas id="topChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.AtRiskRankings.Count > 0)
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Lowest attendance (at risk)</h2>
+                <canvas id="atRiskChart" height="120"></canvas>
+            </div>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>F</th>
+                    <th>R</th>
+                    <th>SAF</th>
+                    <th>Weighted</th>
+                    <th>Real %</th>
+                    <th>F %</th>
+                    <th>F+R %</th>
+                    <th>Diploma</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in stats.Students)
+                {
+                    <tr>
+                        <td>@student.Rank</td>
+                        <td>@student.FullName</td>
+                        <td>@student.AbsentCount</td>
+                        <td>@student.LateCount</td>
+                        <td>@student.EarlyLeaveCount</td>
+                        <td>@student.UnjustifiedWeighted.ToString("0.#")</td>
+                        <td>@student.RealAttendancePercentage%</td>
+                        <td>@student.AbsentFPercentage%</td>
+                        <td>@student.AbsentFRPercentage%</td>
+                        <td>
+                            @if (student.DiplomaEligible)
+                            {
+                                <span class="badge text-bg-success">OK</span>
+                            }
+                            else if (student.AtRiskDrop)
+                            {
+                                <span class="badge text-bg-danger">At risk</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-warning">Below 80%</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (Model.Statistics is not null)
+{
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        const chartData = @Html.Raw(chartJson);
+
+        function initChart(canvasId, config) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                return;
+            }
+
+            new Chart(canvas, config);
+        }
+
+        const statusValues = chartData.statusValues ?? [];
+        if (statusValues.some(v => v > 0)) {
+            initChart('statusChart', {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.statusLabels ?? [],
+                    datasets: [{ data: statusValues, backgroundColor: ['#198754', '#dc3545', '#ffc107', '#6c757d', '#0dcaf0', '#fd7e14', '#6610f2'] }]
+                },
+                options: { plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        const bucketValues = chartData.bucketValues ?? [];
+        if (bucketValues.some(v => v > 0)) {
+            initChart('bucketChart', {
+                type: 'bar',
+                data: {
+                    labels: chartData.bucketLabels ?? [],
+                    datasets: [{ label: 'Students', data: bucketValues, backgroundColor: '#0d6efd' }]
+                },
+                options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        const topLabels = chartData.topStudentLabels ?? [];
+        const topValues = chartData.topStudentValues ?? [];
+        if (topLabels.length > 0) {
+            const lowestTop = Math.min(...topValues);
+            const topAxisMin = Math.max(75, Math.min(95, Math.floor(lowestTop - 1)));
+
+            initChart('topChart', {
+                type: 'bar',
+                data: {
+                    labels: topLabels,
+                    datasets: [{ label: 'Real %', data: topValues, backgroundColor: '#198754' }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            min: topAxisMin,
+                            max: 100,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `Real %: ${ctx.parsed.x}%`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const atRiskLabels = chartData.atRiskLabels ?? [];
+        const atRiskValues = chartData.atRiskValues ?? [];
+        if (atRiskLabels.length > 0) {
+            initChart('atRiskChart', {
+                type: 'bar',
+                data: {
+                    labels: atRiskLabels,
+                    datasets: [{ label: 'Real %', data: atRiskValues, backgroundColor: '#dc3545' }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            min: 75,
+                            max: 100,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `Real %: ${ctx.parsed.x}%`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
+}

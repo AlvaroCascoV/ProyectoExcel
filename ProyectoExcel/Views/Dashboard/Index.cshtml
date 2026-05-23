@@ -1,0 +1,159 @@
+@model MvcProyectoExcel.ViewModels.StudentDashboardViewModel
+@using Attendance.Infrastructure.Entities
+@{
+    ViewData["Title"] = "My dashboard";
+}
+
+<div class="mb-4">
+    <h1 class="h3">Hello, @Model.FullName</h1>
+    <p class="text-muted mb-0">@Model.Email</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+else if (Model.Courses.Count == 0)
+{
+    <div class="alert alert-warning">You are not enrolled in any course.</div>
+}
+else
+{
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-md-6">
+            <label class="form-label" for="courseId">Course</label>
+            <select class="form-select" id="courseId" name="courseId" onchange="this.form.submit()">
+                @foreach (var course in Model.Courses)
+                {
+                    if (Model.SelectedCourseId == course.Id)
+                    {
+                        <option value="@course.Id" selected="selected">@course.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@course.Id">@course.Name</option>
+                    }
+                }
+            </select>
+        </div>
+    </form>
+
+    @if (Model.Summary is not null)
+    {
+        @if (!Model.Summary.DiplomaEligible)
+        {
+            <div class="alert alert-warning">
+                Your real attendance is <strong>@Model.Summary.RealAttendancePercentage%</strong>.
+                @if (Model.Summary.AtRiskDrop)
+                {
+                    <span>You are below the 75% at-risk threshold.</span>
+                }
+                else
+                {
+                    <span>You need at least 80% for diploma eligibility.</span>
+                }
+            </div>
+        }
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="display-6 @(Model.Summary.DiplomaEligible ? "text-primary" : "text-warning")">@Model.Summary.RealAttendancePercentage%</div>
+                        <div class="small text-muted">Real attendance (diploma)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="display-6 text-primary">@Model.Summary.AttendancePercentage%</div>
+                        <div class="small text-muted">Attendance</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="h4 mb-0">@Model.Summary.TotalSessions</div>
+                        <div class="small text-muted">Lective days (year)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        @if (Model.Summary.DiplomaEligible)
+                        {
+                            <span class="badge text-bg-success fs-6">Diploma eligible</span>
+                        }
+                        else if (Model.Summary.AtRiskDrop)
+                        {
+                            <span class="badge text-bg-danger fs-6">At risk (&lt;75%)</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-warning fs-6">Below 80%</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="small text-muted mb-2">Breakdown</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.Present)">Present: @Model.Summary.PresentCount</span>
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.Absent)">Absent: @Model.Summary.AbsentCount</span>
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.Late)">Late: @Model.Summary.LateCount</span>
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.JustifiedAbsent)">FJ: @Model.Summary.JustifiedAbsentCount</span>
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.JustifiedLate)">RJ: @Model.Summary.JustifiedLateCount</span>
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.EarlyLeave)">SAF: @Model.Summary.EarlyLeaveCount</span>
+                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.JustifiedEarlyLeave)">SAFJ: @Model.Summary.JustifiedEarlyLeaveCount</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SelectedCourseName))
+    {
+        <h2 class="h5 mb-3">History — @Model.SelectedCourseName</h2>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Records.Count == 0)
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No attendance records yet for this course.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var record in Model.Records)
+                    {
+                        <tr>
+                            <td>@record.Date.ToString("yyyy-MM-dd")</td>
+                            <td>
+                                <span class="badge @AttendanceStatusDisplay.GetBadgeClass(record.Status)">
+                                    @AttendanceStatusDisplay.GetLabel(record.Status)
+                                </span>
+                            </td>
+                            <td>@(record.Comment ?? "—")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}

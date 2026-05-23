@@ -1,23 +1,31 @@
+using Attendance.Infrastructure.Data;
+using Attendance.Infrastructure.Extensions;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddAttendanceInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("ApiProyectoExcel — Attendance API");
+    });
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
+await DbInitializer.InitializeAsync(app.Services);
+
+app.Logger.LogInformation("API docs available at /scalar (Development only).");
 
 app.Run();
