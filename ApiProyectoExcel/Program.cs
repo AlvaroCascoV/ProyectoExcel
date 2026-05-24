@@ -17,6 +17,10 @@ if (app.Environment.IsDevelopment())
     {
         options.WithTitle("ApiProyectoExcel — Attendance API");
     });
+
+    // Redirect root to Scalar docs in development
+    app.MapGet("/", () => Results.Redirect("/scalar"))
+       .ExcludeFromDescription();
 }
 
 app.UseHttpsRedirection();
