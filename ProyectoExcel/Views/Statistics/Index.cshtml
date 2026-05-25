@@ -2,7 +2,7 @@
 @using System.Text.Json
 @inject IWebHostEnvironment HostEnvironment
 @{
-    ViewData["Title"] = "Statistics";
+    ViewData["Title"] = SharedLocalizer["Statistics"];
     var chartJsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     var chartJson = JsonSerializer.Serialize(Model.ChartData, chartJsonOptions);
     var successMessage = TempData["SuccessMessage"] as string;
@@ -10,7 +10,7 @@
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-    <h1 class="h3 mb-0">Statistics</h1>
+    <h1 class="h3 mb-0">@SharedLocalizer["Statistics"]</h1>
     <div class="d-flex gap-2">
         @if (Model.Statistics is not null && Model.SelectedCourseId.HasValue)
         {
@@ -21,7 +21,7 @@
                asp-route-minPercent="@Model.MinPercent"
                asp-route-maxPercent="@Model.MaxPercent"
                class="btn btn-sm btn-outline-secondary">
-                &#128196; Export PDF
+                &#128196; @SharedLocalizer["ExportPdf"]
             </a>
         }
         @if (HostEnvironment.IsDevelopment() && Model.SelectedCourseId.HasValue)
@@ -30,8 +30,8 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="courseId" value="@Model.SelectedCourseId" />
                 <button type="submit" class="btn btn-sm btn-outline-secondary"
-                        onclick="return confirm('Mark all students Present for the last 7 days? Existing records for those days will be overwritten.');">
-                    Seed test data (last 7 days)
+                        onclick="return confirm('@SharedLocalizer["ConfirmSeedTestData"]');">
+                    @SharedLocalizer["SeedTestData"]
                 </button>
             </form>
         }
@@ -55,7 +55,7 @@
 
 <form method="get" class="row g-2 g-md-3 align-items-end mb-4 filter-row">
     <div class="col-12 col-md-4">
-        <label class="form-label small" for="courseId">Course</label>
+        <label class="form-label small" for="courseId">@SharedLocalizer["CourseLabel"]</label>
         <select class="form-select" id="courseId" name="courseId" onchange="this.form.submit()">
             @foreach (var course in Model.Courses)
             {
@@ -71,9 +71,9 @@
         </select>
     </div>
     <div class="col-6 col-md-2">
-        <label class="form-label small" for="month">Month</label>
+        <label class="form-label small" for="month">@SharedLocalizer["MonthLabel"]</label>
         <select class="form-select" id="month" name="month" onchange="this.form.submit()">
-            <option value="">All</option>
+            <option value="">@SharedLocalizer["AllOption"]</option>
             @for (var m = 1; m <= 12; m++)
             {
                 if (Model.SelectedMonth == m)
@@ -88,20 +88,20 @@
         </select>
     </div>
     <div class="col-6 col-md-2">
-        <label class="form-label small" for="year">Year</label>
+        <label class="form-label small" for="year">@SharedLocalizer["YearLabel"]</label>
         <input class="form-control" type="number" id="year" name="year" min="2020" max="2030"
-               value="@Model.SelectedYear" onchange="this.form.submit()" placeholder="All" />
+               value="@Model.SelectedYear" onchange="this.form.submit()" placeholder="@SharedLocalizer["AllOption"]" />
     </div>
     <div class="col-3 col-md-1">
-        <label class="form-label small" for="minPercent">Min %</label>
+        <label class="form-label small" for="minPercent">@SharedLocalizer["MinPercentLabel"]</label>
         <input class="form-control" type="number" step="0.1" id="minPercent" name="minPercent" value="@Model.MinPercent" />
     </div>
     <div class="col-3 col-md-1">
-        <label class="form-label small" for="maxPercent">Max %</label>
+        <label class="form-label small" for="maxPercent">@SharedLocalizer["MaxPercentLabel"]</label>
         <input class="form-control" type="number" step="0.1" id="maxPercent" name="maxPercent" value="@Model.MaxPercent" />
     </div>
     <div class="col-6 col-md-2 d-flex gap-2">
-        <button type="submit" class="btn btn-outline-primary flex-fill">Load</button>
+        <button type="submit" class="btn btn-outline-primary flex-fill">@SharedLocalizer["Load"]</button>
         @if (Model.Statistics is not null && Model.SelectedCourseId.HasValue)
         {
             <a asp-action="ExportPdf"
@@ -111,7 +111,7 @@
                asp-route-minPercent="@Model.MinPercent"
                asp-route-maxPercent="@Model.MaxPercent"
                class="btn btn-outline-secondary"
-               title="Export PDF">
+               title="@SharedLocalizer["ExportPdf"]">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
                     <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
@@ -127,8 +127,8 @@
     var stats = Model.Statistics;
 
     <p class="text-muted mb-3">
-        Course: <strong>@stats.CourseName</strong> —
-        Lective days: <strong>@stats.TotalClassDays</strong>@(stats.TotalClassDays == Attendance.Infrastructure.Services.LectiveDayCalendar.LectiveDaysPerYear ? " (full year)" : string.Empty)
+        @SharedLocalizer["CourseText"] <strong>@stats.CourseName</strong> —
+        @SharedLocalizer["LectiveDaysText"] <strong>@stats.TotalClassDays</strong>@(stats.TotalClassDays == Attendance.Infrastructure.Services.LectiveDayCalendar.LectiveDaysPerYear ? SharedLocalizer["FullYearText"].Value : string.Empty)
     </p>
 
     <div class="row g-3 mb-4">
@@ -136,7 +136,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <div class="display-6 text-primary">@stats.AverageRealAttendancePercentage%</div>
-                    <div class="small text-muted">Average real attendance</div>
+                    <div class="small text-muted">@SharedLocalizer["AverageRealAttendance"]</div>
                 </div>
             </div>
         </div>
@@ -144,7 +144,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <div class="h4 mb-0 text-warning">@stats.AtRiskCount</div>
-                    <div class="small text-muted">Below 80% (diploma)</div>
+                    <div class="small text-muted">@SharedLocalizer["Below80Diploma"]</div>
                 </div>
             </div>
         </div>
@@ -152,7 +152,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <div class="h4 mb-0 text-danger">@stats.BelowDropThresholdCount</div>
-                    <div class="small text-muted">Below 75% (at risk)</div>
+                    <div class="small text-muted">@SharedLocalizer["Below75AtRisk"]</div>
                 </div>
             </div>
         </div>
@@ -160,7 +160,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center">
                     <div class="h4 mb-0">@stats.Students.Count</div>
-                    <div class="small text-muted">Students</div>
+                    <div class="small text-muted">@SharedLocalizer["StudentsCount"]</div>
                 </div>
             </div>
         </div>
@@ -170,7 +170,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h2 class="h6 mb-3">Status distribution</h2>
+                    <h2 class="h6 mb-3">@SharedLocalizer["StatusDistribution"]</h2>
                     <canvas id="statusChart" height="220"></canvas>
                 </div>
             </div>
@@ -178,7 +178,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h2 class="h6 mb-3">Attendance buckets</h2>
+                    <h2 class="h6 mb-3">@SharedLocalizer["AttendanceBuckets"]</h2>
                     <canvas id="bucketChart" height="220"></canvas>
                 </div>
             </div>
@@ -186,7 +186,7 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h2 class="h6 mb-3">Top 5 students</h2>
+                    <h2 class="h6 mb-3">@SharedLocalizer["Top5Students"]</h2>
                     <canvas id="topChart" height="220"></canvas>
                 </div>
             </div>
@@ -197,7 +197,7 @@
     {
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <h2 class="h6 mb-3">Lowest attendance (at risk)</h2>
+                <h2 class="h6 mb-3">@SharedLocalizer["LowestAttendanceAtRisk"]</h2>
                 <canvas id="atRiskChart" height="120"></canvas>
             </div>
         </div>
@@ -207,16 +207,16 @@
         <table class="table table-striped table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>#</th>
-                    <th>Student</th>
-                    <th>F</th>
-                    <th>R</th>
-                    <th>SAF</th>
-                    <th>Weighted</th>
-                    <th>Real %</th>
-                    <th>F %</th>
-                    <th>F+R %</th>
-                    <th>Diploma</th>
+                    <th>@SharedLocalizer["TableNum"]</th>
+                    <th>@SharedLocalizer["TableStudent"]</th>
+                    <th>@SharedLocalizer["TableF"]</th>
+                    <th>@SharedLocalizer["TableR"]</th>
+                    <th>@SharedLocalizer["TableSAF"]</th>
+                    <th>@SharedLocalizer["TableWeighted"]</th>
+                    <th>@SharedLocalizer["TableRealPercent"]</th>
+                    <th>@SharedLocalizer["TableFPercent"]</th>
+                    <th>@SharedLocalizer["TableFRPercent"]</th>
+                    <th>@SharedLocalizer["TableDiploma"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -235,15 +235,15 @@
                         <td>
                             @if (student.DiplomaEligible)
                             {
-                                <span class="badge text-bg-success">OK</span>
+                                <span class="badge text-bg-success">@SharedLocalizer["StatusOk"]</span>
                             }
                             else if (student.AtRiskDrop)
                             {
-                                <span class="badge text-bg-danger">At risk</span>
+                                <span class="badge text-bg-danger">@SharedLocalizer["StatusAtRisk"]</span>
                             }
                             else
                             {
-                                <span class="badge text-bg-warning">Below 80%</span>
+                                <span class="badge text-bg-warning">@SharedLocalizer["StatusBelow80"]</span>
                             }
                         </td>
                     </tr>
