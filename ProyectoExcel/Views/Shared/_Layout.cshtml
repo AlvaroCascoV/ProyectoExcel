@@ -4,10 +4,11 @@
 @inject IOptions<RequestLocalizationOptions> LocOptions
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentUICulture = requestCulture?.RequestCulture.UICulture.Name;
     var cultureItems = LocOptions.Value.SupportedUICultures
-        ?.Select(c => new SelectListItem { Value = c.Name, Text = c.Name == "es" ? "🇪🇸 Español" : "🇬🇧 English" })
+        ?.Select(c => new SelectListItem { Value = c.Name, Text = c.Name == "es" ? "🇪🇸 Español" : "🇬🇧 English", Selected = c.Name == currentUICulture })
         .ToList() ?? new List<SelectListItem>();
-    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}{Context.Request.QueryString}";
+    var returnUrl = Context.Request.Path.HasValue ? $"~{Context.Request.Path.Value}{Context.Request.QueryString}" : "~/";
 }
 <!DOCTYPE html>
 <html lang="@requestCulture?.RequestCulture.UICulture.TwoLetterISOLanguageName" data-bs-theme="light">
@@ -64,8 +65,9 @@
                     <ul class="navbar-nav align-items-center">
                         <li class="nav-item me-2">
                             <form id="selectLanguage" asp-controller="Culture" asp-action="SetCulture" asp-route-returnUrl="@returnUrl" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
                                 <select name="culture" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit();"
-                                        asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems">
+                                        asp-items="cultureItems">
                                 </select>
                             </form>
                         </li>
