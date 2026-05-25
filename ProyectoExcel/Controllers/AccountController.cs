@@ -5,12 +5,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using MvcProyectoExcel.Services;
 using MvcProyectoExcel.ViewModels;
 
 namespace MvcProyectoExcel.Controllers;
 
-public class AccountController(IAttendanceApiClient apiClient) : Controller
+public class AccountController(IAttendanceApiClient apiClient, IStringLocalizer<SharedResource> localizer) : Controller
 {
     [AllowAnonymous]
     [HttpGet]
@@ -37,7 +38,7 @@ public class AccountController(IAttendanceApiClient apiClient) : Controller
         var response = await apiClient.LoginAsync(new LoginRequest(model.Email, model.Password), cancellationToken);
         if (response is null)
         {
-            ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            ModelState.AddModelError(string.Empty, localizer["ErrorInvalidCredentials"]);
             return View(model);
         }
 

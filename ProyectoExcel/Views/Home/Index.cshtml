@@ -1,9 +1,9 @@
 ﻿@{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = SharedLocalizer["HomeTitle"];
 }
 
 <div class="text-center py-5">
-    <h1 class="display-5 fw-bold mb-3">Tajamar Attendance</h1>
-    <p class="lead text-muted mb-4">Track course attendance, view statistics, and manage your academic record.</p>
-    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">Sign in to continue</a>
+    <h1 class="display-5 fw-bold mb-3">@SharedLocalizer["AppName"]</h1>
+    <p class="lead text-muted mb-4">@SharedLocalizer["HomeDescription"]</p>
+    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">@SharedLocalizer["HomeSignIn"]</a>
 </div>

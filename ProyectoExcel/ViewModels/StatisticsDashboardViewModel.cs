@@ -31,13 +31,13 @@ public class StatisticsChartData
 
 public static class StatisticsChartDataBuilder
 {
-    public static StatisticsChartData From(CourseStatisticsDto statistics, IReadOnlyList<RankingEntryDto> atRiskRankings)
+    public static StatisticsChartData From(CourseStatisticsDto statistics, IReadOnlyList<RankingEntryDto> atRiskRankings, string[]? statusLabels = null)
     {
         var students = statistics.Students;
 
         return new StatisticsChartData
         {
-            StatusLabels = ["Present", "Absent", "Late", "FJ", "RJ", "SAF", "SAFJ"],
+            StatusLabels = statusLabels ?? ["Present", "Absent", "Late", "FJ", "RJ", "SAF", "SAFJ"],
             StatusValues =
             [
                 students.Sum(s => s.PresentCount),
