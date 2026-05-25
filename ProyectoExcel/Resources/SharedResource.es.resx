@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>Asistencia Tajamar</value>
+  </data>
+  <data name="PassList" xml:space="preserve">
+    <value>Pasar lista</value>
+  </data>
+  <data name="Students" xml:space="preserve">
+    <value>Alumnos</value>
+  </data>
+  <data name="Statistics" xml:space="preserve">
+    <value>Estadísticas</value>
+  </data>
+  <data name="Justifications" xml:space="preserve">
+    <value>Justificaciones</value>
+  </data>
+  <data name="MyDashboard" xml:space="preserve">
+    <value>Mi panel</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Cerrar sesión</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Iniciar sesión</value>
+  </data>
+  <data name="HomeTitle" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="HomeDescription" xml:space="preserve">
+    <value>Registra la asistencia a cursos, consulta estadísticas y gestiona tu expediente académico.</value>
+  </data>
+  <data name="HomeSignIn" xml:space="preserve">
+    <value>Inicia sesión para continuar</value>
+  </data>
+  <data name="ToggleTheme" xml:space="preserve">
+    <value>Cambiar tema</value>
+  </data>
+  <data name="SignInTitle" xml:space="preserve">
+    <value>Iniciar sesión</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>Bienvenido/a de nuevo</value>
+  </data>
+  <data name="SignInSubtitle" xml:space="preserve">
+    <value>Inicia sesión en Asistencia Tajamar</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Correo electrónico</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Contraseña</value>
+  </data>
+  <data name="SignInButton" xml:space="preserve">
+    <value>Iniciar sesión</value>
+  </data>
+  <data name="ExportPdf" xml:space="preserve">
+    <value>Exportar PDF</value>
+  </data>
+  <data name="CourseLabel" xml:space="preserve">
+    <value>Curso</value>
+  </data>
+  <data name="SessionDate" xml:space="preserve">
+    <value>Fecha de sesión</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Cargar</value>
+  </data>
+  <data name="PreviouslyRecordedDates" xml:space="preserve">
+    <value>Fechas registradas previamente:</value>
+  </data>
+  <data name="CourseText" xml:space="preserve">
+    <value>Curso:</value>
+  </data>
+  <data name="DateText" xml:space="preserve">
+    <value>Fecha:</value>
+  </data>
+  <data name="TableNum" xml:space="preserve">
+    <value>#</value>
+  </data>
+  <data name="TableStudent" xml:space="preserve">
+    <value>Alumno</value>
+  </data>
+  <data name="TableStatus" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="TableComment" xml:space="preserve">
+    <value>Comentario</value>
+  </data>
+  <data name="NoStudentsEnrolled" xml:space="preserve">
+    <value>No hay alumnos matriculados en este curso.</value>
+  </data>
+  <data name="OptionalPlaceholder" xml:space="preserve">
+    <value>Opcional</value>
+  </data>
+  <data name="SaveAttendance" xml:space="preserve">
+    <value>Guardar asistencia</value>
+  </data>
+  <data name="Status_Present" xml:space="preserve">
+    <value>Presente</value>
+  </data>
+  <data name="Status_Absent" xml:space="preserve">
+    <value>Falta</value>
+  </data>
+  <data name="Status_Late" xml:space="preserve">
+    <value>Retraso</value>
+  </data>
+  <data name="Status_JustifiedAbsent" xml:space="preserve">
+    <value>Falta Justificada (FJ)</value>
+  </data>
+  <data name="Status_JustifiedLate" xml:space="preserve">
+    <value>Retraso Justificado (RJ)</value>
+  </data>
+  <data name="Status_EarlyLeave" xml:space="preserve">
+    <value>Salida Antes de Fin (SAF)</value>
+  </data>
+  <data name="Status_JustifiedEarlyLeave" xml:space="preserve">
+    <value>Salida Justificada (SAFJ)</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Hola</value>
+  </data>
+  <data name="NotEnrolled" xml:space="preserve">
+    <value>No estás matriculado en ningún curso.</value>
+  </data>
+  <data name="RealAttendanceText" xml:space="preserve">
+    <value>Tu asistencia real es</value>
+  </data>
+  <data name="BelowAtRisk" xml:space="preserve">
+    <value>Estás por debajo del umbral de riesgo del 75%.</value>
+  </data>
+  <data name="BelowDiploma" xml:space="preserve">
+    <value>Necesitas al menos un 80% para ser elegible para el diploma.</value>
+  </data>
+  <data name="RealAttendanceDiploma" xml:space="preserve">
+    <value>Asistencia real (diploma)</value>
+  </data>
+  <data name="Attendance" xml:space="preserve">
+    <value>Asistencia</value>
+  </data>
+  <data name="LectiveDaysYear" xml:space="preserve">
+    <value>Días lectivos (año)</value>
+  </data>
+  <data name="DiplomaEligible" xml:space="preserve">
+    <value>Elegible para diploma</value>
+  </data>
+  <data name="AtRisk" xml:space="preserve">
+    <value>En riesgo (&lt;75%)</value>
+  </data>
+  <data name="Below80" xml:space="preserve">
+    <value>Por debajo del 80%</value>
+  </data>
+  <data name="Breakdown" xml:space="preserve">
+    <value>Desglose</value>
+  </data>
+  <data name="PresentCount" xml:space="preserve">
+    <value>Presente</value>
+  </data>
+  <data name="AbsentCount" xml:space="preserve">
+    <value>Falta</value>
+  </data>
+  <data name="LateCount" xml:space="preserve">
+    <value>Retraso</value>
+  </data>
+  <data name="FJCount" xml:space="preserve">
+    <value>FJ</value>
+  </data>
+  <data name="RJCount" xml:space="preserve">
+    <value>RJ</value>
+  </data>
+  <data name="SAFCount" xml:space="preserve">
+    <value>SAF</value>
+  </data>
+  <data name="SAFJCount" xml:space="preserve">
+    <value>SAFJ</value>
+  </data>
+  <data name="History" xml:space="preserve">
+    <value>Historial</value>
+  </data>
+  <data name="DateHeader" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="StatusHeader" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="CommentHeader" xml:space="preserve">
+    <value>Comentario</value>
+  </data>
+  <data name="NoRecordsYet" xml:space="preserve">
+    <value>Aún no hay registros de asistencia para este curso.</value>
+  </data>
+  <data name="RequestJustification" xml:space="preserve">
+    <value>Solicitar justificación</value>
+  </data>
+  <data name="SeedTestData" xml:space="preserve">
+    <value>Generar datos de prueba (últimos 7 días)</value>
+  </data>
+  <data name="ConfirmSeedTestData" xml:space="preserve">
+    <value>¿Marcar a todos los alumnos como Presentes los últimos 7 días? Los registros existentes se sobrescribirán.</value>
+  </data>
+  <data name="MonthLabel" xml:space="preserve">
+    <value>Mes</value>
+  </data>
+  <data name="YearLabel" xml:space="preserve">
+    <value>Año</value>
+  </data>
+  <data name="MinPercentLabel" xml:space="preserve">
+    <value>Min %</value>
+  </data>
+  <data name="MaxPercentLabel" xml:space="preserve">
+    <value>Max %</value>
+  </data>
+  <data name="AllOption" xml:space="preserve">
+    <value>Todos</value>
+  </data>
+  <data name="LectiveDaysText" xml:space="preserve">
+    <value>Días lectivos:</value>
+  </data>
+  <data name="FullYearText" xml:space="preserve">
+    <value> (año completo)</value>
+  </data>
+  <data name="AverageRealAttendance" xml:space="preserve">
+    <value>Asistencia real media</value>
+  </data>
+  <data name="Below80Diploma" xml:space="preserve">
+    <value>Por debajo del 80% (diploma)</value>
+  </data>
+  <data name="Below75AtRisk" xml:space="preserve">
+    <value>Por debajo del 75% (en riesgo)</value>
+  </data>
+  <data name="StudentsCount" xml:space="preserve">
+    <value>Alumnos</value>
+  </data>
+  <data name="StatusDistribution" xml:space="preserve">
+    <value>Distribución de estados</value>
+  </data>
+  <data name="AttendanceBuckets" xml:space="preserve">
+    <value>Rangos de asistencia</value>
+  </data>
+  <data name="Top5Students" xml:space="preserve">
+    <value>Top 5 alumnos</value>
+  </data>
+  <data name="LowestAttendanceAtRisk" xml:space="preserve">
+    <value>Asistencia más baja (en riesgo)</value>
+  </data>
+  <data name="TableF" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="TableR" xml:space="preserve">
+    <value>R</value>
+  </data>
+  <data name="TableSAF" xml:space="preserve">
+    <value>SAF</value>
+  </data>
+  <data name="TableWeighted" xml:space="preserve">
+    <value>Ponderado</value>
+  </data>
+  <data name="TableRealPercent" xml:space="preserve">
+    <value>% Real</value>
+  </data>
+  <data name="TableFPercent" xml:space="preserve">
+    <value>% F</value>
+  </data>
+  <data name="TableFRPercent" xml:space="preserve">
+    <value>% F+R</value>
+  </data>
+  <data name="TableDiploma" xml:space="preserve">
+    <value>Diploma</value>
+  </data>
+  <data name="StatusOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="StatusAtRisk" xml:space="preserve">
+    <value>En riesgo</value>
+  </data>
+  <data name="StatusBelow80" xml:space="preserve">
+    <value>Debajo de 80%</value>
+  </data>
+  <data name="StudentsText" xml:space="preserve">
+    <value>alumnos</value>
+  </data>
+  <data name="TableName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="TableEmail" xml:space="preserve">
+    <value>Correo</value>
+  </data>
+  <data name="StatusActive" xml:space="preserve">
+    <value>Activo</value>
+  </data>
+  <data name="StatusInactive" xml:space="preserve">
+    <value>Inactivo</value>
+  </data>
+</root>

@@ -1,9 +1,20 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Builder
+@inject IOptions<RequestLocalizationOptions> LocOptions
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var cultureItems = LocOptions.Value.SupportedUICultures
+        ?.Select(c => new SelectListItem { Value = c.Name, Text = c.Name == "es" ? "🇪🇸 Español" : "🇬🇧 English" })
+        .ToList() ?? new List<SelectListItem>();
+    var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}{Context.Request.QueryString}";
+}
+<!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Tajamar Attendance</title>
+    <title>@ViewData["Title"] - @SharedLocalizer["AppName"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProyectoExcel.styles.css" asp-append-version="true" />
@@ -13,7 +24,7 @@
         <nav class="navbar navbar-expand-md border-bottom shadow-sm">
             <div class="container-fluid">
                 <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">
-                    Tajamar Attendance
+                    @SharedLocalizer["AppName"]
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
                         aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,32 +37,39 @@
                             @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Attendance" asp-action="Index">Pass list</a>
+                                    <a class="nav-link" asp-controller="Attendance" asp-action="Index">@SharedLocalizer["PassList"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Students" asp-action="Index">Students</a>
+                                    <a class="nav-link" asp-controller="Students" asp-action="Index">@SharedLocalizer["Students"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Statistics" asp-action="Index">Statistics</a>
+                                    <a class="nav-link" asp-controller="Statistics" asp-action="Index">@SharedLocalizer["Statistics"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl" target="_blank" rel="noopener noreferrer">Justifications &#8599;</a>
+                                    <a class="nav-link" href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl" target="_blank" rel="noopener noreferrer">@SharedLocalizer["Justifications"] &#8599;</a>
                                 </li>
                             }
                             @if (User.IsInRole("Student"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Dashboard" asp-action="Index">My dashboard</a>
+                                    <a class="nav-link" asp-controller="Dashboard" asp-action="Index">@SharedLocalizer["MyDashboard"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl" target="_blank" rel="noopener noreferrer">Justifications &#8599;</a>
+                                    <a class="nav-link" href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl" target="_blank" rel="noopener noreferrer">@SharedLocalizer["Justifications"] &#8599;</a>
                                 </li>
                             }
                         }
                     </ul>
                     <ul class="navbar-nav align-items-center">
+                        <li class="nav-item me-2">
+                            <form id="selectLanguage" asp-controller="Culture" asp-action="SetCulture" asp-route-returnUrl="@returnUrl" method="post" class="d-inline">
+                                <select name="culture" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit();"
+                                        asp-for="@requestCulture.RequestCulture.UICulture.Name" asp-items="cultureItems">
+                                </select>
+                            </form>
+                        </li>
                         <li class="nav-item">
-                            <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" type="button">
+                            <button class="theme-toggle" id="themeToggle" title="@SharedLocalizer["ToggleTheme"]" type="button">
                                 <span id="themeIcon">&#9790;</span>
                             </button>
                         </li>
@@ -63,14 +81,14 @@
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">@SharedLocalizer["Logout"]</button>
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="btn btn-sm btn-outline-primary" asp-controller="Account" asp-action="Login">Sign in</a>
+                                <a class="btn btn-sm btn-outline-primary" asp-controller="Account" asp-action="Login">@SharedLocalizer["SignIn"]</a>
                             </li>
                         }
                     </ul>
