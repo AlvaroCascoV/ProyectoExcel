@@ -2,13 +2,14 @@ using Attendance.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using MvcProyectoExcel.Services;
 using MvcProyectoExcel.ViewModels;
 
 namespace MvcProyectoExcel.Controllers;
 
 [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
-public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnvironment environment) : Controller
+public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnvironment environment, IStringLocalizer<SharedResource> localizer) : Controller
 {
     private const int DefaultCourseId = 3430;
 
@@ -60,7 +61,18 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
                     year,
                     cancellationToken);
 
-                model.ChartData = StatisticsChartDataBuilder.From(model.Statistics, model.AtRiskRankings);
+                var statusLabels = new[]
+                {
+                    localizer["PresentCount"].Value,
+                    localizer["AbsentCount"].Value,
+                    localizer["LateCount"].Value,
+                    localizer["FJCount"].Value,
+                    localizer["RJCount"].Value,
+                    localizer["SAFCount"].Value,
+                    localizer["SAFJCount"].Value
+                };
+
+                model.ChartData = StatisticsChartDataBuilder.From(model.Statistics, model.AtRiskRankings, statusLabels);
             }
 
             return View(model);
@@ -69,7 +81,7 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
         {
             return View(new StatisticsDashboardViewModel
             {
-                ErrorMessage = "Could not reach the API. Make sure ApiProyectoExcel is running on http://localhost:5180."
+                ErrorMessage = localizer["ErrorApiUnreachable"]
             });
         }
     }
@@ -88,17 +100,17 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
             var result = await apiClient.SeedPresentDaysAsync(courseId, days: 7, cancellationToken);
             if (result is null)
             {
-                TempData["ErrorMessage"] = "Seed endpoint is not available (Development only).";
+                TempData["ErrorMessage"] = localizer["ErrorSeedNotAvailable"];
             }
             else
             {
                 TempData["SuccessMessage"] =
-                    $"Marked {result.StudentsAffected} students Present for {result.DaysSeeded} days ({result.RecordsUpserted} records).";
+                    string.Format(localizer["SuccessSeedData"], result.StudentsAffected, result.DaysSeeded, result.RecordsUpserted);
             }
         }
         catch (HttpRequestException ex)
         {
-            TempData["ErrorMessage"] = $"Could not seed attendance: {ex.Message}";
+            TempData["ErrorMessage"] = string.Format(localizer["ErrorCouldNotSeed"], ex.Message);
         }
 
         return RedirectToAction(nameof(Index), new { courseId });
@@ -120,7 +132,7 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
 
             if (pdfBytes is null)
             {
-                TempData["ErrorMessage"] = "Could not generate PDF: course not found.";
+                TempData["ErrorMessage"] = localizer["ErrorPdfCourseNotFound"];
                 return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
             }
 
@@ -129,7 +141,7 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
         }
         catch (HttpRequestException)
         {
-            TempData["ErrorMessage"] = "Could not generate PDF. Make sure ApiProyectoExcel is running.";
+            TempData["ErrorMessage"] = localizer["ErrorPdfGeneration"];
             return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
         }
     }

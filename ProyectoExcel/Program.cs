@@ -6,7 +6,6 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Add Localization Services
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
@@ -56,7 +55,6 @@ app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
 app.UseHttpsRedirection();
 app.UseRouting();
 
-// 2. Configure Request Localization Middleware
 app.UseRequestLocalization();
 
 app.UseAuthentication();

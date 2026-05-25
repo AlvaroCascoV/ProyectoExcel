@@ -10,12 +10,13 @@
     var returnUrl = string.IsNullOrEmpty(Context.Request.Path) ? "~/" : $"~{Context.Request.Path.Value}{Context.Request.QueryString}";
 }
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="@requestCulture?.RequestCulture.UICulture.TwoLetterISOLanguageName" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - @SharedLocalizer["AppName"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProyectoExcel.styles.css" asp-append-version="true" />
 </head>
@@ -70,7 +71,7 @@
                         </li>
                         <li class="nav-item">
                             <button class="theme-toggle" id="themeToggle" title="@SharedLocalizer["ToggleTheme"]" type="button">
-                                <span id="themeIcon">&#9790;</span>
+                                <i id="themeIcon" class="bi bi-moon"></i>
                             </button>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
@@ -105,7 +106,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container d-flex justify-content-between align-items-center">
-            <span>&copy; @DateTime.Now.Year Tajamar — Attendance Management</span>
+            <span>&copy; @DateTime.Now.Year @SharedLocalizer["FooterText"]</span>
             <span class="small">v1.0</span>
         </div>
     </footer>

@@ -269,6 +269,9 @@
             new Chart(canvas, config);
         }
 
+        const localizedStudents = '@SharedLocalizer["ChartLabelStudents"].Value';
+        const localizedRealPercent = '@SharedLocalizer["ChartLabelRealPercent"].Value';
+
         const statusValues = chartData.statusValues ?? [];
         if (statusValues.some(v => v > 0)) {
             initChart('statusChart', {
@@ -287,7 +290,7 @@
                 type: 'bar',
                 data: {
                     labels: chartData.bucketLabels ?? [],
-                    datasets: [{ label: 'Students', data: bucketValues, backgroundColor: '#0d6efd' }]
+                    datasets: [{ label: localizedStudents, data: bucketValues, backgroundColor: '#0d6efd' }]
                 },
                 options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
             });
@@ -303,7 +306,7 @@
                 type: 'bar',
                 data: {
                     labels: topLabels,
-                    datasets: [{ label: 'Real %', data: topValues, backgroundColor: '#198754' }]
+                    datasets: [{ label: localizedRealPercent, data: topValues, backgroundColor: '#198754' }]
                 },
                 options: {
                     indexAxis: 'y',
@@ -317,7 +320,7 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => `Real %: ${ctx.parsed.x}%`
+                                label: (ctx) => `${localizedRealPercent}: ${ctx.parsed.x}%`
                             }
                         }
                     }
@@ -332,7 +335,7 @@
                 type: 'bar',
                 data: {
                     labels: atRiskLabels,
-                    datasets: [{ label: 'Real %', data: atRiskValues, backgroundColor: '#dc3545' }]
+                    datasets: [{ label: localizedRealPercent, data: atRiskValues, backgroundColor: '#dc3545' }]
                 },
                 options: {
                     indexAxis: 'y',
@@ -346,7 +349,7 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: (ctx) => `Real %: ${ctx.parsed.x}%`
+                                label: (ctx) => `${localizedRealPercent}: ${ctx.parsed.x}%`
                             }
                         }
                     }

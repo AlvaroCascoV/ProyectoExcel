@@ -303,4 +303,52 @@
   <data name="StatusInactive" xml:space="preserve">
     <value>Inactivo</value>
   </data>
+  <data name="FooterText" xml:space="preserve">
+    <value>Tajamar — Gestión de Asistencia</value>
+  </data>
+  <data name="ErrorInvalidCredentials" xml:space="preserve">
+    <value>Correo electrónico o contraseña incorrectos.</value>
+  </data>
+  <data name="ErrorApiUnreachable" xml:space="preserve">
+    <value>No se pudo conectar con la API. Asegúrate de que ApiProyectoExcel está ejecutándose en http://localhost:5180.</value>
+  </data>
+  <data name="ErrorSelectCourse" xml:space="preserve">
+    <value>Selecciona un curso.</value>
+  </data>
+  <data name="ErrorNoRowsSubmitted" xml:space="preserve">
+    <value>No se enviaron registros de asistencia. Recarga la página e inténtalo de nuevo.</value>
+  </data>
+  <data name="SuccessAttendanceSaved" xml:space="preserve">
+    <value>Asistencia guardada para {0}.</value>
+  </data>
+  <data name="ErrorCouldNotSave" xml:space="preserve">
+    <value>No se pudo guardar la asistencia: {0}</value>
+  </data>
+  <data name="ErrorInvalidDate" xml:space="preserve">
+    <value>Formato de fecha no válido.</value>
+  </data>
+  <data name="ErrorPdfSessionNotFound" xml:space="preserve">
+    <value>No se pudo generar el PDF: sesión no encontrada.</value>
+  </data>
+  <data name="ErrorPdfGeneration" xml:space="preserve">
+    <value>No se pudo generar el PDF. Asegúrate de que ApiProyectoExcel está ejecutándose.</value>
+  </data>
+  <data name="ErrorPdfCourseNotFound" xml:space="preserve">
+    <value>No se pudo generar el PDF: curso no encontrado.</value>
+  </data>
+  <data name="ErrorSeedNotAvailable" xml:space="preserve">
+    <value>El endpoint de datos de prueba no está disponible (solo en desarrollo).</value>
+  </data>
+  <data name="SuccessSeedData" xml:space="preserve">
+    <value>Se marcó como Presente a {0} alumnos durante {1} días ({2} registros).</value>
+  </data>
+  <data name="ErrorCouldNotSeed" xml:space="preserve">
+    <value>No se pudieron generar datos de asistencia: {0}</value>
+  </data>
+  <data name="ChartLabelStudents" xml:space="preserve">
+    <value>Alumnos</value>
+  </data>
+  <data name="ChartLabelRealPercent" xml:space="preserve">
+    <value>% Real</value>
+  </data>
 </root>

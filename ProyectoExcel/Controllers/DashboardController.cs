@@ -1,6 +1,7 @@
 using Attendance.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using MvcProyectoExcel.Services;
 using MvcProyectoExcel.ViewModels;
 using System.Security.Claims;
@@ -8,7 +9,7 @@ using System.Security.Claims;
 namespace MvcProyectoExcel.Controllers;
 
 [Authorize(Roles = AppRoles.Student)]
-public class DashboardController(IAttendanceApiClient apiClient) : Controller
+public class DashboardController(IAttendanceApiClient apiClient, IStringLocalizer<SharedResource> localizer) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(int? courseId, CancellationToken cancellationToken)
@@ -37,7 +38,7 @@ public class DashboardController(IAttendanceApiClient apiClient) : Controller
         }
         catch (HttpRequestException)
         {
-            model.ErrorMessage = "Could not reach the API. Make sure ApiProyectoExcel is running on http://localhost:5180.";
+            model.ErrorMessage = localizer["ErrorApiUnreachable"];
             return View(model);
         }
     }

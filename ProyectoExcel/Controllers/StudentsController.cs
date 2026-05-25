@@ -1,13 +1,14 @@
 using Attendance.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using MvcProyectoExcel.Services;
 using MvcProyectoExcel.ViewModels;
 
 namespace MvcProyectoExcel.Controllers;
 
 [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
-public class StudentsController(IAttendanceApiClient apiClient) : Controller
+public class StudentsController(IAttendanceApiClient apiClient, IStringLocalizer<SharedResource> localizer) : Controller
 {
     private const int DefaultCourseId = 3430;
 
@@ -40,7 +41,7 @@ public class StudentsController(IAttendanceApiClient apiClient) : Controller
         {
             return View(new StudentListViewModel
             {
-                ErrorMessage = "Could not reach the API. Make sure ApiProyectoExcel is running on http://localhost:5180."
+                ErrorMessage = localizer["ErrorApiUnreachable"]
             });
         }
     }

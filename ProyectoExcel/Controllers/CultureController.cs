@@ -6,6 +6,7 @@ namespace MvcProyectoExcel.Controllers;
 public class CultureController : Controller
 {
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult SetCulture(string culture, string returnUrl)
     {
         if (culture != null)

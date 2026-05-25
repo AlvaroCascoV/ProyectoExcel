@@ -1,13 +1,14 @@
 using Attendance.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using MvcProyectoExcel.Services;
 using MvcProyectoExcel.ViewModels;
 
 namespace MvcProyectoExcel.Controllers;
 
 [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
-public class AttendanceController(IAttendanceApiClient apiClient) : Controller
+public class AttendanceController(IAttendanceApiClient apiClient, IStringLocalizer<SharedResource> localizer) : Controller
 {
     private const int DefaultCourseId = 3430;
 
@@ -53,7 +54,7 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
         {
             return View(new AttendancePassListViewModel
             {
-                ErrorMessage = "Could not reach the API. Make sure ApiProyectoExcel is running on http://localhost:5180."
+                ErrorMessage = localizer["ErrorApiUnreachable"]
             });
         }
     }
@@ -64,7 +65,7 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
     {
         if (!model.SelectedCourseId.HasValue)
         {
-            ModelState.AddModelError(string.Empty, "Select a course.");
+            ModelState.AddModelError(string.Empty, localizer["ErrorSelectCourse"]);
             return await Index(null, model.SelectedDate, cancellationToken);
         }
 
@@ -72,7 +73,7 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
         {
             if (model.Rows.Count == 0)
             {
-                model.ErrorMessage = "No attendance rows were submitted. Please reload the page and try again.";
+                model.ErrorMessage = localizer["ErrorNoRowsSubmitted"];
                 return await ReloadIndexView(model, cancellationToken);
             }
 
@@ -89,12 +90,12 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
                 new Attendance.Infrastructure.DTOs.SaveAttendanceSessionRequest(entries),
                 cancellationToken);
 
-            TempData["SuccessMessage"] = $"Attendance saved for {model.SelectedDate:yyyy-MM-dd}.";
+            TempData["SuccessMessage"] = string.Format(localizer["SuccessAttendanceSaved"], model.SelectedDate.ToString("yyyy-MM-dd"));
             return RedirectToAction(nameof(Index), new { courseId = model.SelectedCourseId, date = model.SelectedDate.ToString("yyyy-MM-dd") });
         }
         catch (HttpRequestException ex)
         {
-            model.ErrorMessage = $"Could not save attendance: {ex.Message}";
+            model.ErrorMessage = string.Format(localizer["ErrorCouldNotSave"], ex.Message);
             return await ReloadIndexView(model, cancellationToken);
         }
     }
@@ -106,14 +107,14 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
         {
             if (!DateOnly.TryParse(date, out var parsedDate))
             {
-                TempData["ErrorMessage"] = "Invalid date format.";
+                TempData["ErrorMessage"] = localizer["ErrorInvalidDate"];
                 return RedirectToAction(nameof(Index), new { courseId });
             }
 
             var pdfBytes = await apiClient.ExportAttendanceSessionPdfAsync(courseId, parsedDate, cancellationToken);
             if (pdfBytes is null)
             {
-                TempData["ErrorMessage"] = "Could not generate PDF: session not found.";
+                TempData["ErrorMessage"] = localizer["ErrorPdfSessionNotFound"];
                 return RedirectToAction(nameof(Index), new { courseId, date });
             }
 
@@ -122,7 +123,7 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
         }
         catch (HttpRequestException)
         {
-            TempData["ErrorMessage"] = "Could not generate PDF. Make sure ApiProyectoExcel is running.";
+            TempData["ErrorMessage"] = localizer["ErrorPdfGeneration"];
             return RedirectToAction(nameof(Index), new { courseId, date });
         }
     }
