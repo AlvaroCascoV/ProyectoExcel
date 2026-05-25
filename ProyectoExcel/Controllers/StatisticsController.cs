@@ -103,4 +103,34 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
 
         return RedirectToAction(nameof(Index), new { courseId });
     }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportPdf(
+        int courseId,
+        int? month,
+        int? year,
+        decimal? minPercent,
+        decimal? maxPercent,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var pdfBytes = await apiClient.ExportCourseStatisticsPdfAsync(
+                courseId, month, year, minPercent, maxPercent, cancellationToken);
+
+            if (pdfBytes is null)
+            {
+                TempData["ErrorMessage"] = "Could not generate PDF: course not found.";
+                return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
+            }
+
+            var fileName = $"statistics-{courseId}-{DateTime.Now:yyyy-MM-dd}.pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (HttpRequestException)
+        {
+            TempData["ErrorMessage"] = "Could not generate PDF. Make sure ApiProyectoExcel is running.";
+            return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
+        }
+    }
 }

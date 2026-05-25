@@ -5,8 +5,17 @@
     var successMessage = TempData["SuccessMessage"] as string;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h1 class="h3 mb-0">Pass list</h1>
+    @if (Model.SelectedCourseId.HasValue && Model.Rows.Count > 0)
+    {
+        <a asp-action="ExportPdf"
+           asp-route-courseId="@Model.SelectedCourseId"
+           asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+           class="btn btn-sm btn-outline-secondary">
+            &#128196; Export PDF
+        </a>
+    }
 </div>
 
 @if (!string.IsNullOrEmpty(successMessage))
@@ -19,9 +28,9 @@
     <div class="alert alert-danger">@Model.ErrorMessage</div>
 }
 
-<form method="get" class="row g-3 align-items-end mb-4">
-        <div class="col-md-5">
-            <label class="form-label" for="courseId">Course</label>
+<form method="get" class="row g-2 g-md-3 align-items-end mb-4">
+        <div class="col-12 col-md-5">
+            <label class="form-label small" for="courseId">Course</label>
             <select class="form-select" id="courseId" name="courseId" onchange="this.form.submit()">
                 @foreach (var course in Model.Courses)
                 {
@@ -36,15 +45,29 @@
                 }
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label" for="date">Session date</label>
+        <div class="col-6 col-md-3">
+            <label class="form-label small" for="date">Session date</label>
             <input class="form-control" type="date" id="date" name="date"
                    value="@Model.SelectedDate.ToString("yyyy-MM-dd")"
                    max="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")"
                    onchange="this.form.submit()" />
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary w-100">Load</button>
+        <div class="col-6 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary flex-fill">Load</button>
+            @if (Model.SelectedCourseId.HasValue && Model.Rows.Count > 0)
+            {
+                <a asp-action="ExportPdf"
+                   asp-route-courseId="@Model.SelectedCourseId"
+                   asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+                   class="btn btn-outline-secondary"
+                   title="Export PDF">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                    </svg>
+                    PDF
+                </a>
+            }
         </div>
     </form>
 

@@ -1,6 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Attendance.Infrastructure.DTOs;
 
-public record LoginRequest(string Email, string Password);
+public record LoginRequest(
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "A valid email address is required.")]
+    string Email,
+
+    [Required(ErrorMessage = "Password is required.")]
+    [MinLength(1, ErrorMessage = "Password cannot be empty.")]
+    string Password);
 
 public record LoginResponse(
     string Token,

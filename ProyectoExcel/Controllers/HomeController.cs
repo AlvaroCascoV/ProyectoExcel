@@ -32,6 +32,24 @@ public class HomeController : Controller
         return View();
     }
 
+    [AllowAnonymous]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult StatusCode(int code)
+    {
+        return code switch
+        {
+            403 => View("AccessDenied"),
+            404 => View("NotFound"),
+            _ => View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
+        };
+    }
+
+    [AllowAnonymous]
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

@@ -129,13 +129,14 @@ else
                     <th>Date</th>
                     <th>Status</th>
                     <th>Comment</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model.Records.Count == 0)
                 {
                     <tr>
-                        <td colspan="3" class="text-center text-muted">No attendance records yet for this course.</td>
+                        <td colspan="4" class="text-center text-muted">No attendance records yet for this course.</td>
                     </tr>
                 }
                 else
@@ -150,6 +151,16 @@ else
                                 </span>
                             </td>
                             <td>@(record.Comment ?? "—")</td>
+                            <td>
+                                @if (record.Status is AttendanceStatus.Absent or AttendanceStatus.Late or AttendanceStatus.EarlyLeave)
+                                {
+                                    <a href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Request justification &#8599;
+                                    </a>
+                                }
+                            </td>
                         </tr>
                     }
                 }

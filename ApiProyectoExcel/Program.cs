@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Attendance.Infrastructure.Data;
 using Attendance.Infrastructure.Extensions;
 using Scalar.AspNetCore;
@@ -10,6 +11,28 @@ builder.Services.AddAttendanceInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("GlobalExceptionHandler");
+        logger.LogError(ex, "Unhandled exception for {Method} {Path}", context.Request.Method, context.Request.Path);
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+
+        var payload = app.Environment.IsDevelopment()
+            ? new { message = ex.Message, detail = ex.StackTrace }
+            : new { message = "An internal server error occurred.", detail = (string?)null };
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(payload));
+    }
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -18,7 +41,6 @@ if (app.Environment.IsDevelopment())
         options.WithTitle("ApiProyectoExcel — Attendance API");
     });
 
-    // Redirect root to Scalar docs in development
     app.MapGet("/", () => Results.Redirect("/scalar"))
        .ExcludeFromDescription();
 }

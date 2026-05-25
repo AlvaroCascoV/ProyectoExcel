@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Attendance.Infrastructure.Entities;
 
 namespace Attendance.Infrastructure.DTOs;
@@ -16,11 +17,18 @@ public record AttendanceSessionDto(
     IReadOnlyList<AttendanceEntryDto> Entries);
 
 public record SaveAttendanceEntryRequest(
+    [Range(1, int.MaxValue, ErrorMessage = "StudentId must be a positive integer.")]
     int StudentId,
+
+    [EnumDataType(typeof(AttendanceStatus), ErrorMessage = "Invalid attendance status.")]
     AttendanceStatus Status,
+
+    [MaxLength(500, ErrorMessage = "Comment cannot exceed 500 characters.")]
     string? Comment);
 
 public record SaveAttendanceSessionRequest(
+    [Required(ErrorMessage = "Entries list is required.")]
+    [MinLength(1, ErrorMessage = "At least one attendance entry is required.")]
     IReadOnlyList<SaveAttendanceEntryRequest> Entries);
 
 public record SeedAttendanceResultDto(

@@ -67,6 +67,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
+        services.AddSingleton<IPdfExportService, PdfExportService>();
 
         return services;
     }

@@ -16,7 +16,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<TajamarUser> TajamarUsers => Set<TajamarUser>();
     public DbSet<CourseEnrollment> CourseEnrollments => Set<CourseEnrollment>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -114,5 +113,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(e => e.RecordedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
     }
 }

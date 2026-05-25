@@ -99,6 +99,34 @@ public class AttendanceController(IAttendanceApiClient apiClient) : Controller
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> ExportPdf(int courseId, string date, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!DateOnly.TryParse(date, out var parsedDate))
+            {
+                TempData["ErrorMessage"] = "Invalid date format.";
+                return RedirectToAction(nameof(Index), new { courseId });
+            }
+
+            var pdfBytes = await apiClient.ExportAttendanceSessionPdfAsync(courseId, parsedDate, cancellationToken);
+            if (pdfBytes is null)
+            {
+                TempData["ErrorMessage"] = "Could not generate PDF: session not found.";
+                return RedirectToAction(nameof(Index), new { courseId, date });
+            }
+
+            var fileName = $"attendance-{courseId}-{parsedDate:yyyy-MM-dd}.pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (HttpRequestException)
+        {
+            TempData["ErrorMessage"] = "Could not generate PDF. Make sure ApiProyectoExcel is running.";
+            return RedirectToAction(nameof(Index), new { courseId, date });
+        }
+    }
+
     private async Task<IActionResult> ReloadIndexView(AttendancePassListViewModel model, CancellationToken cancellationToken)
     {
         model.Courses = await apiClient.GetCoursesAsync(cancellationToken: cancellationToken);

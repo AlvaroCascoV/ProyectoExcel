@@ -12,6 +12,7 @@ namespace ApiProyectoExcel.Controllers;
 public class AttendanceController(
     IAttendanceService attendanceService,
     ICourseService courseService,
+    IPdfExportService pdfExportService,
     IWebHostEnvironment environment) : ControllerBase
 {
     [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
@@ -167,6 +168,25 @@ public class AttendanceController(
         }
 
         return Ok(summary);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
+    [HttpGet("courses/{courseId:int}/attendance/export/pdf")]
+    public async Task<IActionResult> ExportAttendanceSessionPdf(
+        int courseId,
+        [FromQuery] DateOnly date,
+        CancellationToken cancellationToken = default)
+    {
+        var session = await attendanceService.GetSessionSheetAsync(courseId, date, cancellationToken);
+        if (session is null)
+        {
+            return NotFound(new { message = $"Course {courseId} not found." });
+        }
+
+        var pdfBytes = pdfExportService.GenerateAttendanceSessionPdf(session);
+        var safeName = session.CourseName.Replace(" ", "-", StringComparison.Ordinal);
+        var fileName = $"attendance-{safeName}-{date:yyyy-MM-dd}.pdf";
+        return File(pdfBytes, "application/pdf", fileName);
     }
 
     private bool TryGetTajamarUserId(out int userId)

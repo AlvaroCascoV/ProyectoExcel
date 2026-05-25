@@ -1,31 +1,32 @@
 @model MvcProyectoExcel.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign in";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
+<div class="row justify-content-center mt-4">
+    <div class="col-sm-8 col-md-6 col-lg-4">
+        <div class="card border-0 shadow">
             <div class="card-body p-4">
-                <h2 class="card-title mb-4 text-center">Sign in</h2>
+                <h2 class="card-title h4 mb-1 text-center">Welcome back</h2>
+                <p class="text-muted text-center small mb-4">Sign in to Tajamar Attendance</p>
 
-                <form asp-action="Login" method="post">
+                <form asp-action="Login" method="post" novalidate>
                     <input type="hidden" asp-for="ReturnUrl" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" autocomplete="username" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
+                        <label asp-for="Email" class="form-label small fw-medium"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="username" placeholder="name@tajamar365.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label small fw-medium"></label>
                         <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                    <button type="submit" class="btn btn-primary w-100">Sign in</button>
                 </form>
             </div>
         </div>

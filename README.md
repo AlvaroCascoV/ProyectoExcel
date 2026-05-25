@@ -188,15 +188,17 @@ Any other **active** user in `USUARIOSTAJAMAR` with an email can log in with the
 
 | Area | Route | What to test |
 |------|-------|----------------|
-| **Pass list** | `/Attendance` | Select course and date; mark attendance (Present, Absent, Late, justified variants, early leave); save session. |
+| **Pass list** | `/Attendance` | Select course and date; mark attendance (Present, Absent, Late, justified variants, early leave); save session. Export PDF button. |
 | **Students** | `/Students` | List enrolled students for a course. |
-| **Statistics** | `/Statistics` | Course dashboard: attendance %, rankings, filters by month/year and percent range; export-oriented metrics aligned with Excel logic. |
+| **Statistics** | `/Statistics` | Course dashboard: attendance %, rankings, filters by month/year and percent range; Chart.js charts; Export PDF button. |
+| **Justifications** | `/Justification/Pending` | Review pending student justification requests; approve or reject with optional comment. |
 
 ### Student (MVC)
 
 | Area | Route | What to test |
 |------|-------|----------------|
-| **My dashboard** | `/Dashboard` | Enrolled courses, attendance history, summary metrics (attendance %, diploma eligibility ≥ 80%, at-risk drop &lt; 75%). |
+| **My dashboard** | `/Dashboard` | Enrolled courses, attendance history, summary metrics (attendance %, diploma eligibility ≥ 80%, at-risk drop &lt; 75%). "Request justification" button on unjustified records. |
+| **Justifications** | `/Justification` | View submitted justification requests and their status (Pending/Approved/Rejected). |
 
 ### REST API (Scalar or HTTP client)
 
@@ -215,6 +217,8 @@ Use the returned `token` as `Authorization: Bearer <token>`.
 | **Attendance (staff)** | `GET/PUT /api/courses/{courseId}/attendance?date=YYYY-MM-DD`, `GET .../attendance/dates` |
 | **Attendance (student)** | `GET /api/attendance/me`, `GET /api/attendance/me/summary`, `GET /api/attendance/me/courses` |
 | **Statistics** | `GET /api/statistics/course/{courseId}`, `GET .../rankings` |
+| **PDF export** | `GET /api/statistics/course/{courseId}/export/pdf`, `GET /api/courses/{courseId}/attendance/export/pdf?date=YYYY-MM-DD` |
+| **Justifications** | `POST /api/justifications`, `GET /api/justifications/me`, `GET /api/justifications/course/{courseId}/pending`, `PUT /api/justifications/{id}/resolve` |
 | **Dev only** | `POST /api/courses/{courseId}/attendance/seed-present?days=7` — seeds recent weekdays as Present (requires Development + Teacher/Admin token) |
 
 ### Attendance status codes
@@ -235,13 +239,18 @@ Metrics (diploma / drop thresholds, weighted absences) are implemented in `Atten
 
 ## Suggested test checklist
 
-1. **Database:** `script.sql` completed without errors; tables `USUARIOSTAJAMAR`, `CURSOSTAJAMAR`, etc. exist.
+1. **Database:** `script.sql` completed without errors; tables `USUARIOSTAJAMAR`, `CURSOSTAJAMAR`, `ASISTENCIATAJAMAR`, `JUSTIFICACIONESTAJAMAR` exist.
 2. **API startup:** No migration/seed errors in console; log mentions Identity seed and dev password.
 3. **Scalar:** Open http://localhost:5180/scalar → login → call `GET /api/courses` with Bearer token.
 4. **MVC login:** Teacher → Pass list → pick course `3430` and a weekday → save attendance → reload and verify persistence.
-5. **Student:** Login as `sofia.martinez@tajamar365.com` → Dashboard shows courses and summary.
-6. **Statistics:** Teacher → Statistics → change course/month filters → rankings update.
-7. **Dev seed (optional):** `POST .../attendance/seed-present` then refresh statistics/pass list.
+5. **PDF export:** Teacher → Pass list or Statistics → click "Export PDF" → verify PDF downloads with correct data.
+6. **Student:** Login as `sofia.martinez@tajamar365.com` → Dashboard shows courses and summary.
+7. **Justification (student):** On Dashboard, click "Request justification" for an unjustified record → submit → verify it appears in Justifications list.
+8. **Justification (teacher):** Login as teacher → Justifications → approve/reject a pending request → verify attendance status updates.
+9. **Statistics:** Teacher → Statistics → change course/month filters → rankings update.
+10. **Dark mode:** Click the moon/sun icon in the navbar → all pages render correctly in dark theme.
+11. **Error pages:** Navigate to a non-existent URL → 404 page shows. Try accessing a Teacher page as Student → 403 page shows.
+12. **Dev seed (optional):** `POST .../attendance/seed-present` then refresh statistics/pass list.
 
 ---
 
@@ -272,6 +281,49 @@ Metrics (diploma / drop thresholds, weighted absences) are implemented in `Atten
 | MVC pages empty or 401 | API must be running; `ApiSettings:BaseUrl` must match API URL; log in again so JWT cookie is set. |
 | No courses in UI | User must be enrolled in `CURSOSUSUARIOSTAJAMAR`; try teacher `paco.garcia.serrano@tajamar365.com` or course id `3430`. |
 | Scalar not available | Only mapped when `ASPNETCORE_ENVIRONMENT=Development` (default for `dotnet run` with Development settings). |
+
+### Reset the local database
+
+To fully reset the database to a clean state (wipes all data including attendance records and Identity users):
+
+1. **Stop** both the API and MVC apps.
+2. **Drop and recreate** the database:
+
+   ```bash
+   # Option A: sqlcmd (macOS/Docker)
+   sqlcmd -S localhost,1433 -U sa -P "YourPassword" -C \
+     -Q "DROP DATABASE IF EXISTS ProyectoExcel; CREATE DATABASE ProyectoExcel;"
+
+   # Option B: SSMS / Azure Data Studio
+   # Right-click ProyectoExcel → Delete → check "Close existing connections" → OK
+   # Then: CREATE DATABASE ProyectoExcel;
+   ```
+
+3. **Re-run `script.sql`** to recreate Tajamar tables and seed data:
+
+   ```bash
+   sqlcmd -S localhost,1433 -U sa -P "YourPassword" -C \
+     -d ProyectoExcel -i script.sql
+   ```
+
+4. **Start the API** — it will automatically:
+   - Apply EF Core migrations (Identity tables)
+   - Create Identity roles (Admin, Teacher, Student)
+   - Seed Identity accounts for every active user (password: `12345`)
+
+   ```bash
+   cd ApiProyectoExcel && dotnet run --launch-profile http
+   ```
+
+5. **Start the MVC** app in a second terminal.
+
+**Partial reset (keep users, clear attendance only):**
+
+```sql
+DELETE FROM dbo.ASISTENCIATAJAMAR;
+-- If justifications table exists:
+-- DELETE FROM dbo.JUSTIFICACIONESTAJAMAR;
+```
 
 ### Apply migrations manually (optional)
 

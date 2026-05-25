@@ -29,3 +29,102 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* --- Dark mode toggle --- */
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--bs-body-color);
+  transition: color 0.2s;
+}
+
+.theme-toggle:hover {
+  color: var(--bs-primary);
+}
+
+/* --- Responsive table improvements --- */
+@media (max-width: 767.98px) {
+  .table-responsive table {
+    font-size: 0.875rem;
+  }
+
+  .table-responsive th,
+  .table-responsive td {
+    padding: 0.5rem 0.35rem;
+    white-space: nowrap;
+  }
+
+  .card .display-6 {
+    font-size: 1.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 1rem;
+  }
+
+  .filter-row .col-md-1,
+  .filter-row .col-md-2 {
+    min-width: 0;
+  }
+}
+
+/* --- Card hover effect --- */
+.card.border-0.shadow-sm {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card.border-0.shadow-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+/* --- Footer styling --- */
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  line-height: 60px;
+}
+
+/* --- Loading spinner overlay --- */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* --- Alert auto-dismiss animation --- */
+.alert-dismissible.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* --- Badge improvements --- */
+.badge {
+  font-weight: 500;
+}
+
+/* --- Stat cards in dark mode --- */
+[data-bs-theme="dark"] .card.border-0.shadow-sm {
+  background-color: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .card.border-0.shadow-sm:hover {
+  box-shadow: 0 0.5rem 1rem rgba(255, 255, 255, 0.05) !important;
+}
