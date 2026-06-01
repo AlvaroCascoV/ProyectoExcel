@@ -35,6 +35,7 @@ public interface IAttendanceApiClient
         CancellationToken cancellationToken = default);
     Task<byte[]?> ExportCourseStatisticsPdfAsync(int courseId, int? month = null, int? year = null, decimal? minPercent = null, decimal? maxPercent = null, CancellationToken cancellationToken = default);
     Task<byte[]?> ExportAttendanceSessionPdfAsync(int courseId, DateOnly date, CancellationToken cancellationToken = default);
+    Task<byte[]?> ExportStatisticsToExcelAsync(int courseId, int? month = null, int? year = null, decimal? minPercent = null, decimal? maxPercent = null, CancellationToken cancellationToken = default);
 }
 
 public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
@@ -299,6 +300,22 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+    }
+
+    public async Task<byte[]?> ExportStatisticsToExcelAsync(
+        int courseId,
+        int? month = null,
+        int? year = null,
+        decimal? minPercent = null,
+        decimal? maxPercent = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = BuildStatisticsQuery(month, year, minPercent, maxPercent);
+        var response = await httpClient.GetAsync(
+            $"api/statistics/course/{courseId}/export{query}", cancellationToken);
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }

@@ -123,6 +123,7 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 | GET | `/api/attendance/me/courses` | My enrolled courses | Student |
 | GET | `/api/statistics/course/{id}?month=&year=&minPercent=&maxPercent=` | Course statistics | Teacher, Admin |
 | GET | `/api/statistics/course/{id}/rankings?ascending=&top=&month=&year=` | Attendance ranking | Teacher, Admin |
+| GET | `/api/statistics/course/{id}/export?month=&year=&minPercent=&maxPercent=` | Export statistics to Excel (.xlsx) | Teacher, Admin |
 
 ---
 
@@ -154,7 +155,7 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 | `System.IdentityModel.Tokens.Jwt` | Infrastructure | JWT tokens |
 | `Microsoft.AspNetCore.OpenApi` | API | OpenAPI |
 | `Scalar.AspNetCore` | API | API docs UI |
-| `ClosedXML` *(planned)* | Infrastructure | Excel export — add when implementing export feature |
+| `ClosedXML` | Infrastructure | Excel export (.xlsx via `ExcelExportService`) |
 
 ---
 
@@ -167,12 +168,13 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 - Student list by course
 - Statistics and rankings with charts
 - Dev data seed (Development only)
+- **Weekend / non-lective day filter** — `AttendanceController` rejects Sat/Sun; `AttendanceService.SaveSessionAsync` rejects non-lective days via `LectiveDayCalendar`
+- **Percent filter validation** — `minPercent`/`maxPercent` bounds (0–100, min ≤ max) enforced at API (`StatisticsController`) and MVC (`[Range]` on ViewModel + `min`/`max` HTML attributes)
+- **Export to Excel** — `GET /api/statistics/course/{id}/export` via `ExcelExportService` (ClosedXML); MVC `Export` action + button in `Statistics/Index.cshtml`
+- **Flag-icons library** — CDN link added to `_Layout.cshtml`; `fi fi-xx` classes available in all views
 
-### 🔄 In progress — branch: `feature/statistics-improvements`
-- **Weekend / non-lective day filter** — attendance records must not be created on weekends or non-lective days
-- **Percent filter validation** — enforce min ≥ 0, max ≤ 100 at API and MVC level
-- **Export to Excel** — export statistics table to `.xlsx` using ClosedXML (Infrastructure project)
-- **Flag-icons library** — country flag display in student list or statistics
+### 🔄 In progress
+*(nothing active — all feature/statistics-improvements items merged)*
 
 ### ⏳ Planned — Phase 2 (do not start until Phase 1 is stable in develop)
 - Secure check-in tied to physical classroom device (TW17, TW18…)
@@ -189,3 +191,4 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 | Date | Author | Change |
 |---|---|---|
 | 2025-xx-xx | [Your name] | Initial CONTEXT.md + AGENTS.md setup |
+| 2026-06-01 | Antigravity | feature/statistics-improvements: flag-icons CDN, percent filter validation (API + MVC), non-lective day guard (API + service), Excel export endpoint + ClosedXML service + MVC action + view button |

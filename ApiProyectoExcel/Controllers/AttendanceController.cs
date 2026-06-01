@@ -39,6 +39,9 @@ public class AttendanceController(
         [FromBody] SaveAttendanceSessionRequest request,
         CancellationToken cancellationToken = default)
     {
+        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+            return BadRequest(new { message = "Cannot save attendance on weekends." });
+
         if (request.Entries.Count == 0)
         {
             return BadRequest(new { message = "At least one attendance entry is required." });

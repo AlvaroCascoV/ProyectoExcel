@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Attendance.Infrastructure.DTOs;
 
 namespace MvcProyectoExcel.ViewModels;
@@ -9,7 +10,10 @@ public class StatisticsDashboardViewModel
     public string SelectedCourseName { get; set; } = string.Empty;
     public int? SelectedMonth { get; set; }
     public int? SelectedYear { get; set; }
+    [Range(0, 100, ErrorMessage = "Minimum must be between 0 and 100")]
     public decimal? MinPercent { get; set; }
+
+    [Range(0, 100, ErrorMessage = "Maximum must be between 0 and 100")]
     public decimal? MaxPercent { get; set; }
     public CourseStatisticsDto? Statistics { get; set; }
     public IReadOnlyList<RankingEntryDto> AtRiskRankings { get; set; } = [];
