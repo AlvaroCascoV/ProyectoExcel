@@ -23,6 +23,15 @@
                class="btn btn-sm btn-outline-secondary">
                 &#128196; @SharedLocalizer["ExportPdf"]
             </a>
+            <a asp-action="Export"
+               asp-route-courseId="@Model.SelectedCourseId"
+               asp-route-month="@Model.SelectedMonth"
+               asp-route-year="@Model.SelectedYear"
+               asp-route-minPercent="@Model.MinPercent"
+               asp-route-maxPercent="@Model.MaxPercent"
+               class="btn btn-sm btn-outline-success">
+                <i class="bi bi-file-earmark-excel"></i> @SharedLocalizer["ExportExcel"]
+            </a>
         }
         @if (HostEnvironment.IsDevelopment() && Model.SelectedCourseId.HasValue)
         {
@@ -94,11 +103,11 @@
     </div>
     <div class="col-3 col-md-1">
         <label class="form-label small" for="minPercent">@SharedLocalizer["MinPercentLabel"]</label>
-        <input class="form-control" type="number" step="0.1" id="minPercent" name="minPercent" value="@Model.MinPercent" />
+        <input class="form-control" type="number" step="0.1" min="0" max="100" id="minPercent" name="minPercent" value="@Model.MinPercent" />
     </div>
     <div class="col-3 col-md-1">
         <label class="form-label small" for="maxPercent">@SharedLocalizer["MaxPercentLabel"]</label>
-        <input class="form-control" type="number" step="0.1" id="maxPercent" name="maxPercent" value="@Model.MaxPercent" />
+        <input class="form-control" type="number" step="0.1" min="0" max="100" id="maxPercent" name="maxPercent" value="@Model.MaxPercent" />
     </div>
     <div class="col-6 col-md-2 d-flex gap-2">
         <button type="submit" class="btn btn-outline-primary flex-fill">@SharedLocalizer["Load"]</button>

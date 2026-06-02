@@ -145,4 +145,34 @@ public class StatisticsController(IAttendanceApiClient apiClient, IWebHostEnviro
             return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Export(
+        int courseId,
+        int? month,
+        int? year,
+        decimal? minPercent,
+        decimal? maxPercent,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var bytes = await apiClient.ExportStatisticsToExcelAsync(
+                courseId, month, year, minPercent, maxPercent, cancellationToken);
+
+            if (bytes is null)
+            {
+                TempData["ErrorMessage"] = localizer["ErrorExcelCourseNotFound"];
+                return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
+            }
+
+            var fileName = $"attendance_{courseId}_{DateTime.Today:yyyyMMdd}.xlsx";
+            return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (HttpRequestException)
+        {
+            TempData["ErrorMessage"] = localizer["ErrorExcelGeneration"];
+            return RedirectToAction(nameof(Index), new { courseId, month, year, minPercent, maxPercent });
+        }
+    }
 }

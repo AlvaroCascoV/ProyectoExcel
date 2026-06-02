@@ -105,11 +105,23 @@ public class AttendanceService(ApplicationDbContext dbContext) : IAttendanceServ
             return (false, "Attendance can only be recorded for today or past lective days.");
         }
 
-        var courseExists = await dbContext.Courses.AnyAsync(c => c.Id == courseId, cancellationToken);
-        if (!courseExists)
+        var course = await dbContext.Courses
+            .AsNoTracking()
+            .Where(c => c.Id == courseId)
+            .Select(c => new { c.StartDate, c.EndDate })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (course is null)
         {
             return (false, $"Course {courseId} not found.");
         }
+
+        var courseStart = LectiveDayCalendar.GetCourseStartDate(course.StartDate);
+        var courseEnd = LectiveDayCalendar.GetCourseEndDate(course.EndDate, courseStart);
+        var lectiveDates = LectiveDayCalendar.GetLectiveDates(courseStart, courseEnd).ToHashSet();
+
+        if (!lectiveDates.Contains(date))
+            return (false, $"{date:yyyy-MM-dd} is not a lective day for this course.");
 
         var enrolledStudentIds = await dbContext.CourseEnrollments
             .AsNoTracking()

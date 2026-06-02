@@ -68,6 +68,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
         services.AddSingleton<IPdfExportService, PdfExportService>();
+        services.AddSingleton<IExcelExportService, ExcelExportService>();
 
         return services;
     }

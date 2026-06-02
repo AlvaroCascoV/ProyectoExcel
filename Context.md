@@ -1,128 +1,194 @@
-# Context — Attendance Management System (Tajamar)
-
-Web application for tracking course attendance at Tajamar, with Excel-compatible metrics (present/absent/late, diploma eligibility, drop risk). Built with .NET 10 and SQL Server.
-
-For full setup instructions, test accounts, and troubleshooting see [README.md](README.md).
+# CONTEXT.md — Attendance Management System (Tajamar)
+> Live document. Updated on every PR that changes architecture, endpoints, domain model or conventions.
+> For setup instructions, test accounts and troubleshooting see [README.md](README.md).
+> Coding and agent rules: [Agents/AGENTS.md](Agents/AGENTS.md)
 
 ---
 
 ## Solution layout
 
 | Project | Folder | Role | Port |
-|---------|--------|------|------|
-| **ApiProyectoExcel** | `ApiProyectoExcel/` | REST API, JWT authentication, OpenAPI + Scalar docs | `5180` |
-| **MvcProyectoExcel** | `ProyectoExcel/` | ASP.NET Core MVC frontend, cookie authentication | `5162` |
-| **Attendance.Infrastructure** | `Attendance.Infrastructure/` | Shared class library: EF Core, entities, DTOs, services | — |
+|---|---|---|---|
+| **ApiProyectoExcel** | `ApiProyectoExcel/` | REST API, JWT auth, OpenAPI + Scalar docs | `5180` |
+| **MvcProyectoExcel** | `ProyectoExcel/` | ASP.NET Core MVC frontend, cookie auth | `5162` |
+| **Attendance.Infrastructure** | `Attendance.Infrastructure/` | Shared library: EF Core, entities, DTOs, services | — |
 
-Both web projects reference `Attendance.Infrastructure`. The MVC app never touches the database directly — it calls the API over HTTP.
+Both web projects reference `Attendance.Infrastructure`. MVC never touches the DB directly — calls the API over HTTP.
 
 ---
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    Browser -->|"Cookie auth"| MVC["MVC Frontend\n:5162"]
-    MVC -->|"JWT via ApiTokenHandler"| API["REST API\n:5180"]
-    API --> Infra["Attendance.Infrastructure"]
-    Infra -->|"EF Core"| DB["SQL Server\nProyectoExcel DB"]
+```
+[Browser]
+    │ Cookie auth (ApiJwt)
+    ▼
+[MvcProyectoExcel :5162]   ASP.NET Core MVC
+    │ JWT via ApiTokenHandler (DelegatingHandler)
+    ▼
+[ApiProyectoExcel :5180]   REST API
+    │ EF Core
+    ▼
+[SQL Server]   LOCALHOST\DEVELOPER  /  DB: ProyectoExcel
 ```
 
-**Authentication flow:**
+**Auth flow:**
+1. User logs in at `/Account/Login` → MVC calls `POST /api/auth/login`
+2. API returns JWT → stored in HttpOnly cookie `ApiJwt` + cookie ClaimsIdentity created
+3. `ApiTokenHandler` reads `ApiJwt` cookie and attaches it as `Bearer` on every outgoing API call
 
-1. User logs in via the MVC app (`/Account/Login`).
-2. MVC calls `POST /api/auth/login` on the API and receives a JWT.
-3. The JWT is stored in an HttpOnly cookie (`ApiJwt`) and a cookie-based `ClaimsIdentity` is created for the MVC session.
-4. On every subsequent API call, `ApiTokenHandler` (a `DelegatingHandler`) reads the cookie and attaches the JWT as a `Bearer` token.
-
-**Roles:** `Admin`, `Teacher`, `Student` — mapped from legacy Tajamar roles (`ADMINISTRADOR`, `PROFESOR`, `ALUMNO`).
+**Roles:** `Admin`, `Teacher`, `Student` — mapped from legacy Tajamar roles (`ADMINISTRADOR`, `PROFESOR`, `ALUMNO`)
 
 ---
 
 ## Domain model
 
-```mermaid
-erDiagram
-    RoleTajamar ||--o{ TajamarUser : has
-    TajamarUser ||--o{ CourseEnrollment : enrolls
-    Course ||--o{ CourseEnrollment : contains
-    TajamarUser ||--o{ AttendanceRecord : "attends (student)"
-    TajamarUser ||--o{ AttendanceRecord : "records (teacher)"
-    Course ||--o{ AttendanceRecord : tracks
-    ApplicationUser ||--|| TajamarUser : "bridges via TajamarUserId"
-```
-
-All entities live in `Attendance.Infrastructure/Entities/`:
-
 | Entity | SQL Table | Notes |
-|--------|-----------|-------|
+|---|---|---|
 | `TajamarUser` | `USUARIOSTAJAMAR` | Students, teachers, admins |
 | `RoleTajamar` | `ROLESCHARLASTAJAMAR` | Legacy role lookup |
 | `Course` | `CURSOSTAJAMAR` | Courses with start/end dates |
 | `CourseEnrollment` | `CURSOSUSUARIOSTAJAMAR` | Many-to-many join |
 | `AttendanceRecord` | `ASISTENCIATAJAMAR` | One record per student per course per day |
-| `AttendanceStatus` | *(enum)* | Present(0), Absent(1), Late(2), JustifiedAbsent(3), JustifiedLate(4), EarlyLeave(5), JustifiedEarlyLeave(6) |
+| `AttendanceStatus` | *(enum)* | See enum table below |
 | `ApplicationUser` | ASP.NET Identity tables | Extends `IdentityUser` with `TajamarUserId` FK |
 
-Entity properties use English names; SQL column mapping is done via `.HasColumnName()` in the Fluent API.
+All entities in `Attendance.Infrastructure/Entities/`. English property names, Spanish SQL column via `.HasColumnName()`.
+
+**AttendanceStatus enum:**
+
+| Value | Name | Display code |
+|---|---|---|
+| 0 | `Present` | — |
+| 1 | `Absent` | F |
+| 2 | `Late` | R |
+| 3 | `JustifiedAbsent` | FJ |
+| 4 | `JustifiedLate` | RJ |
+| 5 | `EarlyLeave` | SAF |
+| 6 | `JustifiedEarlyLeave` | SAFJ |
 
 ---
 
 ## Data access
 
-- **DbContext:** `ApplicationDbContext` extends `IdentityDbContext<ApplicationUser>`. Configured in `Attendance.Infrastructure/Data/ApplicationDbContext.cs`.
-- **Legacy tables** use `ExcludeFromMigrations()` — EF Core reads/writes them but never alters their schema. Only ASP.NET Identity tables are managed by migrations.
-- **No repository layer.** Services inject `ApplicationDbContext` directly and query with LINQ.
-- **DbInitializer** (`Attendance.Infrastructure/Data/DbInitializer.cs`): runs migrations on API startup, seeds Identity roles and user accounts from the legacy `USUARIOSTAJAMAR` table.
+- **DbContext:** `ApplicationDbContext` extends `IdentityDbContext<ApplicationUser>` — `Attendance.Infrastructure/Data/`
+- **Legacy tables** use `ExcludeFromMigrations()` — EF reads/writes them but never alters schema
+- **No repository layer** — services inject `ApplicationDbContext` directly with LINQ
+- **DbInitializer** — runs migrations on API startup, seeds Identity roles and accounts from `USUARIOSTAJAMAR`
 
 ---
 
-## Service layer
-
-All services live in `Attendance.Infrastructure/Services/` with interface + implementation pairs, registered as scoped (except `PdfExportService` which is singleton):
+## Service layer (`Attendance.Infrastructure/Services/`)
 
 | Service | Purpose |
-|---------|---------|
+|---|---|
 | `AuthService` / `JwtTokenService` | Identity login, JWT creation |
 | `CourseService` | Course listing, student roster |
 | `AttendanceService` | Session CRUD, student records/summaries, dev seeding |
 | `StatisticsService` | Course-level stats, rankings, filtering |
-| `PdfExportService` | PDF generation via QuestPDF |
-| `AttendanceMetricsCalculator` | Pure calculation: attendance %, diploma eligibility (≥80%), drop risk (<75%) |
+| `AttendanceMetricsCalculator` | Pure calc: attendance %, diploma eligibility (≥80%), drop risk (<75%) |
 | `LectiveDayCalendar` | Weekday-only academic calendar, 156 lective days/year |
 
-DI registration is centralized in `Attendance.Infrastructure/Extensions/ServiceCollectionExtensions.cs` via `AddAttendanceInfrastructure()`.
+DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensions.cs` → `AddAttendanceInfrastructure()`
 
 ---
 
-## MVC client layer
+## Business rules — do not change without team discussion
 
-The MVC project never accesses the database. Instead it uses:
+| Rule | Value | Where enforced |
+|---|---|---|
+| Diploma eligibility | `RealAttendancePercentage >= 80%` | `AttendanceMetricsCalculator` |
+| Drop risk threshold | `RealAttendancePercentage < 75%` | `AttendanceMetricsCalculator` |
+| Lective days/year | 156 | `LectiveDayCalendar.LectiveDaysPerYear` |
+| Weekend exclusion | Saturday & Sunday never lective | `LectiveDayCalendar.GetWeekdaysInRange` |
+| Non-lective days | Public holidays excluded from lective calendar | `LectiveDayCalendar` |
+| Default course | ID `3430` | `AttendanceController`, `StatisticsController` |
+| Percent filter bounds | `minPercent` ≥ 0, `maxPercent` ≤ 100 | API + MVC validation |
 
-- **`IAttendanceApiClient`** / `AttendanceApiClient` (`ProyectoExcel/Services/AttendanceApiClient.cs`) — a typed `HttpClient` wrapping every API endpoint.
-- **`ApiTokenHandler`** (`ProyectoExcel/Services/ApiTokenHandler.cs`) — a `DelegatingHandler` that reads the JWT from the `ApiJwt` cookie and injects it as a Bearer token on outgoing requests.
+---
 
-MVC controllers build ViewModels from DTO responses and pass them to Razor views.
+## API endpoints
+
+| Method | Route | Description | Roles |
+|---|---|---|---|
+| POST | `/api/auth/login` | Login, returns JWT | Public |
+| GET | `/api/courses?activeOnly=` | List courses | Teacher, Admin |
+| GET | `/api/courses/{id}/students` | Students by course | Teacher, Admin |
+| GET | `/api/courses/{id}/attendance?date=` | Attendance session by date | Teacher, Admin |
+| PUT | `/api/courses/{id}/attendance?date=` | Save attendance session | Teacher, Admin |
+| GET | `/api/courses/{id}/attendance/dates` | Dates with recorded sessions | Teacher, Admin |
+| POST | `/api/courses/{id}/attendance/seed-present?days=` | Seed data (Development only) | Teacher, Admin |
+| GET | `/api/attendance/me` | My attendance history | Student |
+| GET | `/api/attendance/me/summary?courseId=` | My attendance summary | Student |
+| GET | `/api/attendance/me/courses` | My enrolled courses | Student |
+| GET | `/api/statistics/course/{id}?month=&year=&minPercent=&maxPercent=` | Course statistics | Teacher, Admin |
+| GET | `/api/statistics/course/{id}/rankings?ascending=&top=&month=&year=` | Attendance ranking | Teacher, Admin |
+| GET | `/api/statistics/course/{id}/export?month=&year=&minPercent=&maxPercent=` | Export statistics to Excel (.xlsx) | Teacher, Admin |
+
+---
+
+## MVC client (`ProyectoExcel/Services/AttendanceApiClient.cs`)
+
+`IAttendanceApiClient` wraps every API endpoint as a typed method. `ApiTokenHandler` injects the JWT automatically. Controllers must never use raw `HttpClient` or call the DB directly.
 
 ---
 
 ## Frontend
 
-- **CSS framework:** Bootstrap 5 with built-in dark mode (`data-bs-theme` attribute).
-- **Icons:** Bootstrap Icons (CDN).
-- **JS libraries:** jQuery (DOM), Chart.js (statistics charts), jQuery Validation.
-- **Custom files:** `wwwroot/css/site.css` (styles, dark mode overrides), `wwwroot/js/site.js` (dark mode toggle, alert auto-dismiss).
-- **Localization:** Spanish (default) and English via `.resx` resource files in `ProyectoExcel/Resources/`. Language switching via `CultureController` and a navbar dropdown.
-- **Layout:** Single shared layout at `Views/Shared/_Layout.cshtml` with role-based navigation.
+- **Bootstrap 5** with dark mode (`data-bs-theme` on `<html>`)
+- **Bootstrap Icons** (CDN)
+- **flag-icons** CSS library — added in `feature/statistics-improvements` for country flag display
+- **jQuery** (DOM), **Chart.js** (statistics charts), jQuery Validation
+- **Localization:** Spanish (default) + English via `.resx` files in `ProyectoExcel/Resources/`
+- Custom: `wwwroot/css/site.css`, `wwwroot/js/site.js`
+- No CSS preprocessors. No JS bundlers.
 
 ---
 
-## Key conventions
+## NuGet packages
 
-- DTOs are immutable `record` types in `Attendance.Infrastructure/DTOs/`.
-- ViewModels are classes in `ProyectoExcel/ViewModels/`.
-- Services use **primary constructor DI** (e.g., `public class AttendanceService(ApplicationDbContext dbContext)`).
-- All async methods propagate `CancellationToken`.
-- Read queries use `AsNoTracking()`.
-- API errors return `{ message: "..." }` JSON.
-- Role-based authorization via `[Authorize(Roles = "...")]`.
+| Package | Project | Purpose |
+|---|---|---|
+| `Microsoft.AspNetCore.Identity.EntityFrameworkCore` | Infrastructure | Identity |
+| `Microsoft.EntityFrameworkCore.SqlServer` | Infrastructure | EF Core |
+| `Microsoft.AspNetCore.Authentication.JwtBearer` | Infrastructure | JWT |
+| `System.IdentityModel.Tokens.Jwt` | Infrastructure | JWT tokens |
+| `Microsoft.AspNetCore.OpenApi` | API | OpenAPI |
+| `Scalar.AspNetCore` | API | API docs UI |
+| `ClosedXML` | Infrastructure | Excel export (.xlsx via `ExcelExportService`) |
+
+---
+
+## Feature status
+
+### ✅ Done
+- Full auth: login, logout, JWT + cookie, role-based redirect
+- Attendance view for teachers (list, save session)
+- Student dashboard (history + summary)
+- Student list by course
+- Statistics and rankings with charts
+- Dev data seed (Development only)
+- **Weekend / non-lective day filter** — `AttendanceController` rejects Sat/Sun; `AttendanceService.SaveSessionAsync` rejects non-lective days via `LectiveDayCalendar`
+- **Percent filter validation** — `minPercent`/`maxPercent` bounds (0–100, min ≤ max) enforced at API (`StatisticsController`) and MVC (`[Range]` on ViewModel + `min`/`max` HTML attributes)
+- **Export to Excel** — `GET /api/statistics/course/{id}/export` via `ExcelExportService` (ClosedXML); MVC `Export` action + button in `Statistics/Index.cshtml`
+- **Flag-icons library** — CDN link added to `_Layout.cshtml`; `fi fi-xx` classes available in all views
+
+### 🔄 In progress
+*(nothing active — all feature/statistics-improvements items merged)*
+
+### ⏳ Planned — Phase 2 (do not start until Phase 1 is stable in develop)
+- Secure check-in tied to physical classroom device (TW17, TW18…)
+- Seat assignment table in DB (student ↔ device ↔ date)
+- Rotating seat assignment between students
+
+### ❌ Discarded
+- Excel import — data already in DB from legacy Tajamar tables
+
+---
+
+## Changelog
+
+| Date | Author | Change |
+|---|---|---|
+| 2025-xx-xx | [Your name] | Initial CONTEXT.md + AGENTS.md setup |
+| 2026-06-01 | Antigravity | feature/statistics-improvements: flag-icons CDN, percent filter validation (API + MVC), non-lective day guard (API + service), Excel export endpoint + ClosedXML service + MVC action + view button |

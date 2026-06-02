@@ -1,6 +1,6 @@
 # AGENTS.md — Coding rules for AI agents
 
-Read [Context.md](Context.md) first for project overview and architecture.
+Read [Context_Alvaro.md](Context_Alvaro.md) first for project overview and architecture.
 
 ---
 
