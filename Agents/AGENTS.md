@@ -1,5 +1,5 @@
 # AGENTS.md — Coding rules for AI agents
-> Read [CONTEXT.md](../CONTEXT.md) first for project overview and architecture.
+> Read [Context.md](../Context.md) first for project overview and architecture.
 > This file governs ALL agents: Antigravity, Cursor, Copilot, any LLM.
 
 ---

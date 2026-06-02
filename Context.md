@@ -1,7 +1,7 @@
 # CONTEXT.md — Attendance Management System (Tajamar)
 > Live document. Updated on every PR that changes architecture, endpoints, domain model or conventions.
 > For setup instructions, test accounts and troubleshooting see [README.md](README.md).
-> Coding and agent rules: [agents/AGENTS.md](agents/AGENTS.md)
+> Coding and agent rules: [Agents/AGENTS.md](Agents/AGENTS.md)
 
 ---
 
