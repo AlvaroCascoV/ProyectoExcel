@@ -29,11 +29,11 @@
 
 Did this PR...
 
-- [ ] Add or modify an API endpoint? → Update **API endpoints table** in CONTEXT.md
-- [ ] Add or modify a DB table or entity? → Update **Domain model** in CONTEXT.md
-- [ ] Add a NuGet package? → Update **NuGet packages** in CONTEXT.md
-- [ ] Add or change a business rule? → Update **Business rules** in CONTEXT.md
-- [ ] Complete a feature? → Move from "In progress" to "Done" in CONTEXT.md
+- [ ] Add or modify an API endpoint? → Update **API endpoints table** in Context.md
+- [ ] Add or modify a DB table or entity? → Update **Domain model** in Context.md
+- [ ] Add a NuGet package? → Update **NuGet packages** in Context.md
+- [ ] Add or change a business rule? → Update **Business rules** in Context.md
+- [ ] Complete a feature? → Move from "In progress" to "Done" in Context.md
 - [ ] Discard or defer a feature? → Add reason to "Discarded" in CONTEXT.md
 - [ ] Change a coding convention? → Update **AGENTS.md**
 
