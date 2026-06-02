@@ -12,6 +12,7 @@ Use this skill when creating or modifying a controller in `ProyectoExcel/Control
 using Attendance.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using MvcProyectoExcel.Services;
 using MvcProyectoExcel.ViewModels;
 
