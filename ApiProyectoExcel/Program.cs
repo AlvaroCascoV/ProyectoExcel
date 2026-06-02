@@ -20,19 +20,30 @@ app.Use(async (context, next) =>
 {
     // Culture is propagated from MVC via a query param for export endpoints:
     //   ?culture=es|en
-    var cultureParam = context.Request.Query["culture"].ToString();
-    if (!string.IsNullOrWhiteSpace(cultureParam))
-    {
-        var normalized = cultureParam.Trim().ToLowerInvariant();
-        if (supportedCultures.Contains(normalized, StringComparer.Ordinal))
-        {
-            var culture = CultureInfo.GetCultureInfo(normalized);
-            CultureInfo.CurrentCulture = culture;
-            CultureInfo.CurrentUICulture = culture;
-        }
-    }
+    var originalCulture = CultureInfo.CurrentCulture;
+    var originalUICulture = CultureInfo.CurrentUICulture;
 
-    await next();
+    try
+    {
+        var cultureParam = context.Request.Query["culture"].ToString();
+        if (!string.IsNullOrWhiteSpace(cultureParam))
+        {
+            var normalized = cultureParam.Trim().ToLowerInvariant();
+            if (supportedCultures.Contains(normalized, StringComparer.Ordinal))
+            {
+                var culture = CultureInfo.GetCultureInfo(normalized);
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+            }
+        }
+
+        await next();
+    }
+    finally
+    {
+        CultureInfo.CurrentCulture = originalCulture;
+        CultureInfo.CurrentUICulture = originalUICulture;
+    }
 });
 
 app.Use(async (context, next) =>
