@@ -3,172 +3,1025 @@
 @{
     ViewData["Title"] = SharedLocalizer["PassList"];
     var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
+
+<style>
+    :root, [data-bs-theme="light"] {
+        --bg-glass: rgba(255, 255, 255, 0.7);
+        --border-glass: rgba(0, 0, 0, 0.08);
+        --text-muted: #64748b;
+        --primary-glow: 0 0 12px rgba(59, 130, 246, 0.3);
+        
+        --color-lective: #059669;
+        --bg-lective: rgba(5, 150, 105, 0.08);
+        --border-lective: rgba(5, 150, 105, 0.2);
+        
+        --color-festivo: #dc2626;
+        --bg-festivo: rgba(220, 38, 38, 0.08);
+        --border-festivo: rgba(220, 38, 38, 0.2);
+        
+        --color-no-lective: #d97706;
+        --bg-no-lective: rgba(217, 119, 6, 0.08);
+        --border-no-lective: rgba(217, 119, 6, 0.2);
+        
+        --color-weekend: #94a3b8;
+        --bg-weekend: rgba(148, 163, 184, 0.06);
+
+        --color-passed: #0369a1;
+        --bg-passed: #e0f2fe;
+        --border-passed: #bae6fd;
+        
+        --calendar-cell-color: #334155;
+        --tooltip-bg: #1e293b;
+        --tooltip-text: #ffffff;
+    }
+
+    [data-bs-theme="dark"] {
+        --bg-glass: rgba(30, 41, 59, 0.4);
+        --border-glass: rgba(255, 255, 255, 0.08);
+        --text-muted: #94a3b8;
+        --primary-glow: 0 0 15px rgba(59, 130, 246, 0.4);
+        
+        --color-lective: #10b981;
+        --bg-lective: rgba(16, 185, 129, 0.12);
+        --border-lective: rgba(16, 185, 129, 0.25);
+        
+        --color-festivo: #ef4444;
+        --bg-festivo: rgba(239, 68, 68, 0.12);
+        --border-festivo: rgba(239, 68, 68, 0.25);
+        
+        --color-no-lective: #f59e0b;
+        --bg-no-lective: rgba(245, 158, 11, 0.1);
+        --border-no-lective: rgba(245, 158, 11, 0.2);
+        
+        --color-weekend: #64748b;
+        --bg-weekend: rgba(100, 116, 139, 0.05);
+
+        --color-passed: #38bdf8;
+        --bg-passed: rgba(56, 189, 248, 0.15);
+        --border-passed: rgba(56, 189, 248, 0.35);
+        
+        --calendar-cell-color: #e2e8f0;
+        --tooltip-bg: #0f172a;
+        --tooltip-text: #ffffff;
+    }
+
+    .theme-card {
+        background: var(--bs-card-bg);
+        border: 1px solid var(--bs-card-border-color, var(--bs-border-color));
+        border-radius: 12px;
+        box-shadow: var(--bs-box-shadow-sm);
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--bs-border-color);
+        border-radius: 10px;
+        background: var(--bs-tertiary-bg);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        padding: 1.5rem;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--bs-primary);
+        background: rgba(59, 130, 246, 0.05);
+        box-shadow: var(--primary-glow);
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+    }
+
+    .calendar-day-header {
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        padding: 4px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .calendar-cell {
+        position: relative;
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        user-select: none;
+        color: var(--calendar-cell-color);
+    }
+
+    .calendar-cell:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--bs-box-shadow);
+    }
+
+    .calendar-cell.disabled {
+        cursor: not-allowed;
+    }
+
+    .calendar-cell.lective {
+        color: var(--color-lective);
+        background: var(--bg-lective);
+        border-color: var(--border-lective);
+    }
+    .calendar-cell.lective:hover {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: var(--color-lective);
+    }
+
+    .calendar-cell.festivo {
+        color: var(--color-festivo);
+        background: var(--bg-festivo);
+        border-color: var(--border-festivo);
+    }
+
+    .calendar-cell.no-lective {
+        color: var(--color-no-lective);
+        background: var(--bg-no-lective);
+        border-color: var(--border-no-lective);
+    }
+
+    .calendar-cell.weekend {
+        color: var(--color-weekend);
+        background: var(--bg-weekend);
+    }
+
+    .calendar-cell.passed {
+        color: var(--color-passed) !important;
+        background: var(--bg-passed) !important;
+        border-color: var(--border-passed) !important;
+    }
+    .calendar-cell.passed:hover:not(.disabled) {
+        background: rgba(56, 189, 248, 0.2) !important;
+        border-color: var(--color-passed) !important;
+    }
+
+    .calendar-cell.other-month {
+        opacity: 0.2;
+    }
+
+    .calendar-cell.selected {
+        outline: 2px solid var(--bs-primary);
+        outline-offset: 1px;
+        box-shadow: var(--primary-glow);
+    }
+
+    .recorded-dot {
+        position: absolute;
+        bottom: 4px;
+        width: 6px;
+        height: 6px;
+        background-color: var(--color-passed);
+        border-radius: 50%;
+        box-shadow: 0 0 4px var(--color-passed);
+    }
+
+    .legend-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 6px;
+        flex-shrink: 0;
+    }
+    .legend-dot.lective {
+        background-color: var(--color-lective);
+        border: 1px solid var(--border-lective);
+    }
+    .legend-dot.festivo {
+        background-color: var(--color-festivo);
+        border: 1px solid var(--border-festivo);
+    }
+    .legend-dot.no-lective {
+        background-color: var(--color-no-lective);
+        border: 1px solid var(--border-no-lective);
+    }
+    .legend-dot.passed {
+        background-color: var(--color-passed);
+        border: 1px solid var(--border-passed);
+    }
+
+    .cursor-help {
+        cursor: help;
+    }
+
+    .tooltip-container {
+        position: relative;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--tooltip-bg);
+        color: var(--tooltip-text);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        width: 180px;
+        z-index: 100;
+        box-shadow: var(--bs-box-shadow);
+        border: 1px solid var(--border-glass);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        text-align: center;
+        font-weight: 400;
+    }
+
+    .calendar-cell:hover .custom-tooltip {
+        opacity: 1;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    #attendanceCard {
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateY(0);
+    }
+    #attendanceCard.loading {
+        opacity: 0.5;
+        transform: translateY(5px);
+        pointer-events: none;
+    }
+</style>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h1 class="h3 mb-0">@SharedLocalizer["PassList"]</h1>
-    @if (Model.SelectedCourseId.HasValue && Model.Rows.Count > 0)
-    {
-        <a asp-action="ExportPdf"
-           asp-route-courseId="@Model.SelectedCourseId"
-           asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
-           class="btn btn-sm btn-outline-secondary">
-            &#128196; @SharedLocalizer["ExportPdf"]
-        </a>
-    }
+    <div id="pdfExportContainer">
+        @if (Model.SelectedCourseId.HasValue && Model.Rows.Count > 0)
+        {
+            <a asp-action="ExportPdf"
+               asp-route-courseId="@Model.SelectedCourseId"
+               asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-file-earmark-pdf me-1"></i> @SharedLocalizer["ExportPdf"]
+            </a>
+        }
+    </div>
 </div>
 
 @if (!string.IsNullOrEmpty(successMessage))
 {
-    <div class="alert alert-success">@successMessage</div>
+    <div class="alert alert-success border-0 shadow-sm mb-3">@successMessage</div>
 }
 
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
 {
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
+    <div class="alert alert-danger border-0 shadow-sm mb-3">@Model.ErrorMessage</div>
 }
 
-<form method="get" class="row g-2 g-md-3 align-items-end mb-4">
-        <div class="col-12 col-md-5">
-            <label class="form-label small" for="courseId">@SharedLocalizer["CourseLabel"]</label>
-            <select class="form-select" id="courseId" name="courseId" onchange="this.form.submit()">
-                @foreach (var course in Model.Courses)
-                {
-                    if (Model.SelectedCourseId == course.Id)
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger border-0 shadow-sm mb-3">@errorMessage</div>
+}
+
+<!-- MAIN GRID LAYOUT -->
+<div class="row g-4">
+    <!-- LEFT PANEL: CONTROLS & DYNAMIC CALENDAR -->
+    <div class="col-12 col-lg-4">
+        <!-- COURSE SELECTOR CARD -->
+        <div class="card theme-card p-3 mb-4">
+            <form method="get" id="filterForm">
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-semibold" for="courseId">@SharedLocalizer["CourseLabel"]</label>
+                    <select class="form-select" id="courseId" name="courseId" onchange="showLoadingOverlay(); this.form.submit()">
+                        @foreach (var course in Model.Courses)
+                        {
+                            if (Model.SelectedCourseId == course.Id)
+                            {
+                                <option value="@course.Id" selected="selected">@course.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@course.Id">@course.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <!-- HIDDEN SELECTOR DATE -->
+                <input type="hidden" id="dateInput" name="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+            </form>
+        </div>
+
+        @if (Model.SelectedCourseId.HasValue)
+        {
+            <!-- CALENDAR UPLOAD CARD -->
+            <div class="card theme-card p-3 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="h6 mb-0"><i class="bi bi-calendar3 me-1"></i> @SharedLocalizer["CourseCalendar"]</h5>
+                    <button class="btn btn-link btn-sm text-decoration-none text-muted p-0" type="button" data-bs-toggle="collapse" data-bs-target="#uploadCollapse">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div class="collapse" id="uploadCollapse">
+                    <div class="upload-zone text-center mb-3" id="dropZone">
+                        <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
+                        <p class="small text-muted mb-0">Drag Excel file (.xlsx) here or click to upload</p>
+                        <input type="file" id="fileInput" class="d-none" accept=".xlsx" />
+                    </div>
+
+                    <!-- CALENDAR PREVIEW PANEL -->
+                    <div id="previewPanel" class="d-none border p-3 rounded mb-3 bg-body-tertiary animate__animated animate__fadeIn">
+                        <h6 class="small fw-bold mb-2"><i class="bi bi-eye me-1"></i> Calendar Preview</h6>
+                        <p class="small text-muted mb-2 text-truncate" id="previewFileName">File: calendar.xlsx</p>
+                        
+                        <div class="row g-2 mb-3 text-center">
+                            <div class="col-4">
+                                <div class="bg-success bg-opacity-10 text-success p-2 rounded border border-success border-opacity-25">
+                                    <div class="small fw-semibold">Lective</div>
+                                    <div class="fs-6 fw-bold" id="previewLectiveCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-danger bg-opacity-10 text-danger p-2 rounded border border-danger border-opacity-25">
+                                    <div class="small fw-semibold">Holiday</div>
+                                    <div class="fs-6 fw-bold" id="previewFestivoCount">0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-warning bg-opacity-10 text-warning p-2 rounded border border-warning border-opacity-25">
+                                    <div class="small fw-semibold">Non-Lective</div>
+                                    <div class="fs-6 fw-bold" id="previewNoLectivoCount">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-primary flex-fill fw-bold shadow-sm" id="confirmUploadBtn"><i class="bi bi-check-circle me-1"></i> Confirm & Save</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="cancelUploadBtn"><i class="bi bi-x-circle me-1"></i> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CALENDAR STATUS INDICATOR -->
+                <div id="calendarStatus" class="p-2 rounded text-center small mb-1">
+                    @if (Model.HasCalendar)
                     {
-                        <option value="@course.Id" selected="selected">@course.Name</option>
+                        <div class="text-success border border-success bg-opacity-10 bg-success p-2 rounded">
+                            <i class="bi bi-check-circle-fill me-1"></i> Calendar Loaded: <strong>@Model.LectiveDaysCount</strong> Lective Days
+                        </div>
                     }
                     else
                     {
-                        <option value="@course.Id">@course.Name</option>
+                        <div class="text-warning border border-warning bg-opacity-10 bg-warning p-2 rounded">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Fallback Weekdays Mode (No Calendar)
+                        </div>
                     }
-                }
-            </select>
-        </div>
-        <div class="col-6 col-md-3">
-            <label class="form-label small" for="date">@SharedLocalizer["SessionDate"]</label>
-            <input class="form-control" type="date" id="date" name="date"
-                   value="@Model.SelectedDate.ToString("yyyy-MM-dd")"
-                   max="@DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd")"
-                   onchange="this.form.submit()" />
-        </div>
-        <div class="col-6 col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-outline-primary flex-fill">@SharedLocalizer["Load"]</button>
-            @if (Model.SelectedCourseId.HasValue && Model.Rows.Count > 0)
-            {
-                <a asp-action="ExportPdf"
-                   asp-route-courseId="@Model.SelectedCourseId"
-                   asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
-                   class="btn btn-outline-secondary"
-                   title="@SharedLocalizer["ExportPdf"]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                    </svg>
-                    PDF
-                </a>
-            }
-        </div>
-    </form>
-
-    @if (Model.PreviousDates.Count > 0)
-    {
-        <p class="small text-muted mb-3">
-            @SharedLocalizer["PreviouslyRecordedDates"]
-            @string.Join(", ", Model.PreviousDates.Take(10).Select(d => d.ToString("yyyy-MM-dd")))
-            @if (Model.PreviousDates.Count > 10)
-            {
-                <span>…</span>
-            }
-        </p>
-    }
-
-    @if (Model.SelectedCourseId.HasValue)
-    {
-        <form asp-action="Save" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="SelectedCourseId" value="@Model.SelectedCourseId" />
-            <input type="hidden" name="SelectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
-            <input type="hidden" name="SelectedCourseName" value="@Model.SelectedCourseName" />
-
-            @if (!string.IsNullOrEmpty(Model.SelectedCourseName))
-            {
-                <p class="text-muted mb-3">
-                    @SharedLocalizer["CourseText"] <strong>@Model.SelectedCourseName</strong> —
-                    @SharedLocalizer["DateText"] <strong>@Model.SelectedDate.ToString("yyyy-MM-dd")</strong>
-                </p>
-            }
-
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>@SharedLocalizer["TableNum"]</th>
-                            <th>@SharedLocalizer["TableStudent"]</th>
-                            <th style="min-width: 220px;">@SharedLocalizer["TableStatus"]</th>
-                            <th>@SharedLocalizer["TableComment"]</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Rows.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">@SharedLocalizer["NoStudentsEnrolled"]</td>
-                            </tr>
-                        }
-                        else
-                        {
-                            for (var i = 0; i < Model.Rows.Count; i++)
-                            {
-                                var row = Model.Rows[i];
-                                <tr>
-                                    <td>@(i + 1)</td>
-                                    <td>@row.StudentFullName</td>
-                                    <td>
-                                        <input type="hidden" name="Rows[@i].StudentId" value="@row.StudentId" />
-                                        <input type="hidden" name="Rows[@i].StudentFullName" value="@row.StudentFullName" />
-                                        <select class="form-select form-select-sm" name="Rows[@i].Status">
-                                            @foreach (AttendanceStatus status in Enum.GetValues<AttendanceStatus>())
-                                            {
-                                                var labelKey = $"Status_{status}";
-                                                var labelText = SharedLocalizer[labelKey].Value;
-                                                if (string.IsNullOrEmpty(labelText) || labelText == labelKey)
-                                                {
-                                                    labelText = AttendanceStatusDisplay.GetLabel(status);
-                                                }
-                                                
-                                                if (row.Status == status)
-                                                {
-                                                    <option value="@((int)status)" selected="selected">
-                                                        @labelText
-                                                    </option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="@((int)status)">
-                                                        @labelText
-                                                    </option>
-                                                }
-                                            }
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input class="form-control form-control-sm" type="text"
-                                               name="Rows[@i].Comment" value="@row.Comment"
-                                               maxlength="500" placeholder="@SharedLocalizer["OptionalPlaceholder"]" />
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+                </div>
             </div>
 
-            @if (Model.Rows.Count > 0)
-            {
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">@SharedLocalizer["SaveAttendance"]</button>
+            <!-- INTERACTIVE MONTHLY CALENDAR GRID -->
+            <div class="card theme-card p-3 mb-4">
+                <div class="calendar-header">
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" type="button" id="prevMonth"><i class="bi bi-chevron-left"></i></button>
+                    <span class="fw-bold small" id="calendarMonthYear">January 2026</span>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" type="button" id="nextMonth"><i class="bi bi-chevron-right"></i></button>
                 </div>
-            }
-        </form>
+
+                <div class="calendar-grid mb-2">
+                    <div class="calendar-day-header">Mo</div>
+                    <div class="calendar-day-header">Tu</div>
+                    <div class="calendar-day-header">We</div>
+                    <div class="calendar-day-header">Th</div>
+                    <div class="calendar-day-header">Fr</div>
+                    <div class="calendar-day-header">Sa</div>
+                    <div class="calendar-day-header">Su</div>
+                </div>
+
+                <div class="calendar-grid" id="calendarDays">
+                    <!-- Javascript will draw the days dynamically here -->
+                </div>
+
+                <div class="mt-3 d-flex flex-wrap gap-3 justify-content-center small text-muted">
+                    <span class="d-flex align-items-center cursor-help" data-bs-toggle="tooltip" data-bs-placement="top" title="@SharedLocalizer["TooltipLective"]">
+                        <span class="legend-dot lective"></span> @SharedLocalizer["LegendLective"]
+                    </span>
+                    <span class="d-flex align-items-center cursor-help" data-bs-toggle="tooltip" data-bs-placement="top" title="@SharedLocalizer["TooltipFestivo"]">
+                        <span class="legend-dot festivo"></span> @SharedLocalizer["LegendFestivo"]
+                    </span>
+                    <span class="d-flex align-items-center cursor-help" data-bs-toggle="tooltip" data-bs-placement="top" title="@SharedLocalizer["TooltipNoLectivo"]">
+                        <span class="legend-dot no-lective"></span> @SharedLocalizer["LegendNoLectivo"]
+                    </span>
+                    <span class="d-flex align-items-center cursor-help" data-bs-toggle="tooltip" data-bs-placement="top" title="@SharedLocalizer["TooltipPassed"]">
+                        <span class="legend-dot passed"></span> @SharedLocalizer["LegendPassed"]
+                    </span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- RIGHT PANEL: ATTENDANCE ROW SHEET -->
+    <div class="col-12 col-lg-8">
+        @if (Model.SelectedCourseId.HasValue)
+        {
+            <div class="card theme-card p-4" id="attendanceCard">
+                <form asp-action="Save" method="post" id="attendanceForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SelectedCourseId" value="@Model.SelectedCourseId" />
+                    <input type="hidden" name="SelectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="SelectedCourseName" value="@Model.SelectedCourseName" />
+
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <h4 class="h5 mb-1"><i class="bi bi-clipboard-check me-1"></i> Roll Call Grid</h4>
+                            <p class="text-muted small mb-0">
+                                @SharedLocalizer["CourseText"] <strong>@Model.SelectedCourseName</strong> —
+                                @SharedLocalizer["DateText"] <strong class="fw-bold">@Model.SelectedDate.ToString("yyyy-MM-dd")</strong>
+                            </p>
+                        </div>
+                        <div>
+                            @if (Model.Rows.Count > 0)
+                            {
+                                <button type="submit" class="btn btn-sm btn-primary px-3 shadow"><i class="bi bi-floppy me-1"></i> @SharedLocalizer["SaveAttendance"]</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle mb-0">
+                            <thead>
+                                <tr class="text-muted small uppercase">
+                                    <th style="width: 60px;">#</th>
+                                    <th>@SharedLocalizer["TableStudent"]</th>
+                                    <th style="width: 250px;">@SharedLocalizer["TableStatus"]</th>
+                                    <th>@SharedLocalizer["TableComment"]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Rows.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5">
+                                            <div class="py-3">
+                                                <i class="bi bi-people fs-1 opacity-50 mb-3"></i>
+                                                <p class="mb-0">@SharedLocalizer["NoStudentsEnrolled"]</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    for (var i = 0; i < Model.Rows.Count; i++)
+                                    {
+                                        var row = Model.Rows[i];
+                                        <tr>
+                                            <td class="text-muted small">@(i + 1)</td>
+                                            <td class="fw-semibold">@row.StudentFullName</td>
+                                            <td>
+                                                <input type="hidden" name="Rows[@i].StudentId" value="@row.StudentId" />
+                                                <input type="hidden" name="Rows[@i].StudentFullName" value="@row.StudentFullName" />
+                                                <select class="form-select form-select-sm" name="Rows[@i].Status">
+                                                    @foreach (AttendanceStatus status in Enum.GetValues<AttendanceStatus>())
+                                                    {
+                                                        var labelKey = $"Status_{status}";
+                                                        var labelText = SharedLocalizer[labelKey].Value;
+                                                        if (string.IsNullOrEmpty(labelText) || labelText == labelKey)
+                                                        {
+                                                            labelText = AttendanceStatusDisplay.GetLabel(status);
+                                                        }
+                                                        
+                                                        if (row.Status == status)
+                                                        {
+                                                            <option value="@status" selected="selected">
+                                                                @labelText
+                                                            </option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@status">
+                                                                @labelText
+                                                            </option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input class="form-control form-control-sm" type="text"
+                                                       name="Rows[@i].Comment" value="@row.Comment"
+                                                       maxlength="500" placeholder="@SharedLocalizer["OptionalPlaceholder"]" />
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (Model.Rows.Count > 0)
+                    {
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary px-4 shadow"><i class="bi bi-floppy me-1"></i> @SharedLocalizer["SaveAttendance"]</button>
+                        </div>
+                    }
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" class="loading-overlay d-none">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<script>
+    function showLoadingOverlay() {
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+            overlay.classList.remove("d-none");
+        }
     }
+</script>
+
+@if (Model.SelectedCourseId.HasValue)
+{
+    <script>
+        // Calendar dynamic lookup tables
+        let courseCalendar = @Html.Raw(Model.CalendarJson ?? "[]");
+        const previousDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PreviousDates?.Select(d => d.ToString("yyyy-MM-dd")) ?? Array.Empty<string>())));
+        const textAttendanceRecorded = "@SharedLocalizer["TooltipPassed"]";
+        const courseId = @Model.SelectedCourseId.Value;
+        
+        let minCalendarDate = null;
+        let maxCalendarDate = null;
+        if (courseCalendar && courseCalendar.length > 0) {
+            const dates = courseCalendar.map(entry => new Date(entry.Date.split('T')[0] + "T00:00:00"));
+            minCalendarDate = new Date(Math.min(...dates));
+            maxCalendarDate = new Date(Math.max(...dates));
+        }
+        
+        let selectedDateStr = "@Model.SelectedDate.ToString("yyyy-MM-dd")";
+        let currentDate = new Date(selectedDateStr + "T00:00:00");
+        let viewYear = currentDate.getFullYear();
+        let viewMonth = currentDate.getMonth(); // 0-indexed
+
+        // Create quick calendar lookup map
+        let calendarMap = {};
+        function rebuildCalendarMap() {
+            calendarMap = {};
+            courseCalendar.forEach(entry => {
+                // Keep only yyyy-mm-dd
+                const key = entry.Date.split('T')[0];
+                calendarMap[key] = entry;
+            });
+        }
+        rebuildCalendarMap();
+
+        // Elements
+        const calendarMonthYear = document.getElementById("calendarMonthYear");
+        const calendarDays = document.getElementById("calendarDays");
+        const prevMonthBtn = document.getElementById("prevMonth");
+        const nextMonthBtn = document.getElementById("nextMonth");
+        const dateInput = document.getElementById("dateInput");
+        const filterForm = document.getElementById("filterForm");
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        function drawCalendar() {
+            calendarDays.innerHTML = "";
+            calendarMonthYear.textContent = `${monthNames[viewMonth]} ${viewYear}`;
+
+            // First day of the view month
+            const firstDayIndex = new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay(); // Sun=0, Mon=1, etc.
+            // Adjust so week starts on Monday
+            const startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+            // Total days in the view month
+            const totalDaysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate();
+
+            // Total days in the previous month (for padding)
+            const prevMonthTotalDays = new Date(Date.UTC(viewYear, viewMonth, 0)).getUTCDate();
+
+            // 1. Draw padding from previous month
+            for (let i = startOffset; i > 0; i--) {
+                const day = prevMonthTotalDays - i + 1;
+                const cell = document.createElement("div");
+                cell.className = "calendar-cell other-month disabled";
+                cell.textContent = day;
+                calendarDays.appendChild(cell);
+            }
+
+            // 2. Draw current month days
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const cell = document.createElement("div");
+                cell.className = "calendar-cell";
+                cell.textContent = day;
+
+                // Format date string as yyyy-MM-dd
+                const mStr = String(viewMonth + 1).padStart(2, '0');
+                const dStr = String(day).padStart(2, '0');
+                const dateKey = `${viewYear}-${mStr}-${dStr}`;
+
+                // Mark selected day
+                if (dateKey === selectedDateStr) {
+                    cell.classList.add("selected");
+                }
+
+                // Retrieve calendar info
+                const calendarInfo = calendarMap[dateKey];
+                let isLective = false;
+
+                if (courseCalendar && courseCalendar.length > 0) {
+                    if (calendarInfo && calendarInfo.IsLective) {
+                        isLective = true;
+                    }
+                } else {
+                    const curD = new Date(Date.UTC(viewYear, viewMonth, day));
+                    const dayOfWeek = curD.getUTCDay();
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        isLective = true;
+                    }
+                }
+
+                // Check if date is in the past in browser's local timezone
+                const todayObj = new Date();
+                const yStr = todayObj.getFullYear();
+                const mStr2 = String(todayObj.getMonth() + 1).padStart(2, '0');
+                const dStr2 = String(todayObj.getDate()).padStart(2, '0');
+                const todayStr = `${yStr}-${mStr2}-${dStr2}`;
+                const isPast = dateKey < todayStr;
+
+                // Add record indicator dot & mark as passed (blue)
+                if (previousDates.has(dateKey) || (isPast && isLective)) {
+                    cell.classList.add("passed");
+                }
+                if (previousDates.has(dateKey)) {
+                    const dot = document.createElement("span");
+                    dot.className = "recorded-dot";
+                    dot.setAttribute("data-bs-toggle", "tooltip");
+                    dot.setAttribute("data-bs-placement", "top");
+                    dot.setAttribute("title", textAttendanceRecorded);
+                    cell.appendChild(dot);
+                }
+
+                let isClickable = true;
+
+                if (courseCalendar && courseCalendar.length > 0) {
+                    // --- Custom Calendar Mode ---
+                    if (calendarInfo) {
+                        if (calendarInfo.IsLective) {
+                            cell.classList.add("lective");
+                        } else if (calendarInfo.DayType === "FESTIVO") {
+                            cell.classList.add("festivo");
+                            isClickable = false;
+                        } else if (calendarInfo.DayType === "NO LECTIVO") {
+                            cell.classList.add("no-lective");
+                            isClickable = false;
+                        }
+
+                        // Setup Tooltip
+                        if (calendarInfo.Module || calendarInfo.Teacher || calendarInfo.Room) {
+                            const tooltip = document.createElement("span");
+                            tooltip.className = "custom-tooltip shadow";
+                            let tipHtml = `<strong>${calendarInfo.DayType || "Info"}</strong>`;
+                            if (calendarInfo.Module) tipHtml += `<br>${calendarInfo.Module}`;
+                            if (calendarInfo.Teacher) tipHtml += `<br><i class="bi bi-person-workspace me-1"></i> ${calendarInfo.Teacher}`;
+                            if (calendarInfo.Room) tipHtml += `<br><i class="bi bi-geo-alt me-1"></i> Aula ${calendarInfo.Room}`;
+                            tooltip.innerHTML = tipHtml;
+                            cell.appendChild(tooltip);
+                        }
+                    } else {
+                        // Days outside calendar range or missing calendar entry in Custom Calendar Mode
+                        const curD = new Date(Date.UTC(viewYear, viewMonth, day));
+                        const dayOfWeek = curD.getUTCDay();
+                        
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            cell.classList.add("weekend");
+                        } else {
+                            cell.classList.add("other-month"); // Gray out weekdays outside calendar range
+                            cell.style.opacity = "0.25";
+                        }
+                        cell.classList.add("disabled");
+                        isClickable = false;
+                    }
+                } else {
+                    // --- Fallback Mode (No custom calendar loaded) ---
+                    const curD = new Date(Date.UTC(viewYear, viewMonth, day));
+                    const dayOfWeek = curD.getUTCDay(); // Sun=0, Sat=6
+
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
+                        cell.classList.add("weekend");
+                        isClickable = false;
+                    } else {
+                        cell.classList.add("lective");
+                    }
+                }
+
+                if (isClickable) {
+                    cell.addEventListener("click", () => {
+                        // Smooth premium AJAX loading
+                        const attendanceCard = document.getElementById("attendanceCard");
+                        if (attendanceCard) {
+                            attendanceCard.classList.add("loading");
+                        }
+
+                        // Immediate visual feedback for selection
+                        const allCells = calendarDays.querySelectorAll(".calendar-cell");
+                        allCells.forEach(c => c.classList.remove("selected"));
+                        cell.classList.add("selected");
+
+                        selectedDateStr = dateKey;
+                        dateInput.value = dateKey;
+                        const url = `@Url.Action("Index", "Attendance")?courseId=${courseId}&date=${dateKey}`;
+                        
+                        fetch(url)
+                            .then(res => {
+                                if (!res.ok) throw new Error("Network response was not ok");
+                                return res.text();
+                            })
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, "text/html");
+                                
+                                const newForm = doc.getElementById("attendanceForm");
+                                const oldForm = document.getElementById("attendanceForm");
+                                
+                                if (newForm && oldForm) {
+                                    oldForm.innerHTML = newForm.innerHTML;
+                                    
+                                    // Sincronizar inputs ocultos si fuera necesario
+                                    const oldSelectedDateInput = oldForm.querySelector('input[name="SelectedDate"]');
+                                    if (oldSelectedDateInput) {
+                                        oldSelectedDateInput.value = dateKey;
+                                    }
+                                }
+                                
+                                const newPdfContainer = doc.getElementById("pdfExportContainer");
+                                const oldPdfContainer = document.getElementById("pdfExportContainer");
+                                if (newPdfContainer && oldPdfContainer) {
+                                    oldPdfContainer.innerHTML = newPdfContainer.innerHTML;
+                                }
+                                
+                                // Re-inicializar tooltips y eventos
+                                if (typeof initTooltipsAndOverlay === "function") {
+                                    initTooltipsAndOverlay();
+                                }
+                            })
+                            .catch(err => {
+                                console.error("AJAX loading failed, falling back to reload:", err);
+                                showLoadingOverlay();
+                                filterForm.submit();
+                            })
+                            .finally(() => {
+                                if (attendanceCard) {
+                                    attendanceCard.classList.remove("loading");
+                                }
+                            });
+                    });
+                } else {
+                    cell.classList.add("disabled");
+                }
+
+                calendarDays.appendChild(cell);
+            }
+
+            // 3. Draw padding for next month (fill up grid to 42 cells if needed)
+            const drawnCellsCount = startOffset + totalDaysInMonth;
+            const remainingPadding = drawnCellsCount > 35 ? 42 - drawnCellsCount : 35 - drawnCellsCount;
+            for (let i = 1; i <= remainingPadding; i++) {
+                const cell = document.createElement("div");
+                cell.className = "calendar-cell other-month disabled";
+                cell.textContent = i;
+                calendarDays.appendChild(cell);
+            }
+
+            // Initialize tooltips for dynamically created calendar cells safely
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                const dynamicTooltips = calendarDays.querySelectorAll('[data-bs-toggle="tooltip"]');
+                dynamicTooltips.forEach(el => {
+                    if (!bootstrap.Tooltip.getInstance(el)) {
+                        new bootstrap.Tooltip(el);
+                    }
+                });
+            }
+        }
+
+        // Navigate Months
+        prevMonthBtn.addEventListener("click", () => {
+            viewMonth--;
+            if (viewMonth < 0) {
+                viewMonth = 11;
+                viewYear--;
+            }
+            drawCalendar();
+        });
+
+        nextMonthBtn.addEventListener("click", () => {
+            viewMonth++;
+            if (viewMonth > 11) {
+                viewMonth = 0;
+                viewYear++;
+            }
+            drawCalendar();
+        });
+
+        // Initialize Calendar Draw
+        drawCalendar();
+
+        // DRAG & DROP EXCEL FILE UPLOAD LOGIC
+        const dropZone = document.getElementById("dropZone");
+        const fileInput = document.getElementById("fileInput");
+        const calendarStatus = document.getElementById("calendarStatus");
+        const previewPanel = document.getElementById("previewPanel");
+        const previewFileName = document.getElementById("previewFileName");
+        const previewLectiveCount = document.getElementById("previewLectiveCount");
+        const previewFestivoCount = document.getElementById("previewFestivoCount");
+        const previewNoLectivoCount = document.getElementById("previewNoLectivoCount");
+        const confirmUploadBtn = document.getElementById("confirmUploadBtn");
+        const cancelUploadBtn = document.getElementById("cancelUploadBtn");
+
+        let activeFile = null;
+
+        dropZone.addEventListener("click", () => fileInput.click());
+
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        ["dragleave", "dragend"].forEach(type => {
+            dropZone.addEventListener(type, () => {
+                dropZone.classList.remove("dragover");
+            });
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelection(file) {
+            if (!file.name.endsWith(".xlsx")) {
+                alert("Only Excel spreadsheets (.xlsx) are allowed!");
+                return;
+            }
+
+            activeFile = file;
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("courseId", courseId);
+
+            calendarStatus.innerHTML = `
+                <div class="text-info border border-info bg-opacity-10 bg-info p-2 rounded d-flex align-items-center justify-content-center gap-2">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Generating preview... Please wait</span>
+                </div>
+            `;
+
+            fetch(`/Attendance/PreviewCalendar?courseId=${courseId}`, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    calendarStatus.innerHTML = "";
+                    dropZone.classList.add("d-none");
+                    
+                    previewFileName.textContent = `File: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                    previewLectiveCount.textContent = data.lectiveDays;
+                    previewFestivoCount.textContent = data.festivos;
+                    previewNoLectivoCount.textContent = data.noLectivos;
+                    
+                    previewPanel.classList.remove("d-none");
+                } else {
+                    calendarStatus.innerHTML = `
+                        <div class="text-danger border border-danger bg-opacity-10 bg-danger p-2 rounded">
+                            <i class="bi bi-exclamation-octagon-fill me-1"></i> Error: ${data.message}
+                        </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                calendarStatus.innerHTML = `
+                    <div class="text-danger border border-danger bg-opacity-10 bg-danger p-2 rounded">
+                        <i class="bi bi-exclamation-octagon-fill me-1"></i> Network connection failed.
+                    </div>
+                `;
+            });
+        }
+
+        cancelUploadBtn.addEventListener("click", () => {
+            activeFile = null;
+            fileInput.value = "";
+            previewPanel.classList.add("d-none");
+            dropZone.classList.remove("d-none");
+            calendarStatus.innerHTML = "";
+        });
+
+        confirmUploadBtn.addEventListener("click", () => {
+            if (!activeFile) return;
+
+            showLoadingOverlay();
+            confirmUploadBtn.disabled = true;
+            confirmUploadBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...`;
+            cancelUploadBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append("file", activeFile);
+            formData.append("courseId", courseId);
+
+            fetch(`/Attendance/UploadCalendar?courseId=${courseId}`, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    previewPanel.innerHTML = `
+                        <div class="text-success border border-success bg-opacity-10 bg-success p-2 rounded text-center fw-bold animate__animated animate__pulse">
+                            <i class="bi bi-check-circle-fill me-1"></i> Saved Successfully! Reloading...
+                        </div>
+                    `;
+                    
+                    // Reload the page automatically as requested
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                } else {
+                    const overlay = document.getElementById("loadingOverlay");
+                    if (overlay) overlay.classList.add("d-none");
+                    confirmUploadBtn.disabled = false;
+                    confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> Confirm & Save`;
+                    cancelUploadBtn.disabled = false;
+                    alert("Error saving: " + data.message);
+                }
+            })
+            .catch(err => {
+                const overlay = document.getElementById("loadingOverlay");
+                if (overlay) overlay.classList.add("d-none");
+                confirmUploadBtn.disabled = false;
+                confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> Confirm & Save`;
+                cancelUploadBtn.disabled = false;
+                alert("Upload failed. Check network.");
+            });
+        });
+
+        // Initialize tooltips and attach to attendanceForm submission safely
+        function initTooltipsAndOverlay() {
+            // Bootstrap Tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(el => {
+                if (!bootstrap.Tooltip.getInstance(el)) {
+                    new bootstrap.Tooltip(el);
+                }
+            });
+
+            // Form Submit Overlay
+            const attendanceForm = document.getElementById("attendanceForm");
+            if (attendanceForm && !attendanceForm.dataset.submitAttached) {
+                attendanceForm.addEventListener("submit", () => {
+                    showLoadingOverlay();
+                });
+                attendanceForm.dataset.submitAttached = "true";
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initTooltipsAndOverlay);
+        } else {
+            initTooltipsAndOverlay();
+        }
+    </script>
+}

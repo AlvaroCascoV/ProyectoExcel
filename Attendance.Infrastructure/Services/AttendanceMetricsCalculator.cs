@@ -4,7 +4,7 @@ namespace Attendance.Infrastructure.Services;
 
 public static class AttendanceMetricsCalculator
 {
-    public const decimal DiplomaThreshold = 80m;
+    public const decimal DiplomaThreshold = 85m;
     public const decimal DropThreshold = 75m;
 
     public record Metrics(

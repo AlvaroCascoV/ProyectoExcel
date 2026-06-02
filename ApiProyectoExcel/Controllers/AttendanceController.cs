@@ -13,7 +13,9 @@ public class AttendanceController(
     IAttendanceService attendanceService,
     ICourseService courseService,
     IPdfExportService pdfExportService,
-    IWebHostEnvironment environment) : ControllerBase
+    IWebHostEnvironment environment,
+    ICalendarService calendarService,
+    ICalendarParserService calendarParserService) : ControllerBase
 {
     [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
     [HttpGet("courses/{courseId:int}/attendance")]
@@ -39,8 +41,7 @@ public class AttendanceController(
         [FromBody] SaveAttendanceSessionRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
-            return BadRequest(new { message = "Cannot save attendance on weekends." });
+        // Weekend guard is handled dynamically by ICalendarService in SaveSessionAsync
 
         if (request.Entries.Count == 0)
         {
@@ -196,5 +197,135 @@ public class AttendanceController(
     {
         var claim = User.FindFirstValue("tajamar_user_id");
         return int.TryParse(claim, out userId);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
+    [HttpPost("courses/{courseId:int}/calendar/upload")]
+    public async Task<IActionResult> UploadCalendar(
+        int courseId,
+        IFormFile file,
+        CancellationToken cancellationToken = default)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No file uploaded." });
+        }
+
+        var extension = Path.GetExtension(file.FileName);
+        if (!extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Only Excel files (.xlsx) are allowed." });
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var entries = calendarParserService.ParseCalendarExcel(stream, courseId);
+            if (entries.Count == 0)
+            {
+                return BadRequest(new { message = "No calendar entries found in the file." });
+            }
+
+            await calendarService.UploadCalendarAsync(courseId, entries, cancellationToken);
+
+            var totalDays = entries.Count;
+            var lectiveDays = entries.Count(e => e.IsLective);
+            var festivos = entries.Count(e => e.DayType == "FESTIVO");
+            var noLectivos = entries.Count(e => e.DayType == "NO LECTIVO");
+
+            return Ok(new
+            {
+                message = "Calendar uploaded successfully.",
+                totalDays,
+                lectiveDays,
+                festivos,
+                noLectivos
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = $"Error parsing calendar: {ex.Message}" });
+        }
+    }
+
+    [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
+    [HttpPost("courses/{courseId:int}/calendar/preview")]
+    public async Task<IActionResult> PreviewCalendar(
+        int courseId,
+        IFormFile file,
+        CancellationToken cancellationToken = default)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No file uploaded." });
+        }
+
+        var extension = Path.GetExtension(file.FileName);
+        if (!extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Only Excel files (.xlsx) are allowed." });
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var entries = calendarParserService.ParseCalendarExcel(stream, courseId);
+            if (entries.Count == 0)
+            {
+                return BadRequest(new { message = "No calendar entries found in the file." });
+            }
+
+            var totalDays = entries.Count;
+            var lectiveDays = entries.Count(e => e.IsLective);
+            var festivos = entries.Count(e => e.DayType == "FESTIVO");
+            var noLectivos = entries.Count(e => e.DayType == "NO LECTIVO");
+
+            return Ok(new
+            {
+                message = "Calendar parsed successfully.",
+                totalDays,
+                lectiveDays,
+                festivos,
+                noLectivos
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = $"Error parsing calendar: {ex.Message}" });
+        }
+    }
+
+    [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin},{AppRoles.Student}")]
+    [HttpGet("courses/{courseId:int}/calendar/dates")]
+    public async Task<IActionResult> GetLectiveDates(int courseId, CancellationToken cancellationToken = default)
+    {
+        var dates = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
+        return Ok(dates);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
+    [HttpGet("courses/{courseId:int}/calendar/entries")]
+    public async Task<IActionResult> GetCalendarEntries(int courseId, CancellationToken cancellationToken = default)
+    {
+        var entries = await calendarService.GetCalendarEntriesAsync(courseId, cancellationToken);
+        var dtos = entries.Select(e => new
+        {
+            e.Date,
+            e.IsLective,
+            e.DayType,
+            e.Module,
+            e.Teacher,
+            e.Room
+        });
+        return Ok(dtos);
+    }
+
+    [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
+    [HttpGet("courses/{courseId:int}/calendar/status")]
+    public async Task<IActionResult> GetCalendarStatus(int courseId, CancellationToken cancellationToken = default)
+    {
+        var hasCalendar = await calendarService.HasCalendarAsync(courseId, cancellationToken);
+        var lectiveCount = await calendarService.GetLectiveDaysCountAsync(courseId, cancellationToken);
+        return Ok(new { hasCalendar, lectiveCount });
     }
 }

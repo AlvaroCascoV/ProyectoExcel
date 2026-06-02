@@ -50,6 +50,7 @@ Both web projects reference `Attendance.Infrastructure`. MVC never touches the D
 | `Course` | `CURSOSTAJAMAR` | Courses with start/end dates |
 | `CourseEnrollment` | `CURSOSUSUARIOSTAJAMAR` | Many-to-many join |
 | `AttendanceRecord` | `ASISTENCIATAJAMAR` | One record per student per course per day |
+| `CourseCalendarEntry` | `CALENDARIOCURSO` | Dynamic course academic calendar dates |
 | `AttendanceStatus` | *(enum)* | See enum table below |
 | `ApplicationUser` | ASP.NET Identity tables | Extends `IdentityUser` with `TajamarUserId` FK |
 
@@ -86,8 +87,10 @@ All entities in `Attendance.Infrastructure/Entities/`. English property names, S
 | `CourseService` | Course listing, student roster |
 | `AttendanceService` | Session CRUD, student records/summaries, dev seeding |
 | `StatisticsService` | Course-level stats, rankings, filtering |
-| `AttendanceMetricsCalculator` | Pure calc: attendance %, diploma eligibility (≥80%), drop risk (<75%) |
+| `AttendanceMetricsCalculator` | Pure calc: attendance %, diploma warning threshold (<85%), drop risk (<75%) |
 | `LectiveDayCalendar` | Weekday-only academic calendar, 156 lective days/year |
+| `CalendarParserService` | Parses uploaded calendar Excel spreadsheets (.xlsx) using ClosedXML |
+| `CalendarService` | Database operations for custom course calendars |
 
 DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensions.cs` → `AddAttendanceInfrastructure()`
 
@@ -97,11 +100,11 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 
 | Rule | Value | Where enforced |
 |---|---|---|
-| Diploma eligibility | `RealAttendancePercentage >= 80%` | `AttendanceMetricsCalculator` |
+| Diploma warning threshold | `RealAttendancePercentage < 85%` | `AttendanceMetricsCalculator` (warns early before dropping below official 80% threshold) |
 | Drop risk threshold | `RealAttendancePercentage < 75%` | `AttendanceMetricsCalculator` |
-| Lective days/year | 156 | `LectiveDayCalendar.LectiveDaysPerYear` |
-| Weekend exclusion | Saturday & Sunday never lective | `LectiveDayCalendar.GetWeekdaysInRange` |
-| Non-lective days | Public holidays excluded from lective calendar | `LectiveDayCalendar` |
+| Lective days/year | 156 | `LectiveDayCalendar.LectiveDaysPerYear` (or custom calendar count) |
+| Weekend exclusion | Sat & Sun never lective by default | Overridden if marked lective in custom calendar entries |
+| Non-lective days | Public holidays excluded | Validated dynamically via custom calendar database |
 | Default course | ID `3430` | `AttendanceController`, `StatisticsController` |
 | Percent filter bounds | `minPercent` ≥ 0, `maxPercent` ≤ 100 | API + MVC validation |
 
@@ -124,6 +127,11 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 | GET | `/api/statistics/course/{id}?month=&year=&minPercent=&maxPercent=` | Course statistics | Teacher, Admin |
 | GET | `/api/statistics/course/{id}/rankings?ascending=&top=&month=&year=` | Attendance ranking | Teacher, Admin |
 | GET | `/api/statistics/course/{id}/export?month=&year=&minPercent=&maxPercent=` | Export statistics to Excel (.xlsx) | Teacher, Admin |
+| POST | `/api/courses/{id}/calendar/upload` | Upload custom calendar spreadsheet (.xlsx) | Teacher, Admin |
+| POST | `/api/courses/{id}/calendar/preview` | Preview calendar stats from spreadsheet | Teacher, Admin |
+| GET | `/api/courses/{id}/calendar/dates` | List of lective dates in calendar | Teacher, Admin, Student |
+| GET | `/api/courses/{id}/calendar/entries` | List of detailed calendar entry list | Teacher, Admin |
+| GET | `/api/courses/{id}/calendar/status` | Course calendar upload status | Teacher, Admin |
 
 ---
 
@@ -172,6 +180,9 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 - **Percent filter validation** — `minPercent`/`maxPercent` bounds (0–100, min ≤ max) enforced at API (`StatisticsController`) and MVC (`[Range]` on ViewModel + `min`/`max` HTML attributes)
 - **Export to Excel** — `GET /api/statistics/course/{id}/export` via `ExcelExportService` (ClosedXML); MVC `Export` action + button in `Statistics/Index.cshtml`
 - **Flag-icons library** — CDN link added to `_Layout.cshtml`; `fi fi-xx` classes available in all views
+- **Academic Excel Calendar Upload** — ClosedXML parsing and dynamic validation against weekend and holidays (`ICalendarService`).
+- **Interactive Calendar Grid & AJAX load** — Full calendar grid with hover details and instant, flicker-free SPA-like AJAX loads (`fetch`).
+- **Visual Risk alerts** — Custom color-coded rows (warning/danger), pulsing alert badges, and dismissible stats alert banners using the `85%` early warning margin.
 
 ### 🔄 In progress
 *(nothing active — all feature/statistics-improvements items merged)*
@@ -192,3 +203,5 @@ DI registration: `Attendance.Infrastructure/Extensions/ServiceCollectionExtensio
 |---|---|---|
 | 2025-xx-xx | [Your name] | Initial CONTEXT.md + AGENTS.md setup |
 | 2026-06-01 | Antigravity | feature/statistics-improvements: flag-icons CDN, percent filter validation (API + MVC), non-lective day guard (API + service), Excel export endpoint + ClosedXML service + MVC action + view button |
+| 2026-06-02 | Antigravity | Dynamic Excel Calendar Upload: CourseCalendarEntry, CALENDARIOCURSO table, CalendarParserService, CalendarService, API upload/preview/dates/entries/status endpoints, MVC clients. Upgraded monthly calendar with localized circular dots and dynamic tooltips, timezone-safe local browser date checking to highlight past lective dates in blue, perfect HSL custom variables for legend dots in light/dark themes, robust Url.Action MVC AJAX day navigation, and dynamic AJAX PDF export button container updates without page refreshes. Custom risk-alerts upgrade (85% warning threshold, color-coded rows, pulse badges, dismissible banners). |
+

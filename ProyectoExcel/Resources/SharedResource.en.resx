@@ -160,7 +160,7 @@
     <value>At risk (&lt;75%)</value>
   </data>
   <data name="Below80" xml:space="preserve">
-    <value>Below 80%</value>
+    <value>Below 85%</value>
   </data>
   <data name="Breakdown" xml:space="preserve">
     <value>Breakdown</value>
@@ -235,7 +235,7 @@
     <value>Average real attendance</value>
   </data>
   <data name="Below80Diploma" xml:space="preserve">
-    <value>Below 80% (diploma)</value>
+    <value>Below 85% (diploma risk)</value>
   </data>
   <data name="Below75AtRisk" xml:space="preserve">
     <value>Below 75% (at risk)</value>
@@ -286,7 +286,7 @@
     <value>At risk</value>
   </data>
   <data name="StatusBelow80" xml:space="preserve">
-    <value>Below 80%</value>
+    <value>Below 85%</value>
   </data>
   <data name="StudentsText" xml:space="preserve">
     <value>students</value>
@@ -350,5 +350,41 @@
   </data>
   <data name="ChartLabelRealPercent" xml:space="preserve">
     <value>Real %</value>
+  </data>
+  <data name="LegendLective" xml:space="preserve">
+    <value>Lective</value>
+  </data>
+  <data name="LegendFestivo" xml:space="preserve">
+    <value>Festivo</value>
+  </data>
+  <data name="LegendNoLectivo" xml:space="preserve">
+    <value>No Lectivo</value>
+  </data>
+  <data name="LegendPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="TooltipLective" xml:space="preserve">
+    <value>Scheduled class day</value>
+  </data>
+  <data name="TooltipFestivo" xml:space="preserve">
+    <value>Official holiday (no classes)</value>
+  </data>
+  <data name="TooltipNoLectivo" xml:space="preserve">
+    <value>Non-elective administrative or break day</value>
+  </data>
+  <data name="TooltipPassed" xml:space="preserve">
+    <value>Attendance already recorded for this day</value>
+  </data>
+  <data name="AlertDropTitle" xml:space="preserve">
+    <value>Drop Risk Warning</value>
+  </data>
+  <data name="AlertDropMessage" xml:space="preserve">
+    <value>There are {0} student(s) below the minimum attendance threshold (75%).</value>
+  </data>
+  <data name="AlertDiplomaTitle" xml:space="preserve">
+    <value>Diploma Eligibility Warning</value>
+  </data>
+  <data name="AlertDiplomaMessage" xml:space="preserve">
+    <value>There are {0} student(s) below the 85% warning threshold.</value>
   </data>
 </root>

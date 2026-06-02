@@ -160,7 +160,7 @@
     <value>En riesgo (&lt;75%)</value>
   </data>
   <data name="Below80" xml:space="preserve">
-    <value>Por debajo del 80%</value>
+    <value>Por debajo del 85%</value>
   </data>
   <data name="Breakdown" xml:space="preserve">
     <value>Desglose</value>
@@ -235,7 +235,7 @@
     <value>Asistencia real media</value>
   </data>
   <data name="Below80Diploma" xml:space="preserve">
-    <value>Por debajo del 80% (diploma)</value>
+    <value>Por debajo del 85% (riesgo diploma)</value>
   </data>
   <data name="Below75AtRisk" xml:space="preserve">
     <value>Por debajo del 75% (en riesgo)</value>
@@ -286,7 +286,7 @@
     <value>En riesgo</value>
   </data>
   <data name="StatusBelow80" xml:space="preserve">
-    <value>Debajo de 80%</value>
+    <value>Debajo de 85%</value>
   </data>
   <data name="StudentsText" xml:space="preserve">
     <value>alumnos</value>
@@ -350,5 +350,41 @@
   </data>
   <data name="ChartLabelRealPercent" xml:space="preserve">
     <value>% Real</value>
+  </data>
+  <data name="LegendLective" xml:space="preserve">
+    <value>Lectivo</value>
+  </data>
+  <data name="LegendFestivo" xml:space="preserve">
+    <value>Festivo</value>
+  </data>
+  <data name="LegendNoLectivo" xml:space="preserve">
+    <value>No Lectivo</value>
+  </data>
+  <data name="LegendPassed" xml:space="preserve">
+    <value>Pasado</value>
+  </data>
+  <data name="TooltipLective" xml:space="preserve">
+    <value>Día lectivo programado</value>
+  </data>
+  <data name="TooltipFestivo" xml:space="preserve">
+    <value>Día festivo oficial (sin clases)</value>
+  </data>
+  <data name="TooltipNoLectivo" xml:space="preserve">
+    <value>Día no lectivo (administrativo o descanso)</value>
+  </data>
+  <data name="TooltipPassed" xml:space="preserve">
+    <value>Asistencia ya registrada para este día</value>
+  </data>
+  <data name="AlertDropTitle" xml:space="preserve">
+    <value>Riesgo de abandono</value>
+  </data>
+  <data name="AlertDropMessage" xml:space="preserve">
+    <value>Hay {0} alumno(s) por debajo del umbral mínimo de asistencia (75%).</value>
+  </data>
+  <data name="AlertDiplomaTitle" xml:space="preserve">
+    <value>Riesgo de diploma</value>
+  </data>
+  <data name="AlertDiplomaMessage" xml:space="preserve">
+    <value>Hay {0} alumno(s) por debajo del umbral de advertencia (85%).</value>
   </data>
 </root>

@@ -128,3 +128,43 @@ body {
 [data-bs-theme="dark"] .card.border-0.shadow-sm:hover {
   box-shadow: 0 0.5rem 1rem rgba(255, 255, 255, 0.05) !important;
 }
+
+/* --- Attendance Risk Row Styling --- */
+.table tbody tr.row-risk-danger {
+  background-color: #fde8e8 !important;
+  color: #9b1c1c !important;
+}
+.table tbody tr.row-risk-warning {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr.row-risk-danger {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
+}
+[data-bs-theme="dark"] .table tbody tr.row-risk-warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fde047 !important;
+}
+
+/* --- Badge Pulse Animation --- */
+.badge-pulse {
+  animation: pulse-danger 2s infinite;
+  box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+}
+
+@keyframes pulse-danger {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}

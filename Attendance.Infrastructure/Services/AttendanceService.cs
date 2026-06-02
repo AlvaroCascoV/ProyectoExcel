@@ -36,7 +36,7 @@ public interface IAttendanceService
         CancellationToken cancellationToken = default);
 }
 
-public class AttendanceService(ApplicationDbContext dbContext) : IAttendanceService
+public class AttendanceService(ApplicationDbContext dbContext, ICalendarService calendarService) : IAttendanceService
 {
     public async Task<AttendanceSessionDto?> GetSessionSheetAsync(
         int courseId,
@@ -116,9 +116,8 @@ public class AttendanceService(ApplicationDbContext dbContext) : IAttendanceServ
             return (false, $"Course {courseId} not found.");
         }
 
-        var courseStart = LectiveDayCalendar.GetCourseStartDate(course.StartDate);
-        var courseEnd = LectiveDayCalendar.GetCourseEndDate(course.EndDate, courseStart);
-        var lectiveDates = LectiveDayCalendar.GetLectiveDates(courseStart, courseEnd).ToHashSet();
+        var lectiveDatesList = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
+        var lectiveDates = lectiveDatesList.ToHashSet();
 
         if (!lectiveDates.Contains(date))
             return (false, $"{date:yyyy-MM-dd} is not a lective day for this course.");
@@ -248,9 +247,7 @@ public class AttendanceService(ApplicationDbContext dbContext) : IAttendanceServ
             return null;
         }
 
-        var courseStart = LectiveDayCalendar.GetCourseStartDate(course.StartDate);
-        var courseEnd = LectiveDayCalendar.GetCourseEndDate(course.EndDate, courseStart);
-        var lectiveDates = LectiveDayCalendar.GetLectiveDates(courseStart, courseEnd);
+        var lectiveDates = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         var recordsByDate = await dbContext.AttendanceRecords
@@ -258,13 +255,14 @@ public class AttendanceService(ApplicationDbContext dbContext) : IAttendanceServ
             .Where(r => r.StudentId == studentId && r.CourseId == courseId)
             .ToDictionaryAsync(r => r.Date, r => r.Status, cancellationToken);
 
+        var lectiveDaysCount = await calendarService.GetLectiveDaysCountAsync(courseId, cancellationToken);
         var statuses = LectiveDayCalendar.BuildStatuses(lectiveDates, recordsByDate, today);
-        var metrics = AttendanceMetricsCalculator.FromStatuses(statuses, LectiveDayCalendar.LectiveDaysPerYear);
+        var metrics = AttendanceMetricsCalculator.FromStatuses(statuses, lectiveDaysCount);
 
         return new AttendanceSummaryDto(
             course.Id,
             course.Name,
-            LectiveDayCalendar.LectiveDaysPerYear,
+            lectiveDaysCount,
             metrics.PresentCount,
             metrics.AbsentCount,
             metrics.LateCount,
@@ -337,9 +335,8 @@ public class AttendanceService(ApplicationDbContext dbContext) : IAttendanceServ
         }
 
         var end = endDate ?? DateOnly.FromDateTime(DateTime.Today);
-        var courseStart = LectiveDayCalendar.GetCourseStartDate(course.StartDate);
-        var courseEnd = LectiveDayCalendar.GetCourseEndDate(course.EndDate, courseStart);
-        var lectiveDates = LectiveDayCalendar.GetLectiveDates(courseStart, courseEnd).ToHashSet();
+        var lectiveDatesList = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
+        var lectiveDates = lectiveDatesList.ToHashSet();
         var dates = Enumerable.Range(0, days)
             .Select(offset => end.AddDays(-offset))
             .Where(d => d <= end && lectiveDates.Contains(d))
