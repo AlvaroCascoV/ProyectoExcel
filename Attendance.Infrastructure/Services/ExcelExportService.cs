@@ -1,5 +1,7 @@
 using Attendance.Infrastructure.DTOs;
 using ClosedXML.Excel;
+using Attendance.Infrastructure.Resources;
+using Microsoft.Extensions.Localization;
 
 namespace Attendance.Infrastructure.Services;
 
@@ -8,19 +10,28 @@ public interface IExcelExportService
     byte[] ExportStatisticsToExcel(CourseStatisticsDto statistics, string courseName);
 }
 
-public class ExcelExportService : IExcelExportService
+public class ExcelExportService(IStringLocalizer<ExportResource> localizer) : IExcelExportService
 {
     public byte[] ExportStatisticsToExcel(CourseStatisticsDto statistics, string courseName)
     {
         using var workbook = new XLWorkbook();
-        var sheet = workbook.Worksheets.Add("Attendance");
+        var sheet = workbook.Worksheets.Add(localizer["Excel_Sheet_Attendance"]);
 
         // ── Header row ──────────────────────────────────────────────
         var headers = new[]
         {
-            "Rank", "Student", "Present", "Absent (F)", "Late (R)",
-            "FJ", "RJ", "SAF", "SAFJ",
-            "Attendance %", "Diploma Eligible", "At Risk"
+            localizer["Excel_Header_Rank"].Value,
+            localizer["Excel_Header_Student"].Value,
+            localizer["Excel_Header_Present"].Value,
+            localizer["Excel_Header_AbsentF"].Value,
+            localizer["Excel_Header_LateR"].Value,
+            localizer["Excel_Header_FJ"].Value,
+            localizer["Excel_Header_RJ"].Value,
+            localizer["Excel_Header_SAF"].Value,
+            localizer["Excel_Header_SAFJ"].Value,
+            localizer["Excel_Header_AttendancePct"].Value,
+            localizer["Excel_Header_DiplomaEligible"].Value,
+            localizer["Excel_Header_AtRisk"].Value
         };
 
         for (var i = 0; i < headers.Length; i++)
@@ -65,7 +76,7 @@ public class ExcelExportService : IExcelExportService
         }
 
         // ── Summary row ──────────────────────────────────────────────
-        sheet.Cell(row, 1).Value = "AVERAGE";
+        sheet.Cell(row, 1).Value = localizer["Excel_Summary_Average"].Value;
         sheet.Cell(row, 1).Style.Font.Bold = true;
         sheet.Cell(row, 10).Value = (double)statistics.AverageRealAttendancePercentage;
         sheet.Cell(row, 10).Style.NumberFormat.Format = "0.0\"%\"";
