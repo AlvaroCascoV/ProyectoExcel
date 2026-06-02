@@ -30,6 +30,102 @@
   <data name="MyDashboard" xml:space="preserve">
     <value>My dashboard</value>
   </data>
+  <data name="CheckInTitle" xml:space="preserve">
+    <value>Check-in</value>
+  </data>
+  <data name="CheckInSubtitle" xml:space="preserve">
+    <value>Confirm your presence from this device.</value>
+  </data>
+  <data name="DeviceDetected" xml:space="preserve">
+    <value>Detected device</value>
+  </data>
+  <data name="Position" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="PositionNotAssigned" xml:space="preserve">
+    <value>This device is not assigned to a position yet.</value>
+  </data>
+  <data name="AssignedStudent" xml:space="preserve">
+    <value>Assigned student</value>
+  </data>
+  <data name="StudentNotAssigned" xml:space="preserve">
+    <value>This position is not assigned to a student yet.</value>
+  </data>
+  <data name="DoCheckIn" xml:space="preserve">
+    <value>Check in</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="LastResult" xml:space="preserve">
+    <value>Last result</value>
+  </data>
+  <data name="CheckInOk" xml:space="preserve">
+    <value>Check-in recorded</value>
+  </data>
+  <data name="NoCheckInYet" xml:space="preserve">
+    <value>You have not checked in yet.</value>
+  </data>
+  <data name="CheckInFailed" xml:space="preserve">
+    <value>Could not record the check-in. Make sure the device and position are assigned.</value>
+  </data>
+  <data name="CheckInWrongStudent" xml:space="preserve">
+    <value>This seat ({0}) is assigned to another student. You are signed in as {1} (ID {2}). Ask your teacher to reassign the seat or sign in as the correct student.</value>
+  </data>
+  <data name="CheckInBlockedAbsent" xml:space="preserve">
+    <value>You can’t check in because you are marked as “Absent” today. If you think this is a mistake, tell your teacher so they can fix it.</value>
+  </data>
+  <data name="DevicesTitle" xml:space="preserve">
+    <value>Devices</value>
+  </data>
+  <data name="PositionsTitle" xml:space="preserve">
+    <value>Positions</value>
+  </data>
+  <data name="LastSeen" xml:space="preserve">
+    <value>Last seen</value>
+  </data>
+  <data name="AssignPosition" xml:space="preserve">
+    <value>Assign position</value>
+  </data>
+  <data name="AssignStudent" xml:space="preserve">
+    <value>Assign student</value>
+  </data>
+  <data name="DeviceAssigned" xml:space="preserve">
+    <value>Assigned device</value>
+  </data>
+  <data name="PositionIdPlaceholder" xml:space="preserve">
+    <value>Position ID</value>
+  </data>
+  <data name="StudentIdPlaceholder" xml:space="preserve">
+    <value>Student ID</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SeedPositions" xml:space="preserve">
+    <value>Create positions (W01..W25) for a classroom</value>
+  </data>
+  <data name="ClassCode" xml:space="preserve">
+    <value>Classroom</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="NoDevicesYet" xml:space="preserve">
+    <value>No devices yet.</value>
+  </data>
+  <data name="NoPositionsYet" xml:space="preserve">
+    <value>No positions yet.</value>
+  </data>
+  <data name="SelectStudent" xml:space="preserve">
+    <value>Select a student...</value>
+  </data>
   <data name="Logout" xml:space="preserve">
     <value>Logout</value>
   </data>

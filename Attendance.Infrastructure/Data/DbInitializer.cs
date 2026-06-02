@@ -22,7 +22,13 @@ public static class DbInitializer
 
         try
         {
-            await context.Database.MigrateAsync();
+            // This project uses `script.sql` for schema creation in dev.
+            // Avoid applying EF migrations implicitly at runtime.
+            if (!await context.Database.CanConnectAsync())
+            {
+                throw new InvalidOperationException(
+                    "Cannot connect to the database. Ensure the DB exists and run script.sql to create the schema.");
+            }
             await EnsureRolesAsync(roleManager);
             await SeedIdentityUsersAsync(context, userManager, logger);
         }

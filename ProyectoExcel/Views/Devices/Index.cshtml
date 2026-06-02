@@ -1,0 +1,79 @@
+@model IReadOnlyList<Attendance.Infrastructure.DTOs.DeviceAdminDto>
+@{
+    ViewData["Title"] = SharedLocalizer["DevicesTitle"];
+    var error = ViewBag.ErrorMessage as string ?? TempData["ErrorMessage"] as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@SharedLocalizer["DevicesTitle"]</h1>
+    <a class="btn btn-sm btn-outline-secondary" asp-controller="Positions" asp-action="Index">
+        <i class="bi bi-grid-3x3-gap me-1"></i>
+        @SharedLocalizer["PositionsTitle"]
+    </a>
+</div>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>@SharedLocalizer["DeviceDetected"]</th>
+            <th>@SharedLocalizer["Position"]</th>
+            <th>@SharedLocalizer["LastSeen"]</th>
+            <th style="width: 260px">@SharedLocalizer["AssignPosition"]</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr><td colspan="5" class="text-center text-muted">@SharedLocalizer["NoDevicesYet"]</td></tr>
+        }
+        else
+        {
+            foreach (var d in Model)
+            {
+                <tr>
+                    <td class="text-muted">@d.DeviceId</td>
+                    <td class="text-break">
+                        <div class="fw-semibold">@d.DeviceIdentifier</div>
+                        @if (!string.IsNullOrEmpty(d.FriendlyName))
+                        {
+                            <div class="small text-muted">@d.FriendlyName</div>
+                        }
+                        @if (!string.IsNullOrEmpty(d.LastSeenIp))
+                        {
+                            <div class="small text-muted">IP: @d.LastSeenIp</div>
+                        }
+                    </td>
+                    <td>
+                        @if (d.CurrentPositionId is not null)
+                        {
+                            <span class="badge text-bg-primary">@d.ClassCode/@d.DeviceCode</span>
+                            <div class="small text-muted">ID @d.CurrentPositionId</div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">@SharedLocalizer["PositionNotAssigned"]</span>
+                        }
+                    </td>
+                    <td class="small text-muted">@d.LastSeenAtUtc.ToString("u")</td>
+                    <td>
+                        <form asp-action="Assign" method="post" class="d-flex gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="deviceId" value="@d.DeviceId" />
+                            <input class="form-control form-control-sm" name="positionId" type="number" min="1" placeholder="@SharedLocalizer["PositionIdPlaceholder"]" />
+                            <button class="btn btn-sm btn-outline-primary" type="submit">@SharedLocalizer["Save"]</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>
+

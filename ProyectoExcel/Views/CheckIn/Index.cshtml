@@ -1,0 +1,110 @@
+@model MvcProyectoExcel.ViewModels.CheckInViewModel
+@{
+    ViewData["Title"] = SharedLocalizer["CheckInTitle"];
+}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3 mb-1">@SharedLocalizer["CheckInTitle"]</h1>
+        <div class="text-muted small">@SharedLocalizer["CheckInSubtitle"]</div>
+    </div>
+</div>
+
+@if (Model.IsAssignedToAnotherStudent)
+{
+    <div class="alert alert-warning">
+        @SharedLocalizer["CheckInWrongStudent", Model.Context!.AssignedStudentFullName ?? $"ID {Model.Context.AssignedTajamarUserId}", Model.CurrentUserFullName, Model.CurrentTajamarUserId ?? 0]
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="text-muted small">@SharedLocalizer["DeviceDetected"]</div>
+                        <div class="fw-semibold text-break">@Model.DeviceIdentifier</div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded border bg-body">
+                            <div class="text-muted small">@SharedLocalizer["Position"]</div>
+                            @if (Model.Context?.PositionId is not null)
+                            {
+                                <div class="h5 mb-0">@Model.Context.ClassCode/@Model.Context.DeviceCode</div>
+                            }
+                            else
+                            {
+                                <div class="text-muted">@SharedLocalizer["PositionNotAssigned"]</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded border bg-body">
+                            <div class="text-muted small">@SharedLocalizer["AssignedStudent"]</div>
+                            @if (Model.Context?.AssignedTajamarUserId is not null)
+                            {
+                                <div class="h6 mb-0">
+                                    @(string.IsNullOrWhiteSpace(Model.Context.AssignedStudentFullName)
+                                        ? $"ID {Model.Context.AssignedTajamarUserId}"
+                                        : $"{Model.Context.AssignedStudentFullName} ({Model.Context.AssignedTajamarUserId})")
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted">@SharedLocalizer["StudentNotAssigned"]</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <form asp-action="DoCheckIn" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary" @(Model.IsAssignedToAnotherStudent ? "disabled" : null)>
+                            <i class="bi bi-check2-circle me-1"></i>
+                            @SharedLocalizer["DoCheckIn"]
+                        </button>
+                    </form>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        @SharedLocalizer["Refresh"]
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="text-muted small mb-2">@SharedLocalizer["LastResult"]</div>
+                @if (Model.LastCheckIn is not null)
+                {
+                    <div class="alert alert-success mb-0">
+                        <div class="fw-semibold">@SharedLocalizer["CheckInOk"]</div>
+                        <div class="mt-2">
+                            <span class="badge text-bg-success">@SharedLocalizer["Status_Present"]</span>
+                        </div>
+                        <div class="small text-muted">@Model.LastCheckIn.CheckedInAtUtc.ToString("u")</div>
+                        <div class="small">@Model.LastCheckIn.ClassCode/@Model.LastCheckIn.DeviceCode</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">@SharedLocalizer["NoCheckInYet"]</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
