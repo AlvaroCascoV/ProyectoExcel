@@ -61,11 +61,15 @@ public class PdfExportService(IStringLocalizer<ExportResource> localizer) : IPdf
                                 {
                                     text.Span(localizer["Pdf_Label_Period"] + " ").Bold();
                                     var parts = new List<string>();
-                                    if (month.HasValue)
-                                    {
-                                        var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month.Value);
-                                        parts.Add(string.Format(CultureInfo.CurrentCulture, localizer["Pdf_Period_Month"].Value, monthName));
-                                    }
+if (month.HasValue)
+{
+    var monthValue = month.Value;
+    var monthName = monthValue is >= 1 and <= 12
+        ? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthValue)
+        : monthValue.ToString(CultureInfo.InvariantCulture);
+
+    parts.Add(string.Format(CultureInfo.CurrentCulture, localizer["Pdf_Period_Month"].Value, monthName));
+}
 
                                     if (year.HasValue)
                                     {
