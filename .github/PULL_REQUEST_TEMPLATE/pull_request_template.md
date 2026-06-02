@@ -6,7 +6,7 @@
 - [ ] `feat` — new feature
 - [ ] `fix` — bug fix
 - [ ] `refactor` — cleanup, no behavior change
-- [ ] `docs` — documentation / CONTEXT.md only
+- [ ] `docs` — documentation / Context.md only
 - [ ] `chore` — config, packages
 
 ## Branch
