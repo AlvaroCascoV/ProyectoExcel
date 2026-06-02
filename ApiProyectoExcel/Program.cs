@@ -1,15 +1,39 @@
 using System.Text.Json;
 using Attendance.Infrastructure.Data;
 using Attendance.Infrastructure.Extensions;
+using System.Globalization;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Do not set ResourcesPath here: it changes the resource base-name lookup and breaks
+// localization for resources embedded in referenced class libraries (e.g. Attendance.Infrastructure).
+builder.Services.AddLocalization();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddAttendanceInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+var supportedCultures = new[] { "es", "en" };
+app.Use(async (context, next) =>
+{
+    // Culture is propagated from MVC via a query param for export endpoints:
+    //   ?culture=es|en
+    var cultureParam = context.Request.Query["culture"].ToString();
+    if (!string.IsNullOrWhiteSpace(cultureParam))
+    {
+        var normalized = cultureParam.Trim().ToLowerInvariant();
+        if (supportedCultures.Contains(normalized, StringComparer.Ordinal))
+        {
+            var culture = CultureInfo.GetCultureInfo(normalized);
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+        }
+    }
+
+    await next();
+});
 
 app.Use(async (context, next) =>
 {

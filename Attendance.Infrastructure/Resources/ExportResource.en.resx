@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Excel -->
+  <data name="Excel_Sheet_Attendance" xml:space="preserve">
+    <value>Attendance</value>
+  </data>
+  <data name="Excel_Header_Rank" xml:space="preserve"><value>Rank</value></data>
+  <data name="Excel_Header_Student" xml:space="preserve"><value>Student</value></data>
+  <data name="Excel_Header_Present" xml:space="preserve"><value>Present</value></data>
+  <data name="Excel_Header_AbsentF" xml:space="preserve"><value>Absent (F)</value></data>
+  <data name="Excel_Header_LateR" xml:space="preserve"><value>Late (R)</value></data>
+  <data name="Excel_Header_FJ" xml:space="preserve"><value>FJ</value></data>
+  <data name="Excel_Header_RJ" xml:space="preserve"><value>RJ</value></data>
+  <data name="Excel_Header_SAF" xml:space="preserve"><value>SAF</value></data>
+  <data name="Excel_Header_SAFJ" xml:space="preserve"><value>SAFJ</value></data>
+  <data name="Excel_Header_AttendancePct" xml:space="preserve"><value>Attendance %</value></data>
+  <data name="Excel_Header_DiplomaEligible" xml:space="preserve"><value>Diploma Eligible</value></data>
+  <data name="Excel_Header_AtRisk" xml:space="preserve"><value>At Risk</value></data>
+  <data name="Excel_Summary_Average" xml:space="preserve"><value>AVERAGE</value></data>
+
+  <!-- PDF -->
+  <data name="Pdf_Title_Statistics" xml:space="preserve"><value>Attendance Statistics Report</value></data>
+  <data name="Pdf_Title_Record" xml:space="preserve"><value>Attendance Record</value></data>
+
+  <data name="Pdf_Label_Course" xml:space="preserve"><value>Course:</value></data>
+  <data name="Pdf_Label_Period" xml:space="preserve"><value>Period:</value></data>
+  <data name="Pdf_Label_LectiveDays" xml:space="preserve"><value>Lective days:</value></data>
+  <data name="Pdf_Label_Date" xml:space="preserve"><value>Date:</value></data>
+  <data name="Pdf_Label_Students" xml:space="preserve"><value>Students:</value></data>
+
+  <data name="Pdf_Period_Month" xml:space="preserve"><value>Month {0}</value></data>
+  <data name="Pdf_Period_Year" xml:space="preserve"><value>Year {0}</value></data>
+
+  <data name="Pdf_Metric_AvgRealAttendance" xml:space="preserve"><value>Avg. Real Attendance</value></data>
+  <data name="Pdf_Metric_Below80" xml:space="preserve"><value>Below 80% (diploma)</value></data>
+  <data name="Pdf_Metric_Below75" xml:space="preserve"><value>Below 75% (at risk)</value></data>
+  <data name="Pdf_Metric_TotalStudents" xml:space="preserve"><value>Total Students</value></data>
+
+  <data name="Pdf_Table_Student" xml:space="preserve"><value>Student</value></data>
+  <data name="Pdf_Table_Weighted" xml:space="preserve"><value>Weighted</value></data>
+  <data name="Pdf_Table_RealPct" xml:space="preserve"><value>Real %</value></data>
+  <data name="Pdf_Table_Diploma" xml:space="preserve"><value>Diploma</value></data>
+  <data name="Pdf_Table_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Pdf_Table_Comment" xml:space="preserve"><value>Comment</value></data>
+
+  <data name="Pdf_Footer_GeneratedOn" xml:space="preserve"><value>Generated on</value></data>
+  <data name="Pdf_Footer_Page" xml:space="preserve"><value>Page</value></data>
+  <data name="Pdf_Footer_Of" xml:space="preserve"><value>of</value></data>
+
+  <data name="Pdf_Diploma_Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="Pdf_Diploma_AtRisk" xml:space="preserve"><value>At risk</value></data>
+  <data name="Pdf_Diploma_Below80" xml:space="preserve"><value>Below 80%</value></data>
+
+  <data name="Pdf_Placeholder_None" xml:space="preserve"><value>—</value></data>
+
+  <!-- Attendance status labels -->
+  <data name="Status_Present" xml:space="preserve"><value>Present</value></data>
+  <data name="Status_AbsentF" xml:space="preserve"><value>Absent (F)</value></data>
+  <data name="Status_LateR" xml:space="preserve"><value>Late (R)</value></data>
+  <data name="Status_JustifiedAbsentFJ" xml:space="preserve"><value>Justified absent (FJ)</value></data>
+  <data name="Status_JustifiedLateRJ" xml:space="preserve"><value>Justified late (RJ)</value></data>
+  <data name="Status_EarlyLeaveSAF" xml:space="preserve"><value>Early leave (SAF)</value></data>
+  <data name="Status_JustifiedEarlyLeaveSAFJ" xml:space="preserve"><value>Justified early leave (SAFJ)</value></data>
+</root>
+
