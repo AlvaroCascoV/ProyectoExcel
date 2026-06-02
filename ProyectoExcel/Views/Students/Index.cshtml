@@ -40,6 +40,22 @@ else
         <p class="text-muted">@SharedLocalizer["CourseText"] <strong>@Model.SelectedCourseName</strong></p>
     }
 
+    <div class="row g-2 align-items-center mb-3">
+        <div class="col-12 col-md-6">
+            <div class="input-group">
+                <input id="studentSearchInput"
+                       type="text"
+                       class="form-control"
+                       placeholder="@SharedLocalizer["SearchStudents"]"
+                       autocomplete="off" />
+                <button id="studentSearchClear" class="btn btn-outline-secondary" type="button" aria-label="Clear">
+                    &times;
+                </button>
+            </div>
+            <div id="studentSearchCount" class="small text-muted mt-1 d-none"></div>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle">
             <thead class="table-light">
@@ -83,4 +99,66 @@ else
             </tbody>
         </table>
     </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const input = document.getElementById('studentSearchInput');
+            const clearBtn = document.getElementById('studentSearchClear');
+            const countEl = document.getElementById('studentSearchCount');
+            const table = document.querySelector('table');
+            const tbody = table ? table.querySelector('tbody') : null;
+
+            if (!input || !clearBtn || !countEl || !tbody) return;
+
+            const allRows = Array.from(tbody.querySelectorAll('tr'));
+
+            function normalizeText(value) {
+                return (value || '')
+                    .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .trim();
+            }
+
+            function update() {
+                const q = normalizeText(input.value);
+                let visible = 0;
+
+                for (const row of allRows) {
+                    const cells = row.querySelectorAll('td');
+                    const nameCell = cells.length > 1 ? cells[1] : null; // column index 1
+                    const emailCell = cells.length > 2 ? cells[2] : null; // column index 2
+
+                    const name = normalizeText(nameCell ? nameCell.textContent : '');
+                    const email = normalizeText(emailCell ? emailCell.textContent : '');
+                    const haystack = `${name} ${email}`.trim();
+
+                    const show = q.length === 0 || haystack.includes(q);
+                    row.classList.toggle('d-none', !show);
+                    if (show) visible++;
+                }
+
+                if (q.length === 0) {
+                    countEl.classList.add('d-none');
+                    countEl.textContent = '';
+                    return;
+                }
+
+                countEl.classList.remove('d-none');
+                countEl.textContent = `${visible} / ${allRows.length}`;
+            }
+
+            input.addEventListener('input', update);
+            clearBtn.addEventListener('click', function () {
+                input.value = '';
+                update();
+                input.focus();
+            });
+
+            update();
+        })();
+    </script>
 }

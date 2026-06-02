@@ -5,9 +5,8 @@ namespace MvcProyectoExcel.ViewModels;
 public class LoginViewModel
 {
     [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress]
     [Display(Name = "Email")]
-    public string Email { get; set; } = string.Empty;
+    public string EmailLocalPart { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password is required.")]
     [DataType(DataType.Password)]

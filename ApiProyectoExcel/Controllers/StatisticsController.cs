@@ -21,6 +21,11 @@ public class StatisticsController(IStatisticsService statisticsService, IPdfExpo
         [FromQuery] decimal? maxPercent,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         if (minPercent is < 0 or > 100)
             return BadRequest(new { message = "minPercent must be between 0 and 100." });
 
@@ -59,6 +64,11 @@ public class StatisticsController(IStatisticsService statisticsService, IPdfExpo
         [FromQuery] int? year = null,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         var courseExists = await statisticsService.GetCourseStatisticsAsync(courseId, cancellationToken: cancellationToken);
         if (courseExists is null)
         {
@@ -87,6 +97,11 @@ public class StatisticsController(IStatisticsService statisticsService, IPdfExpo
         [FromQuery] decimal? maxPercent,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         var statistics = await statisticsService.GetCourseStatisticsAsync(
             courseId, month: month, year: year,
             minPercent: minPercent, maxPercent: maxPercent,
@@ -112,6 +127,11 @@ public class StatisticsController(IStatisticsService statisticsService, IPdfExpo
         [FromQuery] decimal? maxPercent,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         if (minPercent is < 0 or > 100)
             return BadRequest(new { message = "minPercent must be between 0 and 100." });
 
@@ -130,5 +150,17 @@ public class StatisticsController(IStatisticsService statisticsService, IPdfExpo
         var bytes = excelExportService.ExportStatisticsToExcel(statistics, statistics.CourseName);
         var fileName = $"attendance_{statistics.CourseName.Replace(" ", "_", StringComparison.Ordinal)}_{DateTime.Today:yyyyMMdd}.xlsx";
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
+
+    private bool CanAccessCourse(int courseId)
+    {
+        if (User.IsInRole(AppRoles.Admin))
+        {
+            return true;
+        }
+
+        return User.FindAll("course_id")
+            .Select(c => c.Value)
+            .Any(v => int.TryParse(v, out var id) && id == courseId);
     }
 }

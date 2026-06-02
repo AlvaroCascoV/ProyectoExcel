@@ -35,7 +35,17 @@ public class AccountController(IAttendanceApiClient apiClient, IStringLocalizer<
             return View(model);
         }
 
-        var response = await apiClient.LoginAsync(new LoginRequest(model.Email, model.Password), cancellationToken);
+        var localPart = (model.EmailLocalPart ?? string.Empty).Trim();
+        if (localPart.Contains('@'))
+        {
+            localPart = localPart.Split('@', 2, StringSplitOptions.TrimEntries)[0];
+        }
+
+        var email = string.IsNullOrWhiteSpace(localPart)
+            ? string.Empty
+            : $"{localPart}@tajamar365.com";
+
+        var response = await apiClient.LoginAsync(new LoginRequest(email, model.Password), cancellationToken);
         if (response is null)
         {
             ModelState.AddModelError(string.Empty, localizer["ErrorInvalidCredentials"]);
