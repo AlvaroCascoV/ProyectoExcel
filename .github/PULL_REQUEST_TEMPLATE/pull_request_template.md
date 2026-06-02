@@ -25,7 +25,7 @@
 
 ---
 
-## CONTEXT.md checklist — required if any box below is checked
+## Context.md checklist — required if any box below is checked
 
 Did this PR...
 
