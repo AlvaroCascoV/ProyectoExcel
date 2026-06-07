@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
 	'use strict';
 
 	// --- Dark mode toggle ---
@@ -54,5 +54,22 @@
 				alert.remove();
 			}, 500);
 		}, 5000);
+	});
+
+	// Show loading overlay on any form submit
+	document.addEventListener('submit', function () {
+		var o = document.getElementById('loadingOverlay');
+		if (o) o.classList.remove('d-none');
+	});
+	// Bootstrap tooltip initialization
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
+			new bootstrap.Tooltip(el);
+		});
+	});
+	// Prevent double submit
+	document.addEventListener('submit', function (e) {
+		var btn = e.target.querySelector('[type="submit"]:not([data-allow-multi])');
+		if (btn) setTimeout(function(){ btn.disabled = true; }, 0);
 	});
 })();

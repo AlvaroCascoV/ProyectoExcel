@@ -486,4 +486,16 @@
   <data name="AlertDiplomaMessage" xml:space="preserve">
     <value>Hay {0} alumno(s) por debajo del umbral de advertencia (85%).</value>
   </data>
+  <data name="StudentsAtRiskAlert" xml:space="preserve">
+    <value>alumnos en riesgo de abandono</value>
+  </data>
+  <data name="StudentsAtRiskAlertDetail" xml:space="preserve">
+    <value>— asistencia real por debajo del 75%.</value>
+  </data>
+  <data name="StudentsBelowDiplomaAlert" xml:space="preserve">
+    <value>alumnos por debajo del 80% — riesgo de perder el diploma.</value>
+  </data>
+  <data name="DiplomaWarning" xml:space="preserve">
+    <value>Asistencia por debajo del 85% (umbral de advertencia).</value>
+  </data>
 </root>

@@ -8,6 +8,8 @@
     var currentFlag = currentUICulture == "en" ? "gb" : "es";
     var currentLabel = currentUICulture == "en" ? "English" : "Español";
     var returnUrl = Context.Request.Path.HasValue ? $"~{Context.Request.Path.Value}{Context.Request.QueryString}" : "~/";
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string NavCss(string c) => c == ctrl ? "nav-link active-page" : "nav-link";
 }
 <!DOCTYPE html>
 <html lang="@requestCulture?.RequestCulture.UICulture.TwoLetterISOLanguageName" data-bs-theme="light">
@@ -26,7 +28,8 @@
     <header>
         <nav class="navbar navbar-expand-md border-bottom shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-mortarboard-fill text-primary" aria-hidden="true"></i>
                     @SharedLocalizer["AppName"]
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
@@ -40,13 +43,13 @@
                             @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Attendance" asp-action="Index">@SharedLocalizer["PassList"]</a>
+                                    <a class="@NavCss("Attendance")" asp-controller="Attendance" asp-action="Index">@SharedLocalizer["PassList"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Students" asp-action="Index">@SharedLocalizer["Students"]</a>
+                                    <a class="@NavCss("Students")" asp-controller="Students" asp-action="Index">@SharedLocalizer["Students"]</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Statistics" asp-action="Index">@SharedLocalizer["Statistics"]</a>
+                                    <a class="@NavCss("Statistics")" asp-controller="Statistics" asp-action="Index">@SharedLocalizer["Statistics"]</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl" target="_blank" rel="noopener noreferrer">@SharedLocalizer["Justifications"] &#8599;</a>
@@ -55,7 +58,7 @@
                             @if (User.IsInRole("Student"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Dashboard" asp-action="Index">@SharedLocalizer["MyDashboard"]</a>
+                                    <a class="@NavCss("Dashboard")" asp-controller="Dashboard" asp-action="Index">@SharedLocalizer["MyDashboard"]</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="https://forms.office.com/pages/responsepage.aspx?id=SJ5RaPODX0Ojihp6p3uph2lDlRQhd4BMrzOyCS20Ik9UOFRMMTVRRklONVNXVEY3UjRTVlRJMVY4USQlQCN0PWcu&route=shorturl" target="_blank" rel="noopener noreferrer">@SharedLocalizer["Justifications"] &#8599;</a>
@@ -141,5 +144,12 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+<div class="loading-overlay d-none" id="loadingOverlay" aria-hidden="true">
+    <div class="text-center text-white">
+        <div class="spinner-border mb-3">
+            <span class="visually-hidden">@SharedLocalizer["Loading"]</span>
+        </div>
+    </div>
+</div>
 </body>
 </html>

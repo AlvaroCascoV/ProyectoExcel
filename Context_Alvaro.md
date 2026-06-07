@@ -201,7 +201,7 @@ flowchart LR
 - **Icons:** Bootstrap Icons (CDN).
 - **Flags:** flag-icons CSS library (`fi fi-xx` classes) — CDN link in `_Layout.cshtml`.
 - **JS libraries:** jQuery (DOM), Chart.js (statistics charts), jQuery Validation.
-- **Custom files:** `wwwroot/css/site.css` (styles, dark mode overrides, calendar grid, risk-alert colors), `wwwroot/js/site.js` (dark mode toggle, alert auto-dismiss).
+- **Custom files:** `wwwroot/css/site.css` (design tokens, base component classes, styles, dark mode overrides), `wwwroot/js/site.js` (dark mode toggle, alert dismiss, loading overlay, double-submit prevention).
 - **Localization:** Spanish (default) and English via `.resx` resource files in `ProyectoExcel/Resources/`. Language switching via `CultureController` and a navbar dropdown.
 - **Layout:** Single shared layout at `Views/Shared/_Layout.cshtml` with role-based navigation.
 - **Attendance calendar grid:** interactive monthly grid with AJAX day navigation (no full page reload), hover tooltips, past lective dates highlighted.
@@ -253,6 +253,8 @@ flowchart LR
 - Flag-icons library for country flag display
 - Academic Excel calendar upload — ClosedXML parsing, dynamic validation, API + MVC clients
 - Visual risk alerts — color-coded rows, pulsing badges, dismissible banners at 85% warning threshold
+- Visual UI redesign with custom design tokens (`--ta-*` namespace), stat cards, progress bars, and polished student list / dashboard views
+- Micro-animations: form submit loading overlay spinner, async double-submit prevention, and tooltip auto-initialization
 
 ### Planned — Phase 2
 - Secure check-in tied to physical classroom device (TW17, TW18…)
@@ -272,3 +274,5 @@ flowchart LR
 | 2026-06-01 | Antigravity | Statistics improvements: flag-icons, percent filter validation, Excel export, non-lective day guard |
 | 2026-06-02 | Antigravity | Calendar upload (CourseCalendarEntry, CalendarParserService, CalendarService), interactive calendar grid, risk alerts at 85% |
 | 2026-06-07 | Álvaro | Export i18n (ExportResource.resx, API culture middleware), `_ExportMenu` partial, PDF export endpoints, login local-part email UX, student live search |
+| 2026-06-07 | Antigravity | UI redesign (Tajamar design tokens, stat cards, progress bars) and micro-animations (submit loading overlay, double-submit protection) |
+

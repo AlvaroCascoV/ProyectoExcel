@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = SharedLocalizer["HomeTitle"];
+}
+
+<div class="ta-hero text-center mb-5">
+    <div class="ta-hero-badge mb-3">
+        <i class="bi bi-mortarboard-fill me-1"></i> Tajamar
+    </div>
+    <h1 class="display-5 fw-bold mb-3">@SharedLocalizer["AppName"]</h1>
+    <p class="lead text-muted mb-4" style="max-width:540px;margin-inline:auto">
+        @SharedLocalizer["HomeDescription"]
+    </p>
+    <a asp-controller="Account" asp-action="Login"
+       class="btn btn-primary btn-lg px-4 shadow-sm animate__animated animate__fadeInUp">
+        <i class="bi bi-box-arrow-in-right me-2"></i>@SharedLocalizer["HomeSignIn"]
+    </a>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-3">
+        <div class="ta-feature-card h-100">
+            <div class="ta-feature-icon bg-primary-subtle text-primary">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <h3 class="h6 fw-semibold mb-2">@SharedLocalizer["FeatureAttendanceTitle"]</h3>
+            <p class="small text-muted mb-0">@SharedLocalizer["FeatureAttendanceDesc"]</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="ta-feature-card h-100">
+            <div class="ta-feature-icon bg-danger-subtle text-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <h3 class="h6 fw-semibold mb-2">@SharedLocalizer["FeatureRiskTitle"]</h3>
+            <p class="small text-muted mb-0">@SharedLocalizer["FeatureRiskDesc"]</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="ta-feature-card h-100">
+            <div class="ta-feature-icon bg-success-subtle text-success">
+                <i class="bi bi-bar-chart-line"></i>
+            </div>
+            <h3 class="h6 fw-semibold mb-2">@SharedLocalizer["FeatureStatsTitle"]</h3>
+            <p class="small text-muted mb-0">@SharedLocalizer["FeatureStatsDesc"]</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="ta-feature-card h-100">
+            <div class="ta-feature-icon bg-warning-subtle text-warning">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+            <h3 class="h6 fw-semibold mb-2">@SharedLocalizer["FeatureCalendarTitle"]</h3>
+            <p class="small text-muted mb-0">@SharedLocalizer["FeatureCalendarDesc"]</p>
+        </div>
+    </div>
+</div>
+
+<div class="ta-stats-strip">
+    <div class="ta-strip-item">
+        <div class="ta-strip-value">156</div>
+        <div class="ta-strip-label">@SharedLocalizer["StatLectiveDays"]</div>
+    </div>
+    <div class="ta-strip-divider"></div>
+    <div class="ta-strip-item">
+        <div class="ta-strip-value">80%</div>
+        <div class="ta-strip-label">@SharedLocalizer["StatDiplomaThreshold"]</div>
+    </div>
+    <div class="ta-strip-divider"></div>
+    <div class="ta-strip-item">
+        <div class="ta-strip-value">7</div>
+        <div class="ta-strip-label">@SharedLocalizer["StatStatusTypes"]</div>
+    </div>
+</div>

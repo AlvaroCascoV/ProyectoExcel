@@ -1,0 +1,30 @@
+/* ═══════════════════════════════════════════════════════
+   TAJAMAR DESIGN TOKENS — --ta-* namespace
+   PREPEND to top of site.css (before all existing rules)
+   Does NOT conflict with --color-lective, --bg-glass etc.
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --ta-surface:        #ffffff;
+  --ta-surface-raised: #f8f9fa;
+  --ta-surface-inset:  #f1f3f5;
+  --ta-border:         rgba(0,0,0,.08);
+  --ta-shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --ta-shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --ta-shadow-lg: 0 8px 24px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.04);
+  --ta-radius-sm: 6px;
+  --ta-radius-md: 10px;
+  --ta-radius-lg: 16px;
+  --ta-radius-xl: 24px;
+  --ta-ease: 0.18s ease;
+  --ta-warn85-row: rgba(255,152,0,.06);
+}
+[data-bs-theme="dark"] {
+  --ta-surface:        #1a1d21;
+  --ta-surface-raised: #212529;
+  --ta-surface-inset:  #2b2f33;
+  --ta-border:         rgba(255,255,255,.08);
+  --ta-shadow-sm: 0 1px 3px rgba(0,0,0,.3);
+  --ta-shadow-md: 0 4px 12px rgba(0,0,0,.35);
+  --ta-shadow-lg: 0 8px 24px rgba(0,0,0,.4);
+  --ta-warn85-row: rgba(255,152,0,.10);
+}

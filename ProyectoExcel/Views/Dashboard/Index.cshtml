@@ -40,86 +40,94 @@ else
 
     @if (Model.Summary is not null)
     {
-        @if (Model.Summary.BelowDiplomaWarning)
-        {
-            <div class="alert alert-warning">
-                @SharedLocalizer["RealAttendanceText"] <strong>@Model.Summary.RealAttendancePercentage%</strong>.
+        var pct    = (double)Model.Summary.RealAttendancePercentage;
+        var accent = Model.Summary.AtRiskDrop       ? "border-danger"
+                   : !Model.Summary.DiplomaEligible ? "border-warning"
+                   : pct < 85                        ? "border-warning"
+                   : "border-success";
+        var barCss = Model.Summary.AtRiskDrop       ? "ta-progress-bar bg-danger"
+                   : !Model.Summary.DiplomaEligible ? "ta-progress-bar bg-warning"
+                   : pct < 85                        ? "ta-progress-bar bg-warning"
+                   : "ta-progress-bar bg-success";
+
+        <div class="ta-diploma-banner @accent">
+            <div class="d-flex align-items-center gap-3">
                 @if (Model.Summary.AtRiskDrop)
                 {
-                    <span>@SharedLocalizer["BelowAtRisk"]</span>
+                    <i class="bi bi-exclamation-triangle-fill fs-2 text-danger flex-shrink-0"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-danger">@SharedLocalizer["AtRisk"]</div>
+                        <div class="small text-muted">@SharedLocalizer["BelowAtRisk"]</div>
+                    </div>
+                    <span class="badge text-bg-danger fs-6 badge-pulse">@Model.Summary.RealAttendancePercentage%</span>
                 }
                 else if (!Model.Summary.DiplomaEligible)
                 {
-                    <span>@SharedLocalizer["BelowDiploma"]</span>
+                    <i class="bi bi-info-circle-fill fs-2 text-warning flex-shrink-0"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">@SharedLocalizer["Below80"]</div>
+                        <div class="small text-muted">@SharedLocalizer["BelowDiploma"]</div>
+                    </div>
+                    <span class="badge text-bg-warning fs-6">@Model.Summary.RealAttendancePercentage%</span>
+                }
+                else if (pct < 85)
+                {
+                    <i class="bi bi-exclamation-circle-fill fs-2 text-warning flex-shrink-0"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">@SharedLocalizer["DiplomaEligible"]</div>
+                        <div class="small text-muted">@SharedLocalizer["DiplomaWarning"]</div>
+                    </div>
+                    <span class="badge text-bg-warning fs-6">@Model.Summary.RealAttendancePercentage%</span>
                 }
                 else
                 {
-                    <span>@SharedLocalizer["Below80"]</span>
+                    <i class="bi bi-patch-check-fill fs-2 text-success flex-shrink-0"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-success">@SharedLocalizer["DiplomaEligible"]</div>
+                    </div>
+                    <span class="badge text-bg-success fs-6">@Model.Summary.RealAttendancePercentage%</span>
                 }
             </div>
-        }
+            <div class="ta-progress mt-3">
+                <div class="@barCss" style="width: @pct%"
+                     role="progressbar" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mt-1">
+                <span>0%</span>
+                <span>75% ⚠</span>
+                <span>80% 🎓</span>
+                <span>85% 📋</span>
+                <span>100%</span>
+            </div>
+        </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="display-6 @(Model.Summary.BelowDiplomaWarning ? "text-warning" : "text-primary")">@Model.Summary.RealAttendancePercentage%</div>
-                        <div class="small text-muted">@SharedLocalizer["RealAttendanceDiploma"]</div>
-                    </div>
+            <div class="col-6 col-md-3">
+                <div class="ta-stat-card">
+                    <i class="bi bi-calendar3 text-muted d-block mb-1"></i>
+                    <div class="ta-stat-value text-primary">@Model.Summary.TotalSessions</div>
+                    <div class="ta-stat-label">@SharedLocalizer["LectiveDaysYear"]</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="display-6 text-primary">@Model.Summary.AttendancePercentage%</div>
-                        <div class="small text-muted">@SharedLocalizer["Attendance"]</div>
-                    </div>
+            <div class="col-6 col-md-3">
+                <div class="ta-stat-card">
+                    <i class="bi bi-check-circle text-success d-block mb-1"></i>
+                    <div class="ta-stat-value text-success">@Model.Summary.PresentCount</div>
+                    <div class="ta-stat-label">@SharedLocalizer["PresentCount"]</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        <div class="h4 mb-0">@Model.Summary.TotalSessions</div>
-                        <div class="small text-muted">@SharedLocalizer["LectiveDaysYear"]</div>
-                    </div>
+            <div class="col-6 col-md-3">
+                <div class="ta-stat-card">
+                    <i class="bi bi-x-circle text-danger d-block mb-1"></i>
+                    <div class="ta-stat-value text-danger">@Model.Summary.AbsentCount</div>
+                    <div class="ta-stat-label">@SharedLocalizer["AbsentCount"]</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center">
-                        @if (Model.Summary.AtRiskDrop)
-                        {
-                            <span class="badge text-bg-danger fs-6">@SharedLocalizer["AtRisk"]</span>
-                        }
-                        else if (!Model.Summary.DiplomaEligible)
-                        {
-                            <span class="badge text-bg-warning fs-6">@SharedLocalizer["Below80"]</span>
-                        }
-                        else if (Model.Summary.BelowDiplomaWarning)
-                        {
-                            <span class="badge text-bg-warning fs-6">@SharedLocalizer["Below80"]</span>
-                        }
-                        else
-                        {
-                            <span class="badge text-bg-success fs-6">@SharedLocalizer["DiplomaEligible"]</span>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <div class="small text-muted mb-2">@SharedLocalizer["Breakdown"]</div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.Present)">@SharedLocalizer["PresentCount"]: @Model.Summary.PresentCount</span>
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.Absent)">@SharedLocalizer["AbsentCount"]: @Model.Summary.AbsentCount</span>
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.Late)">@SharedLocalizer["LateCount"]: @Model.Summary.LateCount</span>
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.JustifiedAbsent)">@SharedLocalizer["FJCount"]: @Model.Summary.JustifiedAbsentCount</span>
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.JustifiedLate)">@SharedLocalizer["RJCount"]: @Model.Summary.JustifiedLateCount</span>
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.EarlyLeave)">@SharedLocalizer["SAFCount"]: @Model.Summary.EarlyLeaveCount</span>
-                            <span class="badge @AttendanceStatusDisplay.GetBadgeClass(AttendanceStatus.JustifiedEarlyLeave)">@SharedLocalizer["SAFJCount"]: @Model.Summary.JustifiedEarlyLeaveCount</span>
-                        </div>
-                    </div>
+            <div class="col-6 col-md-3">
+                <div class="ta-stat-card">
+                    <i class="bi bi-clock text-warning d-block mb-1"></i>
+                    <div class="ta-stat-value text-warning">@Model.Summary.LateCount</div>
+                    <div class="ta-stat-label">@SharedLocalizer["LateCount"]</div>
                 </div>
             </div>
         </div>

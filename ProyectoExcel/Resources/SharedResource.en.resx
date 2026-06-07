@@ -486,4 +486,16 @@
   <data name="AlertDiplomaMessage" xml:space="preserve">
     <value>There are {0} student(s) below the 85% warning threshold.</value>
   </data>
+  <data name="StudentsAtRiskAlert" xml:space="preserve">
+    <value>students at drop risk</value>
+  </data>
+  <data name="StudentsAtRiskAlertDetail" xml:space="preserve">
+    <value>— real attendance below 75%.</value>
+  </data>
+  <data name="StudentsBelowDiplomaAlert" xml:space="preserve">
+    <value>students below 80% — at risk of losing the diploma.</value>
+  </data>
+  <data name="DiplomaWarning" xml:space="preserve">
+    <value>Real attendance below 85% (warning threshold).</value>
+  </data>
 </root>
