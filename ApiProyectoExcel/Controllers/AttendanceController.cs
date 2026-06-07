@@ -25,6 +25,11 @@ public class AttendanceController(
         [FromQuery] DateOnly date,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         var session = await attendanceService.GetSessionSheetAsync(courseId, date, cancellationToken);
         if (session is null)
         {
@@ -42,6 +47,11 @@ public class AttendanceController(
         [FromBody] SaveAttendanceSessionRequest request,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         // Weekend guard is handled dynamically by ICalendarService in SaveSessionAsync
 
         if (request.Entries.Count == 0)
@@ -76,6 +86,11 @@ public class AttendanceController(
     [HttpGet("courses/{courseId:int}/attendance/dates")]
     public async Task<IActionResult> GetSessionDates(int courseId, CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         var dates = await attendanceService.GetSessionDatesAsync(courseId, cancellationToken);
         return Ok(dates);
     }
@@ -87,6 +102,11 @@ public class AttendanceController(
         [FromQuery] int days = 7,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         if (!environment.IsDevelopment())
         {
             return NotFound(new { message = "This endpoint is only available in Development." });
@@ -182,6 +202,11 @@ public class AttendanceController(
         [FromQuery] DateOnly date,
         CancellationToken cancellationToken = default)
     {
+        if (!CanAccessCourse(courseId))
+        {
+            return Forbid();
+        }
+
         var session = await attendanceService.GetSessionSheetAsync(courseId, date, cancellationToken);
         if (session is null)
         {
@@ -330,5 +355,17 @@ public class AttendanceController(
         var hasCalendar = await calendarService.HasCalendarAsync(courseId, cancellationToken);
         var lectiveCount = await calendarService.GetLectiveDaysCountAsync(courseId, cancellationToken);
         return Ok(new { hasCalendar, lectiveCount });
+    }
+
+    private bool CanAccessCourse(int courseId)
+    {
+        if (User.IsInRole(AppRoles.Admin))
+        {
+            return true;
+        }
+
+        return User.FindAll("course_id")
+            .Select(c => c.Value)
+            .Any(v => int.TryParse(v, out var id) && id == courseId);
     }
 }

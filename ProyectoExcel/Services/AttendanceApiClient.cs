@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Globalization;
 using Attendance.Infrastructure.DTOs;
 
 namespace MvcProyectoExcel.Services;
@@ -45,6 +46,14 @@ public interface IAttendanceApiClient
 
 public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
 {
+    private static string GetSupportedCultureQuery()
+    {
+        // MVC sets CurrentUICulture via request localization middleware (cookie-based).
+        // We keep the API contract simple: pass `culture=es|en` for export endpoints.
+        var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLowerInvariant();
+        return culture is "es" or "en" ? culture : "es";
+    }
+
     public async Task<LoginResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var response = await httpClient.PostAsJsonAsync("api/auth/login", request, cancellationToken);
@@ -281,7 +290,11 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var query = BuildStatisticsQuery(month, year, minPercent, maxPercent);
-        var response = await httpClient.GetAsync($"api/statistics/course/{courseId}/export/pdf{query}", cancellationToken);
+        var culture = GetSupportedCultureQuery();
+        var separator = string.IsNullOrEmpty(query) ? "?" : "&";
+        var response = await httpClient.GetAsync(
+            $"api/statistics/course/{courseId}/export/pdf{query}{separator}culture={culture}",
+            cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             return null;
@@ -296,8 +309,9 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         DateOnly date,
         CancellationToken cancellationToken = default)
     {
+        var culture = GetSupportedCultureQuery();
         var response = await httpClient.GetAsync(
-            $"api/courses/{courseId}/attendance/export/pdf?date={date:yyyy-MM-dd}",
+            $"api/courses/{courseId}/attendance/export/pdf?date={date:yyyy-MM-dd}&culture={culture}",
             cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -318,8 +332,11 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var query = BuildStatisticsQuery(month, year, minPercent, maxPercent);
+        var culture = GetSupportedCultureQuery();
+        var separator = string.IsNullOrEmpty(query) ? "?" : "&";
         var response = await httpClient.GetAsync(
-            $"api/statistics/course/{courseId}/export{query}", cancellationToken);
+            $"api/statistics/course/{courseId}/export{query}{separator}culture={culture}",
+            cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);

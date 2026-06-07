@@ -1,8 +1,11 @@
 using Attendance.Infrastructure.DTOs;
 using Attendance.Infrastructure.Entities;
+using Attendance.Infrastructure.Resources;
+using Microsoft.Extensions.Localization;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Globalization;
 
 namespace Attendance.Infrastructure.Services;
 
@@ -12,7 +15,7 @@ public interface IPdfExportService
     byte[] GenerateAttendanceSessionPdf(AttendanceSessionDto session);
 }
 
-public class PdfExportService : IPdfExportService
+public class PdfExportService(IStringLocalizer<ExportResource> localizer) : IPdfExportService
 {
     private static readonly string PrimaryColor = "#1a237e";
     private static readonly string AltRowBg = "#f5f5f5";
@@ -36,7 +39,7 @@ public class PdfExportService : IPdfExportService
                 page.MarginVertical(25);
                 page.DefaultTextStyle(x => x.FontSize(8));
 
-                page.Header().Element(header => ComposeHeader(header, "Attendance Statistics Report", statistics.CourseName));
+                page.Header().Element(header => ComposeHeader(header, localizer["Pdf_Title_Statistics"], statistics.CourseName));
 
                 page.Content().Element(content =>
                 {
@@ -48,7 +51,7 @@ public class PdfExportService : IPdfExportService
                         {
                             row.RelativeItem().Text(text =>
                             {
-                                text.Span("Course: ").Bold();
+                                text.Span(localizer["Pdf_Label_Course"] + " ").Bold();
                                 text.Span(statistics.CourseName);
                             });
 
@@ -56,17 +59,29 @@ public class PdfExportService : IPdfExportService
                             {
                                 row.RelativeItem().Text(text =>
                                 {
-                                    text.Span("Period: ").Bold();
+                                    text.Span(localizer["Pdf_Label_Period"] + " ").Bold();
                                     var parts = new List<string>();
-                                    if (month.HasValue) parts.Add($"Month {month.Value}");
-                                    if (year.HasValue) parts.Add($"Year {year.Value}");
+if (month.HasValue)
+{
+    var monthValue = month.Value;
+    var monthName = monthValue is >= 1 and <= 12
+        ? CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthValue)
+        : monthValue.ToString(CultureInfo.InvariantCulture);
+
+    parts.Add(string.Format(CultureInfo.CurrentCulture, localizer["Pdf_Period_Month"].Value, monthName));
+}
+
+                                    if (year.HasValue)
+                                    {
+                                        parts.Add(string.Format(CultureInfo.CurrentCulture, localizer["Pdf_Period_Year"].Value, year.Value));
+                                    }
                                     text.Span(string.Join(", ", parts));
                                 });
                             }
 
                             row.RelativeItem().Text(text =>
                             {
-                                text.Span("Lective days: ").Bold();
+                                text.Span(localizer["Pdf_Label_LectiveDays"] + " ").Bold();
                                 text.Span(statistics.TotalClassDays.ToString());
                             });
                         });
@@ -75,13 +90,13 @@ public class PdfExportService : IPdfExportService
                         {
                             row.Spacing(15);
 
-                            ComposeMetricBox(row.RelativeItem(), "Avg. Real Attendance",
+                            ComposeMetricBox(row.RelativeItem(), localizer["Pdf_Metric_AvgRealAttendance"],
                                 $"{statistics.AverageRealAttendancePercentage}%", PrimaryColor);
-                            ComposeMetricBox(row.RelativeItem(), "Below 80% (diploma)",
+                            ComposeMetricBox(row.RelativeItem(), localizer["Pdf_Metric_Below80"],
                                 statistics.AtRiskCount.ToString(), OrangeColor);
-                            ComposeMetricBox(row.RelativeItem(), "Below 75% (at risk)",
+                            ComposeMetricBox(row.RelativeItem(), localizer["Pdf_Metric_Below75"],
                                 statistics.BelowDropThresholdCount.ToString(), RedColor);
-                            ComposeMetricBox(row.RelativeItem(), "Total Students",
+                            ComposeMetricBox(row.RelativeItem(), localizer["Pdf_Metric_TotalStudents"],
                                 statistics.Students.Count.ToString(), PrimaryColor);
                         });
 
@@ -107,7 +122,7 @@ public class PdfExportService : IPdfExportService
                 page.MarginVertical(25);
                 page.DefaultTextStyle(x => x.FontSize(9));
 
-                page.Header().Element(header => ComposeHeader(header, "Attendance Record", session.CourseName));
+                page.Header().Element(header => ComposeHeader(header, localizer["Pdf_Title_Record"], session.CourseName));
 
                 page.Content().Element(content =>
                 {
@@ -119,17 +134,17 @@ public class PdfExportService : IPdfExportService
                         {
                             row.RelativeItem().Text(text =>
                             {
-                                text.Span("Course: ").Bold();
+                                text.Span(localizer["Pdf_Label_Course"] + " ").Bold();
                                 text.Span(session.CourseName);
                             });
                             row.RelativeItem().Text(text =>
                             {
-                                text.Span("Date: ").Bold();
-                                text.Span(session.Date.ToString("yyyy-MM-dd"));
+                                text.Span(localizer["Pdf_Label_Date"] + " ").Bold();
+                                text.Span(session.Date.ToDateTime(TimeOnly.MinValue).ToString("d", CultureInfo.CurrentCulture));
                             });
                             row.RelativeItem().Text(text =>
                             {
-                                text.Span("Students: ").Bold();
+                                text.Span(localizer["Pdf_Label_Students"] + " ").Bold();
                                 text.Span(session.Entries.Count.ToString());
                             });
                         });
@@ -145,7 +160,7 @@ public class PdfExportService : IPdfExportService
         return document.GeneratePdf();
     }
 
-    private static void ComposeHeader(IContainer container, string title, string courseName)
+    private void ComposeHeader(IContainer container, string title, string courseName)
     {
         container.Column(col =>
         {
@@ -157,13 +172,13 @@ public class PdfExportService : IPdfExportService
                     innerCol.Item().Text(title).FontSize(16).Bold().FontColor(PrimaryColor);
                 });
                 row.ConstantItem(150).AlignRight().AlignMiddle()
-                    .Text(DateTime.Now.ToString("dd/MM/yyyy HH:mm")).FontSize(8).FontColor("#666666");
+                    .Text(DateTime.Now.ToString("g", CultureInfo.CurrentCulture)).FontSize(8).FontColor("#666666");
             });
             col.Item().PaddingTop(4).LineHorizontal(1).LineColor(PrimaryColor);
         });
     }
 
-    private static void ComposeFooter(IContainer container)
+    private void ComposeFooter(IContainer container)
     {
         container.Column(col =>
         {
@@ -172,14 +187,14 @@ public class PdfExportService : IPdfExportService
             {
                 row.RelativeItem().Text(text =>
                 {
-                    text.Span("Generated on ").FontSize(7).FontColor("#999999");
-                    text.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")).FontSize(7).FontColor("#999999");
+                    text.Span(localizer["Pdf_Footer_GeneratedOn"] + " ").FontSize(7).FontColor("#999999");
+                    text.Span(DateTime.Now.ToString("G", CultureInfo.CurrentCulture)).FontSize(7).FontColor("#999999");
                 });
                 row.RelativeItem().AlignRight().Text(text =>
                 {
-                    text.Span("Page ").FontSize(7).FontColor("#999999");
+                    text.Span(localizer["Pdf_Footer_Page"] + " ").FontSize(7).FontColor("#999999");
                     text.CurrentPageNumber().FontSize(7).FontColor("#999999");
-                    text.Span(" of ").FontSize(7).FontColor("#999999");
+                    text.Span($" {localizer["Pdf_Footer_Of"]} ").FontSize(7).FontColor("#999999");
                     text.TotalPages().FontSize(7).FontColor("#999999");
                 });
             });
@@ -200,7 +215,7 @@ public class PdfExportService : IPdfExportService
             });
     }
 
-    private static void ComposeStatisticsTable(IContainer container, IReadOnlyList<StudentStatisticsDto> students)
+    private void ComposeStatisticsTable(IContainer container, IReadOnlyList<StudentStatisticsDto> students)
     {
         container.Table(table =>
         {
@@ -223,15 +238,15 @@ public class PdfExportService : IPdfExportService
                 var headerStyle = TextStyle.Default.Bold().FontSize(7).FontColor("#ffffff");
 
                 header.Cell().Background(PrimaryColor).Padding(4).Text("#").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(4).Text("Student").Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(4).Text(localizer["Pdf_Table_Student"]).Style(headerStyle);
                 header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("F").Style(headerStyle);
                 header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("R").Style(headerStyle);
                 header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("SAF").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("Weighted").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("Real %").Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text(localizer["Pdf_Table_Weighted"]).Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text(localizer["Pdf_Table_RealPct"]).Style(headerStyle);
                 header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("F%").Style(headerStyle);
                 header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("F+R%").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text("Diploma").Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(4).AlignCenter().Text(localizer["Pdf_Table_Diploma"]).Style(headerStyle);
             });
 
             var cellStyle = TextStyle.Default.FontSize(7);
@@ -253,10 +268,10 @@ public class PdfExportService : IPdfExportService
 
                 var (diplomaText, diplomaColor) = student switch
                 {
-                    { AtRiskDrop: true } => ("At risk", RedColor),
-                    { DiplomaEligible: false } => ("Below 80%", OrangeColor),
-                    { BelowDiplomaWarning: true } => ("Below 85%", OrangeColor),
-                    _ => ("OK", GreenColor)
+                    { AtRiskDrop: true } => (localizer["Pdf_Diploma_AtRisk"].Value, RedColor),
+                    { DiplomaEligible: false } => (localizer["Pdf_Diploma_Below80"].Value, OrangeColor),
+                    { BelowDiplomaWarning: true } => (localizer["Pdf_Diploma_Below80"].Value, OrangeColor),
+                    _ => (localizer["Pdf_Diploma_Ok"].Value, GreenColor)
                 };
 
                 table.Cell().Background(bg).Padding(3).AlignCenter()
@@ -265,7 +280,7 @@ public class PdfExportService : IPdfExportService
         });
     }
 
-    private static void ComposeAttendanceTable(IContainer container, IReadOnlyList<AttendanceEntryDto> entries)
+    private void ComposeAttendanceTable(IContainer container, IReadOnlyList<AttendanceEntryDto> entries)
     {
         container.Table(table =>
         {
@@ -282,9 +297,9 @@ public class PdfExportService : IPdfExportService
                 var headerStyle = TextStyle.Default.Bold().FontSize(8).FontColor("#ffffff");
 
                 header.Cell().Background(PrimaryColor).Padding(5).Text("#").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(5).Text("Student").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(5).Text("Status").Style(headerStyle);
-                header.Cell().Background(PrimaryColor).Padding(5).Text("Comment").Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(5).Text(localizer["Pdf_Table_Student"]).Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(5).Text(localizer["Pdf_Table_Status"]).Style(headerStyle);
+                header.Cell().Background(PrimaryColor).Padding(5).Text(localizer["Pdf_Table_Comment"]).Style(headerStyle);
             });
 
             var cellStyle = TextStyle.Default.FontSize(8);
@@ -299,20 +314,20 @@ public class PdfExportService : IPdfExportService
                 table.Cell().Background(bg).Padding(4).Text(entry.StudentFullName).Style(cellStyle);
                 table.Cell().Background(bg).Padding(4).Text(statusLabel).Style(cellStyle)
                     .FontColor(GetStatusColor(entry.Status));
-                table.Cell().Background(bg).Padding(4).Text(entry.Comment ?? "—").Style(cellStyle).FontColor("#666666");
+                table.Cell().Background(bg).Padding(4).Text(entry.Comment ?? localizer["Pdf_Placeholder_None"]).Style(cellStyle).FontColor("#666666");
             }
         });
     }
 
-    private static string GetStatusLabel(AttendanceStatus status) => status switch
+    private string GetStatusLabel(AttendanceStatus status) => status switch
     {
-        AttendanceStatus.Present => "Present",
-        AttendanceStatus.Absent => "Absent (F)",
-        AttendanceStatus.Late => "Late (R)",
-        AttendanceStatus.JustifiedAbsent => "Justified absent (FJ)",
-        AttendanceStatus.JustifiedLate => "Justified late (RJ)",
-        AttendanceStatus.EarlyLeave => "Early leave (SAF)",
-        AttendanceStatus.JustifiedEarlyLeave => "Justified early leave (SAFJ)",
+        AttendanceStatus.Present => localizer["Status_Present"],
+        AttendanceStatus.Absent => localizer["Status_AbsentF"],
+        AttendanceStatus.Late => localizer["Status_LateR"],
+        AttendanceStatus.JustifiedAbsent => localizer["Status_JustifiedAbsentFJ"],
+        AttendanceStatus.JustifiedLate => localizer["Status_JustifiedLateRJ"],
+        AttendanceStatus.EarlyLeave => localizer["Status_EarlyLeaveSAF"],
+        AttendanceStatus.JustifiedEarlyLeave => localizer["Status_JustifiedEarlyLeaveSAFJ"],
         _ => status.ToString()
     };
 

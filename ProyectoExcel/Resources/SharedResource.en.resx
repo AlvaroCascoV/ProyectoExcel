@@ -66,8 +66,14 @@
   <data name="SignInButton" xml:space="preserve">
     <value>Sign in</value>
   </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
   <data name="ExportPdf" xml:space="preserve">
     <value>Export PDF</value>
+  </data>
+  <data name="SearchStudents" xml:space="preserve">
+    <value>Search student...</value>
   </data>
   <data name="CourseLabel" xml:space="preserve">
     <value>Course</value>

@@ -15,9 +15,15 @@
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Email" class="form-label small fw-medium">@SharedLocalizer["Email"]</label>
-                        <input asp-for="Email" class="form-control" autocomplete="username" placeholder="name@tajamar365.com" />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
+                        <label asp-for="EmailLocalPart" class="form-label small fw-medium">@SharedLocalizer["Email"]</label>
+                        <div class="input-group">
+                            <input asp-for="EmailLocalPart"
+                                   class="form-control"
+                                   autocomplete="username"
+                                   placeholder="name" />
+                            <span class="input-group-text">@@tajamar365.com</span>
+                        </div>
+                        <span asp-validation-for="EmailLocalPart" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-4">

@@ -12,12 +12,15 @@
     <div id="pdfExportContainer">
         @if (Model.SelectedCourseId.HasValue && Model.Rows.Count > 0)
         {
-            <a asp-action="ExportPdf"
-               asp-route-courseId="@Model.SelectedCourseId"
-               asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")"
-               class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-file-earmark-pdf me-1"></i> @SharedLocalizer["ExportPdf"]
-            </a>
+            @await Html.PartialAsync("_ExportMenu",
+                new MvcProyectoExcel.ViewModels.ExportMenuViewModel
+                {
+                    PdfUrl = Url.Action("ExportPdf", new
+                    {
+                        courseId = Model.SelectedCourseId,
+                        date = Model.SelectedDate.ToString("yyyy-MM-dd")
+                    })
+                })
         }
     </div>
 </div>
