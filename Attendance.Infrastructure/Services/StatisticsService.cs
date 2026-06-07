@@ -28,7 +28,7 @@ public interface IStatisticsService
         CancellationToken cancellationToken = default);
 }
 
-public class StatisticsService(ApplicationDbContext dbContext) : IStatisticsService
+public class StatisticsService(ApplicationDbContext dbContext, ICalendarService calendarService) : IStatisticsService
 {
     public async Task<CourseStatisticsDto?> GetCourseStatisticsAsync(
         int courseId,
@@ -51,12 +51,12 @@ public class StatisticsService(ApplicationDbContext dbContext) : IStatisticsServ
             return null;
         }
 
-        var courseStart = LectiveDayCalendar.GetCourseStartDate(course.StartDate);
-        var courseEnd = LectiveDayCalendar.GetCourseEndDate(course.EndDate, courseStart);
-        var allLectiveDates = LectiveDayCalendar.GetLectiveDates(courseStart, courseEnd);
+        var allLectiveDates = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
         var isFiltered = LectiveDayCalendar.HasDateFilter(from, to, month, year);
         var lectiveDates = LectiveDayCalendar.FilterLectiveDates(allLectiveDates, from, to, month, year);
-        var totalClassDays = LectiveDayCalendar.GetDenominator(lectiveDates, isFiltered);
+        var totalClassDays = isFiltered
+            ? lectiveDates.Count
+            : await calendarService.GetLectiveDaysCountAsync(courseId, cancellationToken);
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         var recordsByStudent = await LoadRecordsByStudentAsync(courseId, cancellationToken);
@@ -96,6 +96,7 @@ public class StatisticsService(ApplicationDbContext dbContext) : IStatisticsServ
                 metrics.AbsentFPercentage,
                 metrics.AbsentFRPercentage,
                 metrics.DiplomaEligible,
+                metrics.BelowDiplomaWarning,
                 metrics.AtRiskDrop,
                 0));
         }
@@ -124,7 +125,7 @@ public class StatisticsService(ApplicationDbContext dbContext) : IStatisticsServ
             course.Name,
             totalClassDays,
             average,
-            ranked.Count(s => !s.DiplomaEligible),
+            ranked.Count(s => s.BelowDiplomaWarning),
             ranked.Count(s => s.AtRiskDrop),
             ranked);
     }

@@ -128,3 +128,308 @@ body {
 [data-bs-theme="dark"] .card.border-0.shadow-sm:hover {
   box-shadow: 0 0.5rem 1rem rgba(255, 255, 255, 0.05) !important;
 }
+
+/* --- Attendance Risk Row Styling --- */
+.table tbody tr.row-risk-danger {
+  background-color: #fde8e8 !important;
+  color: #9b1c1c !important;
+}
+.table tbody tr.row-risk-warning {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+[data-bs-theme="dark"] .table tbody tr.row-risk-danger {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
+}
+[data-bs-theme="dark"] .table tbody tr.row-risk-warning {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #fde047 !important;
+}
+
+/* --- Badge Pulse Animation --- */
+.badge-pulse {
+  animation: pulse-danger 2s infinite;
+  box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+}
+
+@keyframes pulse-danger {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+
+/* --- Attendance pass list (calendar) --- */
+:root, [data-bs-theme="light"] {
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --text-muted: #64748b;
+  --primary-glow: 0 0 12px rgba(59, 130, 246, 0.3);
+
+  --color-lective: #059669;
+  --bg-lective: rgba(5, 150, 105, 0.08);
+  --border-lective: rgba(5, 150, 105, 0.2);
+
+  --color-festivo: #dc2626;
+  --bg-festivo: rgba(220, 38, 38, 0.08);
+  --border-festivo: rgba(220, 38, 38, 0.2);
+
+  --color-no-lective: #d97706;
+  --bg-no-lective: rgba(217, 119, 6, 0.08);
+  --border-no-lective: rgba(217, 119, 6, 0.2);
+
+  --color-weekend: #94a3b8;
+  --bg-weekend: rgba(148, 163, 184, 0.06);
+
+  --color-passed: #0369a1;
+  --bg-passed: #e0f2fe;
+  --border-passed: #bae6fd;
+
+  --calendar-cell-color: #334155;
+  --tooltip-bg: #1e293b;
+  --tooltip-text: #ffffff;
+}
+
+[data-bs-theme="dark"] {
+  --bg-glass: rgba(30, 41, 59, 0.4);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --text-muted: #94a3b8;
+  --primary-glow: 0 0 15px rgba(59, 130, 246, 0.4);
+
+  --color-lective: #10b981;
+  --bg-lective: rgba(16, 185, 129, 0.12);
+  --border-lective: rgba(16, 185, 129, 0.25);
+
+  --color-festivo: #ef4444;
+  --bg-festivo: rgba(239, 68, 68, 0.12);
+  --border-festivo: rgba(239, 68, 68, 0.25);
+
+  --color-no-lective: #f59e0b;
+  --bg-no-lective: rgba(245, 158, 11, 0.1);
+  --border-no-lective: rgba(245, 158, 11, 0.2);
+
+  --color-weekend: #64748b;
+  --bg-weekend: rgba(100, 116, 139, 0.05);
+
+  --color-passed: #38bdf8;
+  --bg-passed: rgba(56, 189, 248, 0.15);
+  --border-passed: rgba(56, 189, 248, 0.35);
+
+  --calendar-cell-color: #e2e8f0;
+  --tooltip-bg: #0f172a;
+  --tooltip-text: #ffffff;
+}
+
+.theme-card {
+  background: var(--bs-card-bg);
+  border: 1px solid var(--bs-card-border-color, var(--bs-border-color));
+  border-radius: 12px;
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.upload-zone {
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 10px;
+  background: var(--bs-tertiary-bg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  padding: 1.5rem;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+  border-color: var(--bs-primary);
+  background: rgba(59, 130, 246, 0.05);
+  box-shadow: var(--primary-glow);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calendar-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  user-select: none;
+  color: var(--calendar-cell-color);
+}
+
+.calendar-cell:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--bs-box-shadow);
+}
+
+.calendar-cell.disabled {
+  cursor: not-allowed;
+}
+
+.calendar-cell.lective {
+  color: var(--color-lective);
+  background: var(--bg-lective);
+  border-color: var(--border-lective);
+}
+
+.calendar-cell.lective:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: var(--color-lective);
+}
+
+.calendar-cell.festivo {
+  color: var(--color-festivo);
+  background: var(--bg-festivo);
+  border-color: var(--border-festivo);
+}
+
+.calendar-cell.no-lective {
+  color: var(--color-no-lective);
+  background: var(--bg-no-lective);
+  border-color: var(--border-no-lective);
+}
+
+.calendar-cell.weekend {
+  color: var(--color-weekend);
+  background: var(--bg-weekend);
+}
+
+.calendar-cell.passed {
+  color: var(--color-passed) !important;
+  background: var(--bg-passed) !important;
+  border-color: var(--border-passed) !important;
+}
+
+.calendar-cell.passed:hover:not(.disabled) {
+  background: rgba(56, 189, 248, 0.2) !important;
+  border-color: var(--color-passed) !important;
+}
+
+.calendar-cell.other-month {
+  opacity: 0.2;
+}
+
+.calendar-cell.selected {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 1px;
+  box-shadow: var(--primary-glow);
+}
+
+.recorded-dot {
+  position: absolute;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-passed);
+  border-radius: 50%;
+  box-shadow: 0 0 4px var(--color-passed);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.legend-dot.lective {
+  background-color: var(--color-lective);
+  border: 1px solid var(--border-lective);
+}
+
+.legend-dot.festivo {
+  background-color: var(--color-festivo);
+  border: 1px solid var(--border-festivo);
+}
+
+.legend-dot.no-lective {
+  background-color: var(--color-no-lective);
+  border: 1px solid var(--border-no-lective);
+}
+
+.legend-dot.passed {
+  background-color: var(--color-passed);
+  border: 1px solid var(--border-passed);
+}
+
+.cursor-help {
+  cursor: help;
+}
+
+.tooltip-container {
+  position: relative;
+}
+
+.custom-tooltip {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  width: 180px;
+  z-index: 100;
+  box-shadow: var(--bs-box-shadow);
+  border: 1px solid var(--border-glass);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  text-align: center;
+  font-weight: 400;
+}
+
+.calendar-cell:hover .custom-tooltip {
+  opacity: 1;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+#attendanceCard {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+#attendanceCard.loading {
+  opacity: 0.5;
+  transform: translateY(5px);
+  pointer-events: none;
+}

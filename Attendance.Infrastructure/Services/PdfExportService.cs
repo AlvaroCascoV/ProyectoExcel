@@ -268,9 +268,10 @@ if (month.HasValue)
 
                 var (diplomaText, diplomaColor) = student switch
                 {
-                    { DiplomaEligible: true } => (localizer["Pdf_Diploma_Ok"].Value, GreenColor),
                     { AtRiskDrop: true } => (localizer["Pdf_Diploma_AtRisk"].Value, RedColor),
-                    _ => (localizer["Pdf_Diploma_Below80"].Value, OrangeColor)
+                    { DiplomaEligible: false } => (localizer["Pdf_Diploma_Below80"].Value, OrangeColor),
+                    { BelowDiplomaWarning: true } => (localizer["Pdf_Diploma_Below80"].Value, OrangeColor),
+                    _ => (localizer["Pdf_Diploma_Ok"].Value, GreenColor)
                 };
 
                 table.Cell().Background(bg).Padding(3).AlignCenter()

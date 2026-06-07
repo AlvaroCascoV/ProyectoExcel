@@ -67,7 +67,7 @@ public class ExcelExportService(IStringLocalizer<ExportResource> localizer) : IE
             {
                 sheet.Row(row).Style.Fill.BackgroundColor = XLColor.FromHtml("#FDECEA");
             }
-            else if (!student.DiplomaEligible)
+            else if (student.BelowDiplomaWarning)
             {
                 sheet.Row(row).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFF3E0");
             }

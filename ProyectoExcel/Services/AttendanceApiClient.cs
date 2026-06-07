@@ -37,6 +37,11 @@ public interface IAttendanceApiClient
     Task<byte[]?> ExportCourseStatisticsPdfAsync(int courseId, int? month = null, int? year = null, decimal? minPercent = null, decimal? maxPercent = null, CancellationToken cancellationToken = default);
     Task<byte[]?> ExportAttendanceSessionPdfAsync(int courseId, DateOnly date, CancellationToken cancellationToken = default);
     Task<byte[]?> ExportStatisticsToExcelAsync(int courseId, int? month = null, int? year = null, decimal? minPercent = null, decimal? maxPercent = null, CancellationToken cancellationToken = default);
+    Task<CalendarUploadResultDto?> UploadCourseCalendarAsync(int courseId, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
+    Task<CalendarUploadResultDto?> PreviewCourseCalendarAsync(int courseId, Stream fileStream, string fileName, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<DateOnly>> GetCourseLectiveDatesAsync(int courseId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CourseCalendarEntryDto>> GetCourseCalendarEntriesAsync(int courseId, CancellationToken cancellationToken = default);
+    Task<CourseCalendarStatusDto?> GetCourseCalendarStatusAsync(int courseId, CancellationToken cancellationToken = default);
 }
 
 public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
@@ -336,4 +341,96 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
+
+    public async Task<CalendarUploadResultDto?> UploadCourseCalendarAsync(
+        int courseId,
+        Stream fileStream,
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        content.Add(streamContent, "file", fileName);
+
+        var response = await httpClient.PostAsync($"api/courses/{courseId}/calendar/upload", content, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body);
+        }
+
+        return await response.Content.ReadFromJsonAsync<CalendarUploadResultDto>(cancellationToken);
+    }
+
+    public async Task<CalendarUploadResultDto?> PreviewCourseCalendarAsync(
+        int courseId,
+        Stream fileStream,
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        content.Add(streamContent, "file", fileName);
+
+        var response = await httpClient.PostAsync($"api/courses/{courseId}/calendar/preview", content, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body);
+        }
+
+        return await response.Content.ReadFromJsonAsync<CalendarUploadResultDto>(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DateOnly>> GetCourseLectiveDatesAsync(
+        int courseId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync($"api/courses/{courseId}/calendar/dates", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<DateOnly>>(cancellationToken) ?? [];
+    }
+
+    public async Task<IReadOnlyList<CourseCalendarEntryDto>> GetCourseCalendarEntriesAsync(
+        int courseId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync($"api/courses/{courseId}/calendar/entries", cancellationToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<CourseCalendarEntryDto>>(cancellationToken) ?? [];
+    }
+
+    public async Task<CourseCalendarStatusDto?> GetCourseCalendarStatusAsync(
+        int courseId,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync($"api/courses/{courseId}/calendar/status", cancellationToken);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CourseCalendarStatusDto>(cancellationToken);
+    }
 }
+
+public record CalendarUploadResultDto(
+    string Message,
+    int TotalDays,
+    int LectiveDays,
+    int Festivos,
+    int NoLectivos);
+
+public record CourseCalendarEntryDto(
+    DateOnly Date,
+    bool IsLective,
+    string? DayType,
+    string? Module,
+    string? Teacher,
+    string? Room);
+
+public record CourseCalendarStatusDto(
+    bool HasCalendar,
+    int LectiveCount);

@@ -15,6 +15,7 @@ public record StudentStatisticsDto(
     decimal AbsentFPercentage,
     decimal AbsentFRPercentage,
     bool DiplomaEligible,
+    bool BelowDiplomaWarning,
     bool AtRiskDrop,
     int Rank);
 

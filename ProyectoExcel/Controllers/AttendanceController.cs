@@ -8,7 +8,10 @@ using MvcProyectoExcel.ViewModels;
 namespace MvcProyectoExcel.Controllers;
 
 [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
-public class AttendanceController(IAttendanceApiClient apiClient, IStringLocalizer<SharedResource> localizer) : Controller
+public class AttendanceController(
+    IAttendanceApiClient apiClient,
+    IStringLocalizer<SharedResource> localizer,
+    ILogger<AttendanceController> logger) : Controller
 {
     private const int DefaultCourseId = 3430;
 
@@ -32,6 +35,16 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
             {
                 model.SelectedCourseName = courses.FirstOrDefault(c => c.Id == selectedId)?.Name ?? string.Empty;
                 model.PreviousDates = await apiClient.GetAttendanceDatesAsync(selectedId.Value, cancellationToken);
+
+                var calStatus = await apiClient.GetCourseCalendarStatusAsync(selectedId.Value, cancellationToken);
+                if (calStatus is not null)
+                {
+                    model.HasCalendar = calStatus.HasCalendar;
+                    model.LectiveDaysCount = calStatus.LectiveCount;
+                }
+
+                var calEntries = await apiClient.GetCourseCalendarEntriesAsync(selectedId.Value, cancellationToken);
+                model.CalendarJson = System.Text.Json.JsonSerializer.Serialize(calEntries);
 
                 var session = await apiClient.GetAttendanceSessionAsync(selectedId.Value, selectedDate, cancellationToken);
                 if (session is not null)
@@ -137,6 +150,16 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
         {
             model.PreviousDates = await apiClient.GetAttendanceDatesAsync(model.SelectedCourseId.Value, cancellationToken);
 
+            var calStatus = await apiClient.GetCourseCalendarStatusAsync(model.SelectedCourseId.Value, cancellationToken);
+            if (calStatus is not null)
+            {
+                model.HasCalendar = calStatus.HasCalendar;
+                model.LectiveDaysCount = calStatus.LectiveCount;
+            }
+
+            var calEntries = await apiClient.GetCourseCalendarEntriesAsync(model.SelectedCourseId.Value, cancellationToken);
+            model.CalendarJson = System.Text.Json.JsonSerializer.Serialize(calEntries);
+
             if (model.Rows.Count == 0)
             {
                 var session = await apiClient.GetAttendanceSessionAsync(
@@ -160,5 +183,75 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
         }
 
         return View("Index", model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UploadCalendar(int courseId, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return Json(new { success = false, message = localizer["ErrorNoFileUploaded"].Value });
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var result = await apiClient.UploadCourseCalendarAsync(courseId, stream, file.FileName, cancellationToken);
+            if (result == null)
+            {
+                return Json(new { success = false, message = localizer["ErrorCouldNotUploadCalendar"].Value });
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = result.Message,
+                totalDays = result.TotalDays,
+                lectiveDays = result.LectiveDays,
+                festivos = result.Festivos,
+                noLectivos = result.NoLectivos
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to upload calendar for course {CourseId}", courseId);
+            return Json(new { success = false, message = localizer["ErrorCalendarUnexpected"].Value });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PreviewCalendar(int courseId, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return Json(new { success = false, message = localizer["ErrorNoFileUploaded"].Value });
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var result = await apiClient.PreviewCourseCalendarAsync(courseId, stream, file.FileName, cancellationToken);
+            if (result == null)
+            {
+                return Json(new { success = false, message = localizer["ErrorCouldNotParseCalendar"].Value });
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = result.Message,
+                totalDays = result.TotalDays,
+                lectiveDays = result.LectiveDays,
+                festivos = result.Festivos,
+                noLectivos = result.NoLectivos
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to preview calendar for course {CourseId}", courseId);
+            return Json(new { success = false, message = localizer["ErrorCalendarUnexpected"].Value });
+        }
     }
 }

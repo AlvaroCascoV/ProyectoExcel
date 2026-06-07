@@ -7,6 +7,12 @@
     var chartJson = JsonSerializer.Serialize(Model.ChartData, chartJsonOptions);
     var successMessage = TempData["SuccessMessage"] as string;
     var seedErrorMessage = TempData["ErrorMessage"] as string;
+    var chartLabelsJson = JsonSerializer.Serialize(new Dictionary<string, string>
+    {
+        ["students"] = SharedLocalizer["ChartLabelStudents"].Value,
+        ["realPercent"] = SharedLocalizer["ChartLabelRealPercent"].Value
+    });
+    var confirmSeedTestDataJson = JsonSerializer.Serialize(SharedLocalizer["ConfirmSeedTestData"].Value);
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
@@ -40,8 +46,7 @@
             <form asp-action="SeedPresentWeek" method="post" class="d-inline">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="courseId" value="@Model.SelectedCourseId" />
-                <button type="submit" class="btn btn-sm btn-outline-secondary"
-                        onclick="return confirm('@SharedLocalizer["ConfirmSeedTestData"]');">
+                <button type="submit" class="btn btn-sm btn-outline-secondary" id="seedPresentWeekBtn">
                     @SharedLocalizer["SeedTestData"]
                 </button>
             </form>
@@ -197,6 +202,30 @@
         </div>
     }
 
+    @if (stats.BelowDropThresholdCount > 0)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center gap-2 mb-3 animate__animated animate__fadeIn" role="alert">
+            <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+            <div>
+                <strong>@SharedLocalizer["AlertDropTitle"]:</strong>
+                @string.Format(SharedLocalizer["AlertDropMessage"].Value, stats.BelowDropThresholdCount)
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (stats.AtRiskCount > 0)
+    {
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm d-flex align-items-center gap-2 mb-3 animate__animated animate__fadeIn" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>
+                <strong>@SharedLocalizer["AlertDiplomaTitle"]:</strong>
+                @string.Format(SharedLocalizer["AlertDiplomaMessage"].Value, stats.AtRiskCount)
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row g-2 align-items-center mb-3">
         <div class="col-12 col-md-6">
             <div class="input-group">
@@ -232,7 +261,16 @@
             <tbody>
                 @foreach (var student in stats.Students)
                 {
-                    <tr>
+                    var rowClass = "";
+                    if (student.AtRiskDrop)
+                    {
+                        rowClass = "row-risk-danger";
+                    }
+                    else if (student.BelowDiplomaWarning)
+                    {
+                        rowClass = "row-risk-warning";
+                    }
+                    <tr class="@rowClass">
                         <td>@student.Rank</td>
                         <td>@student.FullName</td>
                         <td>@student.AbsentCount</td>
@@ -243,17 +281,21 @@
                         <td>@student.AbsentFPercentage%</td>
                         <td>@student.AbsentFRPercentage%</td>
                         <td>
-                            @if (student.DiplomaEligible)
+                            @if (student.AtRiskDrop)
                             {
-                                <span class="badge text-bg-success">@SharedLocalizer["StatusOk"]</span>
+                                <span class="badge text-bg-danger badge-pulse">@SharedLocalizer["StatusAtRisk"]</span>
                             }
-                            else if (student.AtRiskDrop)
+                            else if (!student.DiplomaEligible)
                             {
-                                <span class="badge text-bg-danger">@SharedLocalizer["StatusAtRisk"]</span>
+                                <span class="badge text-bg-warning">@SharedLocalizer["StatusBelow80"]</span>
+                            }
+                            else if (student.BelowDiplomaWarning)
+                            {
+                                <span class="badge text-bg-warning">@SharedLocalizer["StatusBelow80"]</span>
                             }
                             else
                             {
-                                <span class="badge text-bg-warning">@SharedLocalizer["StatusBelow80"]</span>
+                                <span class="badge text-bg-success">@SharedLocalizer["StatusOk"]</span>
                             }
                         </td>
                     </tr>
@@ -279,8 +321,19 @@
             new Chart(canvas, config);
         }
 
-        const localizedStudents = '@SharedLocalizer["ChartLabelStudents"].Value';
-        const localizedRealPercent = '@SharedLocalizer["ChartLabelRealPercent"].Value';
+        const chartLabels = @Html.Raw(chartLabelsJson);
+        const localizedStudents = chartLabels.students;
+        const localizedRealPercent = chartLabels.realPercent;
+        const confirmSeedTestData = @Html.Raw(confirmSeedTestDataJson);
+
+        const seedPresentWeekBtn = document.getElementById("seedPresentWeekBtn");
+        if (seedPresentWeekBtn) {
+            seedPresentWeekBtn.closest("form")?.addEventListener("submit", (event) => {
+                if (!confirm(confirmSeedTestData)) {
+                    event.preventDefault();
+                }
+            });
+        }
 
         const statusValues = chartData.statusValues ?? [];
         if (statusValues.some(v => v > 0)) {

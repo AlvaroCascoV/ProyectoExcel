@@ -166,7 +166,7 @@
     <value>At risk (&lt;75%)</value>
   </data>
   <data name="Below80" xml:space="preserve">
-    <value>Below 80%</value>
+    <value>Below 85%</value>
   </data>
   <data name="Breakdown" xml:space="preserve">
     <value>Breakdown</value>
@@ -241,7 +241,7 @@
     <value>Average real attendance</value>
   </data>
   <data name="Below80Diploma" xml:space="preserve">
-    <value>Below 80% (diploma)</value>
+    <value>Below 85% (diploma risk)</value>
   </data>
   <data name="Below75AtRisk" xml:space="preserve">
     <value>Below 75% (at risk)</value>
@@ -292,7 +292,7 @@
     <value>At risk</value>
   </data>
   <data name="StatusBelow80" xml:space="preserve">
-    <value>Below 80%</value>
+    <value>Below 85%</value>
   </data>
   <data name="StudentsText" xml:space="preserve">
     <value>students</value>
@@ -351,10 +351,139 @@
   <data name="ErrorCouldNotSeed" xml:space="preserve">
     <value>Could not seed attendance: {0}</value>
   </data>
+  <data name="ErrorNoFileUploaded" xml:space="preserve">
+    <value>No file was uploaded.</value>
+  </data>
+  <data name="ErrorCouldNotUploadCalendar" xml:space="preserve">
+    <value>Could not upload calendar.</value>
+  </data>
+  <data name="ErrorCouldNotParseCalendar" xml:space="preserve">
+    <value>Could not parse calendar.</value>
+  </data>
+  <data name="ErrorCalendarUnexpected" xml:space="preserve">
+    <value>An unexpected error occurred while processing the calendar. Please try again.</value>
+  </data>
+  <data name="CourseCalendar" xml:space="preserve">
+    <value>Course calendar</value>
+  </data>
+  <data name="CalendarUploadInstructions" xml:space="preserve">
+    <value>Drag an Excel file (.xlsx) here or click to upload</value>
+  </data>
+  <data name="CalendarPreview" xml:space="preserve">
+    <value>Calendar preview</value>
+  </data>
+  <data name="PreviewFileWithSize" xml:space="preserve">
+    <value>File: {0} ({1} KB)</value>
+  </data>
+  <data name="ConfirmAndSave" xml:space="preserve">
+    <value>Confirm &amp; save</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CalendarLoadedStatus" xml:space="preserve">
+    <value>Calendar loaded: {0} lective days</value>
+  </data>
+  <data name="CalendarFallbackMode" xml:space="preserve">
+    <value>Fallback weekdays mode (no calendar)</value>
+  </data>
+  <data name="RollCallGrid" xml:space="preserve">
+    <value>Roll call grid</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="WeekdayMon" xml:space="preserve">
+    <value>Mo</value>
+  </data>
+  <data name="WeekdayTue" xml:space="preserve">
+    <value>Tu</value>
+  </data>
+  <data name="WeekdayWed" xml:space="preserve">
+    <value>We</value>
+  </data>
+  <data name="WeekdayThu" xml:space="preserve">
+    <value>Th</value>
+  </data>
+  <data name="WeekdayFri" xml:space="preserve">
+    <value>Fr</value>
+  </data>
+  <data name="WeekdaySat" xml:space="preserve">
+    <value>Sa</value>
+  </data>
+  <data name="WeekdaySun" xml:space="preserve">
+    <value>Su</value>
+  </data>
+  <data name="CalendarRoomPrefix" xml:space="preserve">
+    <value>Room {0}</value>
+  </data>
+  <data name="CalendarDayInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="ErrorOnlyXlsxAllowed" xml:space="preserve">
+    <value>Only Excel spreadsheets (.xlsx) are allowed.</value>
+  </data>
+  <data name="CalendarGeneratingPreview" xml:space="preserve">
+    <value>Generating preview... Please wait</value>
+  </data>
+  <data name="ErrorMessagePrefix" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="ErrorNetworkConnectionFailed" xml:space="preserve">
+    <value>Network connection failed.</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving...</value>
+  </data>
+  <data name="CalendarSavedReloading" xml:space="preserve">
+    <value>Saved successfully! Reloading...</value>
+  </data>
+  <data name="ErrorSavingFormat" xml:space="preserve">
+    <value>Error saving: {0}</value>
+  </data>
+  <data name="ErrorUploadFailedNetwork" xml:space="preserve">
+    <value>Upload failed. Check your network connection.</value>
+  </data>
   <data name="ChartLabelStudents" xml:space="preserve">
     <value>Students</value>
   </data>
   <data name="ChartLabelRealPercent" xml:space="preserve">
     <value>Real %</value>
+  </data>
+  <data name="LegendLective" xml:space="preserve">
+    <value>Lective</value>
+  </data>
+  <data name="LegendFestivo" xml:space="preserve">
+    <value>Festivo</value>
+  </data>
+  <data name="LegendNoLectivo" xml:space="preserve">
+    <value>No Lectivo</value>
+  </data>
+  <data name="LegendPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="TooltipLective" xml:space="preserve">
+    <value>Scheduled class day</value>
+  </data>
+  <data name="TooltipFestivo" xml:space="preserve">
+    <value>Official holiday (no classes)</value>
+  </data>
+  <data name="TooltipNoLectivo" xml:space="preserve">
+    <value>Non-lective administrative or break day</value>
+  </data>
+  <data name="TooltipPassed" xml:space="preserve">
+    <value>Attendance already recorded for this day</value>
+  </data>
+  <data name="AlertDropTitle" xml:space="preserve">
+    <value>Drop Risk Warning</value>
+  </data>
+  <data name="AlertDropMessage" xml:space="preserve">
+    <value>There are {0} student(s) below the minimum attendance threshold (75%).</value>
+  </data>
+  <data name="AlertDiplomaTitle" xml:space="preserve">
+    <value>Diploma Eligibility Warning</value>
+  </data>
+  <data name="AlertDiplomaMessage" xml:space="preserve">
+    <value>There are {0} student(s) below the 85% warning threshold.</value>
   </data>
 </root>

@@ -53,46 +53,36 @@ public decimal? MaxPercent { get; set; }
 ## Non-lective day guard
 
 ### What already exists — do not duplicate
-`LectiveDayCalendar.GetWeekdaysInRange` already filters weekends from the lective calendar.
-`LectiveDayCalendar.GetLectiveDates` produces the final list of valid days.
+`ICalendarService` manages course lective days in the database.
+If a course has an uploaded calendar (Excel spreadsheet), `ICalendarService.GetLectiveDatesAsync` returns those entries.
+If a course has NO custom calendar, it dynamically falls back to the static `LectiveDayCalendar.GetLectiveDates` weekday generation logic.
 
-### Where to add weekend guard — API AttendanceController
-```csharp
-// In SaveSession action, before calling the service:
-if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
-    return BadRequest(new { message = "Cannot save attendance on weekends." });
-```
+### Dynamic guards — API AttendanceController & AttendanceService
+Weekend and holiday checks are evaluated dynamically. Do not hardcode weekend blocks in controllers, as some courses might run weekend classes.
+Instead, let `AttendanceService.SaveSessionAsync` validate using the database calendar entries:
 
-### Where to add non-lective guard — AttendanceService
 ```csharp
-// In SaveSessionAsync, before upserting records:
-var lectiveDates = LectiveDayCalendar.GetLectiveDates(courseStart, courseEnd);
+// In AttendanceService.SaveSessionAsync, before saving:
+var lectiveDatesList = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
+var lectiveDates = lectiveDatesList.ToHashSet();
+
 if (!lectiveDates.Contains(date))
     return (false, $"{date:yyyy-MM-dd} is not a lective day for this course.");
 ```
 
-### MVC — disable weekend dates in the date picker
-```html
-<!-- In Attendance/Index.cshtml -->
-<input asp-for="SelectedDate"
-       type="date"
-       class="form-control"
-       id="attendanceDatePicker" />
-
-<script>
-// Disable weekends in native date input (visual hint, not a security control)
-document.getElementById('attendanceDatePicker').addEventListener('input', function() {
-    const d = new Date(this.value);
-    const day = d.getUTCDay();
-    if (day === 0 || day === 6) {
-        this.setCustomValidity('Please select a weekday.');
-        this.reportValidity();
-    } else {
-        this.setCustomValidity('');
-    }
-});
-</script>
-```
+### MVC — Interactive visual monthly calendar grid
+Instead of a simple date picker input, render an interactive monthly calendar using Javascript.
+1. Fetch detailed course calendar entries from `/api/courses/{courseId}/calendar/entries`.
+2. Map each entry by date in a lookup dictionary.
+3. Determine the start and end range of the course calendar if a custom calendar is loaded.
+4. Render grid items for the selected month:
+   - **Lective days**: highlighted green, clickable.
+   - **Festivo / Holiday**: highlighted red/orange with details, unclickable.
+   - **No Lectivo**: highlighted orange/gray, unclickable.
+   - **Weekends**: highlighted gray, unclickable.
+   - **Outside Range / Non-Calendar Days**: Any day completely outside the custom calendar date range, or weekdays with no calendar entries when a custom calendar is loaded, MUST be disabled and grayed out.
+   - **Passed/Recorded**: A highly visible blue indicator dot under the day cell.
+   - **Selected**: Blue focus ring.
 
 ---
 
