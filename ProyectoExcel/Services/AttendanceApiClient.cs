@@ -409,7 +409,7 @@ public record CalendarUploadResultDto(
 public record CourseCalendarEntryDto(
     DateOnly Date,
     bool IsLective,
-    string DayType,
+    string? DayType,
     string? Module,
     string? Teacher,
     string? Room);

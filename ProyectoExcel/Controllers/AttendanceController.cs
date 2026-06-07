@@ -8,7 +8,10 @@ using MvcProyectoExcel.ViewModels;
 namespace MvcProyectoExcel.Controllers;
 
 [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
-public class AttendanceController(IAttendanceApiClient apiClient, IStringLocalizer<SharedResource> localizer) : Controller
+public class AttendanceController(
+    IAttendanceApiClient apiClient,
+    IStringLocalizer<SharedResource> localizer,
+    ILogger<AttendanceController> logger) : Controller
 {
     private const int DefaultCourseId = 3430;
 
@@ -185,9 +188,10 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadCalendar(int courseId, IFormFile file, CancellationToken cancellationToken)
+    {
         if (file == null || file.Length == 0)
         {
-            return Json(new { success = false, message = "No file was uploaded." });
+            return Json(new { success = false, message = localizer["ErrorNoFileUploaded"].Value });
         }
 
         try
@@ -196,7 +200,7 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
             var result = await apiClient.UploadCourseCalendarAsync(courseId, stream, file.FileName, cancellationToken);
             if (result == null)
             {
-                return Json(new { success = false, message = "Could not upload calendar." });
+                return Json(new { success = false, message = localizer["ErrorCouldNotUploadCalendar"].Value });
             }
 
             return Json(new
@@ -211,16 +215,18 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
         }
         catch (Exception ex)
         {
-            return Json(new { success = false, message = ex.Message });
+            logger.LogError(ex, "Failed to upload calendar for course {CourseId}", courseId);
+            return Json(new { success = false, message = localizer["ErrorCalendarUnexpected"].Value });
         }
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> PreviewCalendar(int courseId, IFormFile file, CancellationToken cancellationToken)
+    {
         if (file == null || file.Length == 0)
         {
-            return Json(new { success = false, message = "No file was uploaded." });
+            return Json(new { success = false, message = localizer["ErrorNoFileUploaded"].Value });
         }
 
         try
@@ -229,7 +235,7 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
             var result = await apiClient.PreviewCourseCalendarAsync(courseId, stream, file.FileName, cancellationToken);
             if (result == null)
             {
-                return Json(new { success = false, message = "Could not parse calendar." });
+                return Json(new { success = false, message = localizer["ErrorCouldNotParseCalendar"].Value });
             }
 
             return Json(new
@@ -244,7 +250,8 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
         }
         catch (Exception ex)
         {
-            return Json(new { success = false, message = ex.Message });
+            logger.LogError(ex, "Failed to preview calendar for course {CourseId}", courseId);
+            return Json(new { success = false, message = localizer["ErrorCalendarUnexpected"].Value });
         }
     }
 }

@@ -1,267 +1,11 @@
 @model MvcProyectoExcel.ViewModels.AttendancePassListViewModel
 @using Attendance.Infrastructure.Entities
+@using System.Text.Json
 @{
     ViewData["Title"] = SharedLocalizer["PassList"];
     var successMessage = TempData["SuccessMessage"] as string;
     var errorMessage = TempData["ErrorMessage"] as string;
 }
-
-<style>
-    :root, [data-bs-theme="light"] {
-        --bg-glass: rgba(255, 255, 255, 0.7);
-        --border-glass: rgba(0, 0, 0, 0.08);
-        --text-muted: #64748b;
-        --primary-glow: 0 0 12px rgba(59, 130, 246, 0.3);
-        
-        --color-lective: #059669;
-        --bg-lective: rgba(5, 150, 105, 0.08);
-        --border-lective: rgba(5, 150, 105, 0.2);
-        
-        --color-festivo: #dc2626;
-        --bg-festivo: rgba(220, 38, 38, 0.08);
-        --border-festivo: rgba(220, 38, 38, 0.2);
-        
-        --color-no-lective: #d97706;
-        --bg-no-lective: rgba(217, 119, 6, 0.08);
-        --border-no-lective: rgba(217, 119, 6, 0.2);
-        
-        --color-weekend: #94a3b8;
-        --bg-weekend: rgba(148, 163, 184, 0.06);
-
-        --color-passed: #0369a1;
-        --bg-passed: #e0f2fe;
-        --border-passed: #bae6fd;
-        
-        --calendar-cell-color: #334155;
-        --tooltip-bg: #1e293b;
-        --tooltip-text: #ffffff;
-    }
-
-    [data-bs-theme="dark"] {
-        --bg-glass: rgba(30, 41, 59, 0.4);
-        --border-glass: rgba(255, 255, 255, 0.08);
-        --text-muted: #94a3b8;
-        --primary-glow: 0 0 15px rgba(59, 130, 246, 0.4);
-        
-        --color-lective: #10b981;
-        --bg-lective: rgba(16, 185, 129, 0.12);
-        --border-lective: rgba(16, 185, 129, 0.25);
-        
-        --color-festivo: #ef4444;
-        --bg-festivo: rgba(239, 68, 68, 0.12);
-        --border-festivo: rgba(239, 68, 68, 0.25);
-        
-        --color-no-lective: #f59e0b;
-        --bg-no-lective: rgba(245, 158, 11, 0.1);
-        --border-no-lective: rgba(245, 158, 11, 0.2);
-        
-        --color-weekend: #64748b;
-        --bg-weekend: rgba(100, 116, 139, 0.05);
-
-        --color-passed: #38bdf8;
-        --bg-passed: rgba(56, 189, 248, 0.15);
-        --border-passed: rgba(56, 189, 248, 0.35);
-        
-        --calendar-cell-color: #e2e8f0;
-        --tooltip-bg: #0f172a;
-        --tooltip-text: #ffffff;
-    }
-
-    .theme-card {
-        background: var(--bs-card-bg);
-        border: 1px solid var(--bs-card-border-color, var(--bs-border-color));
-        border-radius: 12px;
-        box-shadow: var(--bs-box-shadow-sm);
-    }
-
-    .upload-zone {
-        border: 2px dashed var(--bs-border-color);
-        border-radius: 10px;
-        background: var(--bs-tertiary-bg);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        padding: 1.5rem;
-    }
-    .upload-zone:hover, .upload-zone.dragover {
-        border-color: var(--bs-primary);
-        background: rgba(59, 130, 246, 0.05);
-        box-shadow: var(--primary-glow);
-    }
-
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
-    }
-
-    .calendar-day-header {
-        text-align: center;
-        font-weight: 700;
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        padding: 4px 0;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .calendar-cell {
-        position: relative;
-        aspect-ratio: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid transparent;
-        user-select: none;
-        color: var(--calendar-cell-color);
-    }
-
-    .calendar-cell:hover:not(.disabled) {
-        transform: translateY(-2px);
-        box-shadow: var(--bs-box-shadow);
-    }
-
-    .calendar-cell.disabled {
-        cursor: not-allowed;
-    }
-
-    .calendar-cell.lective {
-        color: var(--color-lective);
-        background: var(--bg-lective);
-        border-color: var(--border-lective);
-    }
-    .calendar-cell.lective:hover {
-        background: rgba(16, 185, 129, 0.2);
-        border-color: var(--color-lective);
-    }
-
-    .calendar-cell.festivo {
-        color: var(--color-festivo);
-        background: var(--bg-festivo);
-        border-color: var(--border-festivo);
-    }
-
-    .calendar-cell.no-lective {
-        color: var(--color-no-lective);
-        background: var(--bg-no-lective);
-        border-color: var(--border-no-lective);
-    }
-
-    .calendar-cell.weekend {
-        color: var(--color-weekend);
-        background: var(--bg-weekend);
-    }
-
-    .calendar-cell.passed {
-        color: var(--color-passed) !important;
-        background: var(--bg-passed) !important;
-        border-color: var(--border-passed) !important;
-    }
-    .calendar-cell.passed:hover:not(.disabled) {
-        background: rgba(56, 189, 248, 0.2) !important;
-        border-color: var(--color-passed) !important;
-    }
-
-    .calendar-cell.other-month {
-        opacity: 0.2;
-    }
-
-    .calendar-cell.selected {
-        outline: 2px solid var(--bs-primary);
-        outline-offset: 1px;
-        box-shadow: var(--primary-glow);
-    }
-
-    .recorded-dot {
-        position: absolute;
-        bottom: 4px;
-        width: 6px;
-        height: 6px;
-        background-color: var(--color-passed);
-        border-radius: 50%;
-        box-shadow: 0 0 4px var(--color-passed);
-    }
-
-    .legend-dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: 6px;
-        flex-shrink: 0;
-    }
-    .legend-dot.lective {
-        background-color: var(--color-lective);
-        border: 1px solid var(--border-lective);
-    }
-    .legend-dot.festivo {
-        background-color: var(--color-festivo);
-        border: 1px solid var(--border-festivo);
-    }
-    .legend-dot.no-lective {
-        background-color: var(--color-no-lective);
-        border: 1px solid var(--border-no-lective);
-    }
-    .legend-dot.passed {
-        background-color: var(--color-passed);
-        border: 1px solid var(--border-passed);
-    }
-
-    .cursor-help {
-        cursor: help;
-    }
-
-    .tooltip-container {
-        position: relative;
-    }
-
-    .custom-tooltip {
-        position: absolute;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--tooltip-bg);
-        color: var(--tooltip-text);
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 0.7rem;
-        width: 180px;
-        z-index: 100;
-        box-shadow: var(--bs-box-shadow);
-        border: 1px solid var(--border-glass);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        text-align: center;
-        font-weight: 400;
-    }
-
-    .calendar-cell:hover .custom-tooltip {
-        opacity: 1;
-    }
-
-    .calendar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    #attendanceCard {
-        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        transform: translateY(0);
-    }
-    #attendanceCard.loading {
-        opacity: 0.5;
-        transform: translateY(5px);
-        pointer-events: none;
-    }
-</style>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h1 class="h3 mb-0">@SharedLocalizer["PassList"]</h1>
@@ -335,39 +79,39 @@
                 <div class="collapse" id="uploadCollapse">
                     <div class="upload-zone text-center mb-3" id="dropZone">
                         <i class="bi bi-cloud-upload fs-1 text-primary mb-2"></i>
-                        <p class="small text-muted mb-0">Drag Excel file (.xlsx) here or click to upload</p>
+                        <p class="small text-muted mb-0">@SharedLocalizer["CalendarUploadInstructions"]</p>
                         <input type="file" id="fileInput" class="d-none" accept=".xlsx" />
                     </div>
 
                     <!-- CALENDAR PREVIEW PANEL -->
                     <div id="previewPanel" class="d-none border p-3 rounded mb-3 bg-body-tertiary animate__animated animate__fadeIn">
-                        <h6 class="small fw-bold mb-2"><i class="bi bi-eye me-1"></i> Calendar Preview</h6>
-                        <p class="small text-muted mb-2 text-truncate" id="previewFileName">File: calendar.xlsx</p>
+                        <h6 class="small fw-bold mb-2"><i class="bi bi-eye me-1"></i> @SharedLocalizer["CalendarPreview"]</h6>
+                        <p class="small text-muted mb-2 text-truncate" id="previewFileName"></p>
                         
                         <div class="row g-2 mb-3 text-center">
                             <div class="col-4">
                                 <div class="bg-success bg-opacity-10 text-success p-2 rounded border border-success border-opacity-25">
-                                    <div class="small fw-semibold">Lective</div>
+                                    <div class="small fw-semibold">@SharedLocalizer["LegendLective"]</div>
                                     <div class="fs-6 fw-bold" id="previewLectiveCount">0</div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="bg-danger bg-opacity-10 text-danger p-2 rounded border border-danger border-opacity-25">
-                                    <div class="small fw-semibold">Holiday</div>
+                                    <div class="small fw-semibold">@SharedLocalizer["LegendFestivo"]</div>
                                     <div class="fs-6 fw-bold" id="previewFestivoCount">0</div>
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="bg-warning bg-opacity-10 text-warning p-2 rounded border border-warning border-opacity-25">
-                                    <div class="small fw-semibold">Non-Lective</div>
+                                    <div class="small fw-semibold">@SharedLocalizer["LegendNoLectivo"]</div>
                                     <div class="fs-6 fw-bold" id="previewNoLectivoCount">0</div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-primary flex-fill fw-bold shadow-sm" id="confirmUploadBtn"><i class="bi bi-check-circle me-1"></i> Confirm & Save</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="cancelUploadBtn"><i class="bi bi-x-circle me-1"></i> Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary flex-fill fw-bold shadow-sm" id="confirmUploadBtn"><i class="bi bi-check-circle me-1"></i> @SharedLocalizer["ConfirmAndSave"]</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="cancelUploadBtn"><i class="bi bi-x-circle me-1"></i> @SharedLocalizer["Cancel"]</button>
                         </div>
                     </div>
                 </div>
@@ -377,13 +121,13 @@
                     @if (Model.HasCalendar)
                     {
                         <div class="text-success border border-success bg-opacity-10 bg-success p-2 rounded">
-                            <i class="bi bi-check-circle-fill me-1"></i> Calendar Loaded: <strong>@Model.LectiveDaysCount</strong> Lective Days
+                            <i class="bi bi-check-circle-fill me-1"></i> @string.Format(SharedLocalizer["CalendarLoadedStatus"].Value, Model.LectiveDaysCount)
                         </div>
                     }
                     else
                     {
                         <div class="text-warning border border-warning bg-opacity-10 bg-warning p-2 rounded">
-                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Fallback Weekdays Mode (No Calendar)
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> @SharedLocalizer["CalendarFallbackMode"]
                         </div>
                     }
                 </div>
@@ -393,18 +137,18 @@
             <div class="card theme-card p-3 mb-4">
                 <div class="calendar-header">
                     <button class="btn btn-sm btn-outline-secondary py-0 px-2" type="button" id="prevMonth"><i class="bi bi-chevron-left"></i></button>
-                    <span class="fw-bold small" id="calendarMonthYear">January 2026</span>
+                    <span class="fw-bold small" id="calendarMonthYear"></span>
                     <button class="btn btn-sm btn-outline-secondary py-0 px-2" type="button" id="nextMonth"><i class="bi bi-chevron-right"></i></button>
                 </div>
 
                 <div class="calendar-grid mb-2">
-                    <div class="calendar-day-header">Mo</div>
-                    <div class="calendar-day-header">Tu</div>
-                    <div class="calendar-day-header">We</div>
-                    <div class="calendar-day-header">Th</div>
-                    <div class="calendar-day-header">Fr</div>
-                    <div class="calendar-day-header">Sa</div>
-                    <div class="calendar-day-header">Su</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdayMon"]</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdayTue"]</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdayWed"]</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdayThu"]</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdayFri"]</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdaySat"]</div>
+                    <div class="calendar-day-header">@SharedLocalizer["WeekdaySun"]</div>
                 </div>
 
                 <div class="calendar-grid" id="calendarDays">
@@ -442,7 +186,7 @@
 
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
                         <div>
-                            <h4 class="h5 mb-1"><i class="bi bi-clipboard-check me-1"></i> Roll Call Grid</h4>
+                            <h4 class="h5 mb-1"><i class="bi bi-clipboard-check me-1"></i> @SharedLocalizer["RollCallGrid"]</h4>
                             <p class="text-muted small mb-0">
                                 @SharedLocalizer["CourseText"] <strong>@Model.SelectedCourseName</strong> —
                                 @SharedLocalizer["DateText"] <strong class="fw-bold">@Model.SelectedDate.ToString("yyyy-MM-dd")</strong>
@@ -459,7 +203,7 @@
                     <div class="table-responsive">
                         <table class="table table-hover table-striped align-middle mb-0">
                             <thead>
-                                <tr class="text-muted small uppercase">
+                                <tr class="text-muted small text-uppercase">
                                     <th style="width: 60px;">#</th>
                                     <th>@SharedLocalizer["TableStudent"]</th>
                                     <th style="width: 250px;">@SharedLocalizer["TableStatus"]</th>
@@ -541,7 +285,7 @@
 <!-- LOADING OVERLAY -->
 <div id="loadingOverlay" class="loading-overlay d-none">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">@SharedLocalizer["Loading"]</span>
     </div>
 </div>
 
@@ -556,12 +300,47 @@
 
 @if (Model.SelectedCourseId.HasValue)
 {
+    var attendanceI18n = new Dictionary<string, string>
+    {
+        ["previewFileWithSize"] = SharedLocalizer["PreviewFileWithSize"].Value,
+        ["errorOnlyXlsx"] = SharedLocalizer["ErrorOnlyXlsxAllowed"].Value,
+        ["generatingPreview"] = SharedLocalizer["CalendarGeneratingPreview"].Value,
+        ["errorMessagePrefix"] = SharedLocalizer["ErrorMessagePrefix"].Value,
+        ["errorNetworkConnectionFailed"] = SharedLocalizer["ErrorNetworkConnectionFailed"].Value,
+        ["saving"] = SharedLocalizer["Saving"].Value,
+        ["calendarSavedReloading"] = SharedLocalizer["CalendarSavedReloading"].Value,
+        ["confirmAndSave"] = SharedLocalizer["ConfirmAndSave"].Value,
+        ["errorSavingFormat"] = SharedLocalizer["ErrorSavingFormat"].Value,
+        ["errorUploadFailedNetwork"] = SharedLocalizer["ErrorUploadFailedNetwork"].Value,
+        ["calendarRoomPrefix"] = SharedLocalizer["CalendarRoomPrefix"].Value,
+        ["tooltipPassed"] = SharedLocalizer["TooltipPassed"].Value,
+        ["calendarDayInfo"] = SharedLocalizer["CalendarDayInfo"].Value
+    };
+    var attendanceScriptConfig = new Dictionary<string, object>
+    {
+        ["i18n"] = attendanceI18n,
+        ["selectedDate"] = Model.SelectedDate.ToString("yyyy-MM-dd"),
+        ["attendanceIndexUrl"] = Url.Action("Index", "Attendance") ?? string.Empty,
+        ["courseId"] = Model.SelectedCourseId!.Value
+    };
     <script>
+        function formatString(template, ...args) {
+            return args.reduce((result, arg, index) => result.replace(`{${index}}`, arg), template);
+        }
+
+        function formatMonthYearLabel(year, month) {
+            const pageLocale = document.documentElement.lang || "es";
+            return new Intl.DateTimeFormat(pageLocale, { month: "long", year: "numeric" })
+                .format(new Date(year, month, 1));
+        }
+
         // Calendar dynamic lookup tables
+        const scriptConfig = @Html.Raw(JsonSerializer.Serialize(attendanceScriptConfig));
+        const i18n = scriptConfig.i18n;
         let courseCalendar = @Html.Raw(Model.CalendarJson ?? "[]");
-        const previousDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PreviousDates?.Select(d => d.ToString("yyyy-MM-dd")) ?? Array.Empty<string>())));
-        const textAttendanceRecorded = "@SharedLocalizer["TooltipPassed"]";
-        const courseId = @Model.SelectedCourseId.Value;
+        const previousDates = new Set(@Html.Raw(JsonSerializer.Serialize(Model.PreviousDates?.Select(d => d.ToString("yyyy-MM-dd")) ?? Array.Empty<string>())));
+        const courseId = scriptConfig.courseId;
+        const attendanceIndexUrl = scriptConfig.attendanceIndexUrl;
         
         let minCalendarDate = null;
         let maxCalendarDate = null;
@@ -571,7 +350,7 @@
             maxCalendarDate = new Date(Math.max(...dates));
         }
         
-        let selectedDateStr = "@Model.SelectedDate.ToString("yyyy-MM-dd")";
+        let selectedDateStr = scriptConfig.selectedDate;
         let currentDate = new Date(selectedDateStr + "T00:00:00");
         let viewYear = currentDate.getFullYear();
         let viewMonth = currentDate.getMonth(); // 0-indexed
@@ -596,14 +375,9 @@
         const dateInput = document.getElementById("dateInput");
         const filterForm = document.getElementById("filterForm");
 
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-
         function drawCalendar() {
             calendarDays.innerHTML = "";
-            calendarMonthYear.textContent = `${monthNames[viewMonth]} ${viewYear}`;
+            calendarMonthYear.textContent = formatMonthYearLabel(viewYear, viewMonth);
 
             // First day of the view month
             const firstDayIndex = new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay(); // Sun=0, Mon=1, etc.
@@ -674,7 +448,7 @@
                     dot.className = "recorded-dot";
                     dot.setAttribute("data-bs-toggle", "tooltip");
                     dot.setAttribute("data-bs-placement", "top");
-                    dot.setAttribute("title", textAttendanceRecorded);
+                    dot.setAttribute("title", i18n.tooltipPassed);
                     cell.appendChild(dot);
                 }
 
@@ -697,10 +471,10 @@
                         if (calendarInfo.Module || calendarInfo.Teacher || calendarInfo.Room) {
                             const tooltip = document.createElement("span");
                             tooltip.className = "custom-tooltip shadow";
-                            let tipHtml = `<strong>${calendarInfo.DayType || "Info"}</strong>`;
+                            let tipHtml = `<strong>${calendarInfo.DayType || i18n.calendarDayInfo}</strong>`;
                             if (calendarInfo.Module) tipHtml += `<br>${calendarInfo.Module}`;
                             if (calendarInfo.Teacher) tipHtml += `<br><i class="bi bi-person-workspace me-1"></i> ${calendarInfo.Teacher}`;
-                            if (calendarInfo.Room) tipHtml += `<br><i class="bi bi-geo-alt me-1"></i> Aula ${calendarInfo.Room}`;
+                            if (calendarInfo.Room) tipHtml += `<br><i class="bi bi-geo-alt me-1"></i> ${formatString(i18n.calendarRoomPrefix, calendarInfo.Room)}`;
                             tooltip.innerHTML = tipHtml;
                             cell.appendChild(tooltip);
                         }
@@ -746,7 +520,7 @@
 
                         selectedDateStr = dateKey;
                         dateInput.value = dateKey;
-                        const url = `@Url.Action("Index", "Attendance")?courseId=${courseId}&date=${dateKey}`;
+                        const url = `${attendanceIndexUrl}?courseId=${courseId}&date=${dateKey}`;
                         
                         fetch(url)
                             .then(res => {
@@ -886,7 +660,7 @@
 
         function handleFileSelection(file) {
             if (!file.name.endsWith(".xlsx")) {
-                alert("Only Excel spreadsheets (.xlsx) are allowed!");
+                alert(i18n.errorOnlyXlsx);
                 return;
             }
 
@@ -899,7 +673,7 @@
             calendarStatus.innerHTML = `
                 <div class="text-info border border-info bg-opacity-10 bg-info p-2 rounded d-flex align-items-center justify-content-center gap-2">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span>Generating preview... Please wait</span>
+                    <span>${i18n.generatingPreview}</span>
                 </div>
             `;
 
@@ -916,7 +690,7 @@
                     calendarStatus.innerHTML = "";
                     dropZone.classList.add("d-none");
                     
-                    previewFileName.textContent = `File: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+                    previewFileName.textContent = formatString(i18n.previewFileWithSize, file.name, Math.round(file.size / 1024));
                     previewLectiveCount.textContent = data.lectiveDays;
                     previewFestivoCount.textContent = data.festivos;
                     previewNoLectivoCount.textContent = data.noLectivos;
@@ -925,7 +699,7 @@
                 } else {
                     calendarStatus.innerHTML = `
                         <div class="text-danger border border-danger bg-opacity-10 bg-danger p-2 rounded">
-                            <i class="bi bi-exclamation-octagon-fill me-1"></i> Error: ${data.message}
+                            <i class="bi bi-exclamation-octagon-fill me-1"></i> ${formatString(i18n.errorMessagePrefix, data.message)}
                         </div>
                     `;
                 }
@@ -933,7 +707,7 @@
             .catch(err => {
                 calendarStatus.innerHTML = `
                     <div class="text-danger border border-danger bg-opacity-10 bg-danger p-2 rounded">
-                        <i class="bi bi-exclamation-octagon-fill me-1"></i> Network connection failed.
+                        <i class="bi bi-exclamation-octagon-fill me-1"></i> ${i18n.errorNetworkConnectionFailed}
                     </div>
                 `;
             });
@@ -952,7 +726,7 @@
 
             showLoadingOverlay();
             confirmUploadBtn.disabled = true;
-            confirmUploadBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...`;
+            confirmUploadBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> ${i18n.saving}`;
             cancelUploadBtn.disabled = true;
 
             const formData = new FormData();
@@ -971,7 +745,7 @@
                 if (data.success) {
                     previewPanel.innerHTML = `
                         <div class="text-success border border-success bg-opacity-10 bg-success p-2 rounded text-center fw-bold animate__animated animate__pulse">
-                            <i class="bi bi-check-circle-fill me-1"></i> Saved Successfully! Reloading...
+                            <i class="bi bi-check-circle-fill me-1"></i> ${i18n.calendarSavedReloading}
                         </div>
                     `;
                     
@@ -983,18 +757,18 @@
                     const overlay = document.getElementById("loadingOverlay");
                     if (overlay) overlay.classList.add("d-none");
                     confirmUploadBtn.disabled = false;
-                    confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> Confirm & Save`;
+                    confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${i18n.confirmAndSave}`;
                     cancelUploadBtn.disabled = false;
-                    alert("Error saving: " + data.message);
+                    alert(formatString(i18n.errorSavingFormat, data.message));
                 }
             })
             .catch(err => {
                 const overlay = document.getElementById("loadingOverlay");
                 if (overlay) overlay.classList.add("d-none");
                 confirmUploadBtn.disabled = false;
-                confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> Confirm & Save`;
+                confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${i18n.confirmAndSave}`;
                 cancelUploadBtn.disabled = false;
-                alert("Upload failed. Check network.");
+                alert(i18n.errorUploadFailedNetwork);
             });
         });
 

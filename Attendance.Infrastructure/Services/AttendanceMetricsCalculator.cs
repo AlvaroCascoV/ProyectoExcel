@@ -4,7 +4,8 @@ namespace Attendance.Infrastructure.Services;
 
 public static class AttendanceMetricsCalculator
 {
-    public const decimal DiplomaThreshold = 85m;
+    public const decimal DiplomaThreshold = 80m;
+    public const decimal DiplomaWarningThreshold = 85m;
     public const decimal DropThreshold = 75m;
 
     public record Metrics(
@@ -23,6 +24,7 @@ public static class AttendanceMetricsCalculator
         decimal AbsentFPercentage,
         decimal AbsentFRPercentage,
         bool DiplomaEligible,
+        bool BelowDiplomaWarning,
         bool AtRiskDrop);
 
     public static Metrics FromStatuses(IReadOnlyList<AttendanceStatus> statuses, int totalClassDays)
@@ -64,6 +66,7 @@ public static class AttendanceMetricsCalculator
             PercentFromAbsenceUnits(absentFOnly),
             PercentFromAbsenceUnits(absentFAndR),
             realAttendancePercentage >= DiplomaThreshold,
+            realAttendancePercentage < DiplomaWarningThreshold,
             realAttendancePercentage < DropThreshold);
     }
 }

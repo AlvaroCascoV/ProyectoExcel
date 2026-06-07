@@ -15,7 +15,8 @@ public class AttendanceController(
     IPdfExportService pdfExportService,
     IWebHostEnvironment environment,
     ICalendarService calendarService,
-    ICalendarParserService calendarParserService) : ControllerBase
+    ICalendarParserService calendarParserService,
+    ILogger<AttendanceController> logger) : ControllerBase
 {
     [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
     [HttpGet("courses/{courseId:int}/attendance")]
@@ -244,13 +245,14 @@ public class AttendanceController(
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = $"Error parsing calendar: {ex.Message}" });
+            logger.LogError(ex, "Failed to upload calendar for course {CourseId}", courseId);
+            return BadRequest(new { message = "Could not parse or upload the calendar file." });
         }
     }
 
     [Authorize(Roles = $"{AppRoles.Teacher},{AppRoles.Admin}")]
     [HttpPost("courses/{courseId:int}/calendar/preview")]
-    public async Task<IActionResult> PreviewCalendar(
+    public IActionResult PreviewCalendar(
         int courseId,
         IFormFile file,
         CancellationToken cancellationToken = default)
@@ -291,7 +293,8 @@ public class AttendanceController(
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = $"Error parsing calendar: {ex.Message}" });
+            logger.LogError(ex, "Failed to preview calendar for course {CourseId}", courseId);
+            return BadRequest(new { message = "Could not parse the calendar file." });
         }
     }
 

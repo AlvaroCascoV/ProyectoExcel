@@ -54,7 +54,9 @@ public class StatisticsService(ApplicationDbContext dbContext, ICalendarService 
         var allLectiveDates = await calendarService.GetLectiveDatesAsync(courseId, cancellationToken);
         var isFiltered = LectiveDayCalendar.HasDateFilter(from, to, month, year);
         var lectiveDates = LectiveDayCalendar.FilterLectiveDates(allLectiveDates, from, to, month, year);
-        var totalClassDays = isFiltered ? lectiveDates.Count : allLectiveDates.Count;
+        var totalClassDays = isFiltered
+            ? lectiveDates.Count
+            : await calendarService.GetLectiveDaysCountAsync(courseId, cancellationToken);
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         var recordsByStudent = await LoadRecordsByStudentAsync(courseId, cancellationToken);
@@ -94,6 +96,7 @@ public class StatisticsService(ApplicationDbContext dbContext, ICalendarService 
                 metrics.AbsentFPercentage,
                 metrics.AbsentFRPercentage,
                 metrics.DiplomaEligible,
+                metrics.BelowDiplomaWarning,
                 metrics.AtRiskDrop,
                 0));
         }
@@ -122,7 +125,7 @@ public class StatisticsService(ApplicationDbContext dbContext, ICalendarService 
             course.Name,
             totalClassDays,
             average,
-            ranked.Count(s => !s.DiplomaEligible),
+            ranked.Count(s => s.BelowDiplomaWarning),
             ranked.Count(s => s.AtRiskDrop),
             ranked);
     }

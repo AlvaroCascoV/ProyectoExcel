@@ -40,7 +40,7 @@ else
 
     @if (Model.Summary is not null)
     {
-        @if (!Model.Summary.DiplomaEligible)
+        @if (Model.Summary.BelowDiplomaWarning)
         {
             <div class="alert alert-warning">
                 @SharedLocalizer["RealAttendanceText"] <strong>@Model.Summary.RealAttendancePercentage%</strong>.
@@ -48,9 +48,13 @@ else
                 {
                     <span>@SharedLocalizer["BelowAtRisk"]</span>
                 }
-                else
+                else if (!Model.Summary.DiplomaEligible)
                 {
                     <span>@SharedLocalizer["BelowDiploma"]</span>
+                }
+                else
+                {
+                    <span>@SharedLocalizer["Below80"]</span>
                 }
             </div>
         }
@@ -59,7 +63,7 @@ else
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center">
-                        <div class="display-6 @(Model.Summary.DiplomaEligible ? "text-primary" : "text-warning")">@Model.Summary.RealAttendancePercentage%</div>
+                        <div class="display-6 @(Model.Summary.BelowDiplomaWarning ? "text-warning" : "text-primary")">@Model.Summary.RealAttendancePercentage%</div>
                         <div class="small text-muted">@SharedLocalizer["RealAttendanceDiploma"]</div>
                     </div>
                 </div>
@@ -83,17 +87,21 @@ else
             <div class="col-md-3">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center">
-                        @if (Model.Summary.DiplomaEligible)
-                        {
-                            <span class="badge text-bg-success fs-6">@SharedLocalizer["DiplomaEligible"]</span>
-                        }
-                        else if (Model.Summary.AtRiskDrop)
+                        @if (Model.Summary.AtRiskDrop)
                         {
                             <span class="badge text-bg-danger fs-6">@SharedLocalizer["AtRisk"]</span>
                         }
-                        else
+                        else if (!Model.Summary.DiplomaEligible)
                         {
                             <span class="badge text-bg-warning fs-6">@SharedLocalizer["Below80"]</span>
+                        }
+                        else if (Model.Summary.BelowDiplomaWarning)
+                        {
+                            <span class="badge text-bg-warning fs-6">@SharedLocalizer["Below80"]</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-success fs-6">@SharedLocalizer["DiplomaEligible"]</span>
                         }
                     </div>
                 </div>

@@ -273,6 +273,7 @@ public class AttendanceService(ApplicationDbContext dbContext, ICalendarService 
             metrics.AttendancePercentage,
             metrics.RealAttendancePercentage,
             metrics.DiplomaEligible,
+            metrics.BelowDiplomaWarning,
             metrics.AtRiskDrop);
     }
 

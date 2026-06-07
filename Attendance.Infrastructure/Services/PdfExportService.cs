@@ -253,9 +253,10 @@ public class PdfExportService : IPdfExportService
 
                 var (diplomaText, diplomaColor) = student switch
                 {
-                    { DiplomaEligible: true } => ("OK", GreenColor),
                     { AtRiskDrop: true } => ("At risk", RedColor),
-                    _ => ("Below 80%", OrangeColor)
+                    { DiplomaEligible: false } => ("Below 80%", OrangeColor),
+                    { BelowDiplomaWarning: true } => ("Below 85%", OrangeColor),
+                    _ => ("OK", GreenColor)
                 };
 
                 table.Cell().Background(bg).Padding(3).AlignCenter()
