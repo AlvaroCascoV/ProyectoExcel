@@ -183,8 +183,8 @@ public class AttendanceController(IAttendanceApiClient apiClient, IStringLocaliz
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadCalendar(int courseId, IFormFile file, CancellationToken cancellationToken)
-    {
         if (file == null || file.Length == 0)
         {
             return Json(new { success = false, message = "No file was uploaded." });
