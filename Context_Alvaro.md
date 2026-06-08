@@ -8,11 +8,11 @@ For full setup instructions, test accounts, and troubleshooting see [README.md](
 
 ## Solution layout
 
-| Project | Folder | Role | Port |
-|---------|--------|------|------|
-| **ApiProyectoExcel** | `ApiProyectoExcel/` | REST API, JWT authentication, OpenAPI + Scalar docs | `5180` |
-| **MvcProyectoExcel** | `ProyectoExcel/` | ASP.NET Core MVC frontend, cookie authentication | `5162` |
-| **Attendance.Infrastructure** | `Attendance.Infrastructure/` | Shared class library: EF Core, entities, DTOs, services | — |
+| Project                       | Folder                       | Role                                                    | Port   |
+| ----------------------------- | ---------------------------- | ------------------------------------------------------- | ------ |
+| **ApiProyectoExcel**          | `ApiProyectoExcel/`          | REST API, JWT authentication, OpenAPI + Scalar docs     | `5180` |
+| **MvcProyectoExcel**          | `ProyectoExcel/`             | ASP.NET Core MVC frontend, cookie authentication        | `5162` |
+| **Attendance.Infrastructure** | `Attendance.Infrastructure/` | Shared class library: EF Core, entities, DTOs, services | —      |
 
 Both web projects reference `Attendance.Infrastructure`. The MVC app never touches the database directly — it calls the API over HTTP.
 
@@ -54,15 +54,15 @@ erDiagram
 
 All entities live in `Attendance.Infrastructure/Entities/`:
 
-| Entity | SQL Table | Notes |
-|--------|-----------|-------|
-| `TajamarUser` | `USUARIOSTAJAMAR` | Students, teachers, admins |
-| `RoleTajamar` | `ROLESCHARLASTAJAMAR` | Legacy role lookup |
-| `Course` | `CURSOSTAJAMAR` | Courses with start/end dates |
-| `CourseEnrollment` | `CURSOSUSUARIOSTAJAMAR` | Many-to-many join |
-| `AttendanceRecord` | `ASISTENCIATAJAMAR` | One record per student per course per day |
-| `AttendanceStatus` | *(enum)* | Present(0), Absent(1), Late(2), JustifiedAbsent(3), JustifiedLate(4), EarlyLeave(5), JustifiedEarlyLeave(6) |
-| `ApplicationUser` | ASP.NET Identity tables | Extends `IdentityUser` with `TajamarUserId` FK |
+| Entity             | SQL Table               | Notes                                                                                                       |
+| ------------------ | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `TajamarUser`      | `USUARIOSTAJAMAR`       | Students, teachers, admins                                                                                  |
+| `RoleTajamar`      | `ROLESCHARLASTAJAMAR`   | Legacy role lookup                                                                                          |
+| `Course`           | `CURSOSTAJAMAR`         | Courses with start/end dates                                                                                |
+| `CourseEnrollment` | `CURSOSUSUARIOSTAJAMAR` | Many-to-many join                                                                                           |
+| `AttendanceRecord` | `ASISTENCIATAJAMAR`     | One record per student per course per day                                                                   |
+| `AttendanceStatus` | _(enum)_                | Present(0), Absent(1), Late(2), JustifiedAbsent(3), JustifiedLate(4), EarlyLeave(5), JustifiedEarlyLeave(6) |
+| `ApplicationUser`  | ASP.NET Identity tables | Extends `IdentityUser` with `TajamarUserId` FK                                                              |
 
 Entity properties use English names; SQL column mapping is done via `.HasColumnName()` in the Fluent API.
 
@@ -81,15 +81,15 @@ Entity properties use English names; SQL column mapping is done via `.HasColumnN
 
 All services live in `Attendance.Infrastructure/Services/` with interface + implementation pairs, registered as scoped (except `PdfExportService` which is singleton):
 
-| Service | Purpose |
-|---------|---------|
-| `AuthService` / `JwtTokenService` | Identity login, JWT creation |
-| `CourseService` | Course listing, student roster |
-| `AttendanceService` | Session CRUD, student records/summaries, dev seeding |
-| `StatisticsService` | Course-level stats, rankings, filtering |
-| `PdfExportService` | PDF generation via QuestPDF |
-| `AttendanceMetricsCalculator` | Pure calculation: attendance %, diploma eligibility (≥80%), drop risk (<75%) |
-| `LectiveDayCalendar` | Weekday-only academic calendar, 156 lective days/year |
+| Service                           | Purpose                                                                      |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `AuthService` / `JwtTokenService` | Identity login, JWT creation                                                 |
+| `CourseService`                   | Course listing, student roster                                               |
+| `AttendanceService`               | Session CRUD, student records/summaries, dev seeding                         |
+| `StatisticsService`               | Course-level stats, rankings, filtering                                      |
+| `PdfExportService`                | PDF generation via QuestPDF                                                  |
+| `AttendanceMetricsCalculator`     | Pure calculation: attendance %, diploma eligibility (≥80%), drop risk (<75%) |
+| `LectiveDayCalendar`              | Weekday-only academic calendar, 156 lective days/year                        |
 
 DI registration is centralized in `Attendance.Infrastructure/Extensions/ServiceCollectionExtensions.cs` via `AddAttendanceInfrastructure()`.
 
