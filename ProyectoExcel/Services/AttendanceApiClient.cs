@@ -70,7 +70,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var response = await httpClient.GetAsync($"api/courses?activeOnly={activeOnly.ToString().ToLowerInvariant()}", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<CourseDto>>(cancellationToken) ?? [];
     }
 
@@ -79,7 +79,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var response = await httpClient.GetAsync($"api/courses/{courseId}/students", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<StudentDto>>(cancellationToken) ?? [];
     }
 
@@ -97,7 +97,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<AttendanceSessionDto>(cancellationToken);
     }
 
@@ -112,12 +112,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             request,
             cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            var message = ApiErrorHelper.ExtractMessage(body);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
-        }
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
     }
 
     public async Task<IReadOnlyList<DateOnly>> GetAttendanceDatesAsync(
@@ -125,7 +120,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var response = await httpClient.GetAsync($"api/courses/{courseId}/attendance/dates", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<DateOnly>>(cancellationToken) ?? [];
     }
 
@@ -158,7 +153,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         }
 
         var response = await httpClient.GetAsync(url, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<AttendanceRecordDto>>(cancellationToken) ?? [];
     }
 
@@ -172,14 +167,14 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<AttendanceSummaryDto>(cancellationToken);
     }
 
     public async Task<IReadOnlyList<CourseDto>> GetMyCoursesAsync(CancellationToken cancellationToken = default)
     {
         var response = await httpClient.GetAsync("api/attendance/me/courses", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<CourseDto>>(cancellationToken) ?? [];
     }
 
@@ -198,7 +193,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<CourseStatisticsDto>(cancellationToken);
     }
 
@@ -228,7 +223,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
 
         var query = "?" + string.Join("&", queryParts);
         var response = await httpClient.GetAsync($"api/statistics/course/{courseId}/rankings{query}", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<RankingEntryDto>>(cancellationToken) ?? [];
     }
 
@@ -273,12 +268,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            var message = ApiErrorHelper.ExtractMessage(body);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
-        }
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
 
         return await response.Content.ReadFromJsonAsync<SeedAttendanceResultDto>(cancellationToken);
     }
@@ -302,7 +292,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
 
@@ -321,7 +311,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             return null;
         }
 
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
 
@@ -340,7 +330,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
             $"api/statistics/course/{courseId}/export{query}{separator}culture={culture}",
             cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound) return null;
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
 
@@ -356,12 +346,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         content.Add(streamContent, "file", fileName);
 
         var response = await httpClient.PostAsync($"api/courses/{courseId}/calendar/upload", content, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            var message = ApiErrorHelper.ExtractMessage(body);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
-        }
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
 
         return await response.Content.ReadFromJsonAsync<CalendarUploadResultDto>(cancellationToken);
     }
@@ -378,12 +363,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         content.Add(streamContent, "file", fileName);
 
         var response = await httpClient.PostAsync($"api/courses/{courseId}/calendar/preview", content, cancellationToken);
-        if (!response.IsSuccessStatusCode)
-        {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            var message = ApiErrorHelper.ExtractMessage(body);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
-        }
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
 
         return await response.Content.ReadFromJsonAsync<CalendarUploadResultDto>(cancellationToken);
     }
@@ -393,7 +373,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var response = await httpClient.GetAsync($"api/courses/{courseId}/calendar/dates", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<DateOnly>>(cancellationToken) ?? [];
     }
 
@@ -402,7 +382,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         CancellationToken cancellationToken = default)
     {
         var response = await httpClient.GetAsync($"api/courses/{courseId}/calendar/entries", cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<List<CourseCalendarEntryDto>>(cancellationToken) ?? [];
     }
 
@@ -415,7 +395,7 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         {
             return null;
         }
-        response.EnsureSuccessStatusCode();
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<CourseCalendarStatusDto>(cancellationToken);
     }
 }

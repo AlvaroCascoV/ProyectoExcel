@@ -124,8 +124,10 @@ else
             input.addEventListener('input', function () {
                 var q = normalizeText(input.value);
                 tbody.querySelectorAll('tr').forEach(function (row) {
-                    var name = row.cells[1] ? normalizeText(row.cells[1].textContent) : '';
-                    var email = row.cells[2] ? normalizeText(row.cells[2].textContent) : '';
+                    if (row.cells.length < 3) return;
+
+                    var name = normalizeText(row.cells[1].textContent);
+                    var email = normalizeText(row.cells[2].textContent);
                     var haystack = (name + ' ' + email).trim();
                     row.style.display = !q || haystack.includes(q) ? '' : 'none';
                 });

@@ -144,12 +144,11 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-<div class="loading-overlay d-none" id="loadingOverlay" aria-hidden="true">
-    <div class="text-center text-white">
-        <div class="spinner-border mb-3">
-            <span class="visually-hidden">@SharedLocalizer["Loading"]</span>
-        </div>
+<div class="loading-overlay d-none" id="loadingOverlay" data-loading-text="@SharedLocalizer["Loading"]" aria-hidden="true">
+    <div class="text-center text-white" aria-hidden="true">
+        <div class="spinner-border mb-3"></div>
     </div>
+    <span class="visually-hidden" data-loading-status role="status" aria-live="polite" aria-atomic="true">@SharedLocalizer["Loading"]</span>
 </div>
 </body>
 </html>

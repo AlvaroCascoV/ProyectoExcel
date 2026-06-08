@@ -297,22 +297,6 @@
     </div>
 </div>
 
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay" class="loading-overlay d-none">
-    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">@SharedLocalizer["Loading"]</span>
-    </div>
-</div>
-
-<script>
-    function showLoadingOverlay() {
-        const overlay = document.getElementById("loadingOverlay");
-        if (overlay) {
-            overlay.classList.remove("d-none");
-        }
-    }
-</script>
-
 @if (Model.SelectedCourseId.HasValue)
 {
     var attendanceI18n = new Dictionary<string, string>
@@ -566,8 +550,8 @@
                                 }
                                 
                                 // Re-inicializar tooltips y eventos
-                                if (typeof initTooltipsAndOverlay === "function") {
-                                    initTooltipsAndOverlay();
+                                if (typeof initTooltips === "function") {
+                                    initTooltips();
                                 }
                             })
                             .catch(err => {
@@ -598,14 +582,8 @@
                 calendarDays.appendChild(cell);
             }
 
-            // Initialize tooltips for dynamically created calendar cells safely
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                const dynamicTooltips = calendarDays.querySelectorAll('[data-bs-toggle="tooltip"]');
-                dynamicTooltips.forEach(el => {
-                    if (!bootstrap.Tooltip.getInstance(el)) {
-                        new bootstrap.Tooltip(el);
-                    }
-                });
+            if (typeof initTooltips === 'function') {
+                initTooltips();
             }
         }
 
@@ -769,8 +747,7 @@
                         window.location.reload();
                     }, 800);
                 } else {
-                    const overlay = document.getElementById("loadingOverlay");
-                    if (overlay) overlay.classList.add("d-none");
+                    hideLoadingOverlay();
                     confirmUploadBtn.disabled = false;
                     confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${i18n.confirmAndSave}`;
                     cancelUploadBtn.disabled = false;
@@ -778,39 +755,12 @@
                 }
             })
             .catch(err => {
-                const overlay = document.getElementById("loadingOverlay");
-                if (overlay) overlay.classList.add("d-none");
+                hideLoadingOverlay();
                 confirmUploadBtn.disabled = false;
                 confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${i18n.confirmAndSave}`;
                 cancelUploadBtn.disabled = false;
                 alert(i18n.errorUploadFailedNetwork);
             });
         });
-
-        // Initialize tooltips and attach to attendanceForm submission safely
-        function initTooltipsAndOverlay() {
-            // Bootstrap Tooltips
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltipTriggerList.forEach(el => {
-                if (!bootstrap.Tooltip.getInstance(el)) {
-                    new bootstrap.Tooltip(el);
-                }
-            });
-
-            // Form Submit Overlay
-            const attendanceForm = document.getElementById("attendanceForm");
-            if (attendanceForm && !attendanceForm.dataset.submitAttached) {
-                attendanceForm.addEventListener("submit", () => {
-                    showLoadingOverlay();
-                });
-                attendanceForm.dataset.submitAttached = "true";
-            }
-        }
-
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", initTooltipsAndOverlay);
-        } else {
-            initTooltipsAndOverlay();
-        }
     </script>
 }
