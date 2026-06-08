@@ -328,7 +328,19 @@
     <value>Asistencia guardada para {0}.</value>
   </data>
   <data name="ErrorCouldNotSave" xml:space="preserve">
-    <value>No se pudo guardar la asistencia: {0}</value>
+    <value>No se pudo guardar la asistencia. {0}</value>
+  </data>
+  <data name="ErrorNotLectiveDay" xml:space="preserve">
+    <value>El {0} no es un día lectivo para este curso. Selecciona otra fecha en el calendario.</value>
+  </data>
+  <data name="ErrorPastLectiveDaysOnly" xml:space="preserve">
+    <value>Solo se puede registrar asistencia para hoy o días lectivos pasados.</value>
+  </data>
+  <data name="ErrorStudentNotEnrolled" xml:space="preserve">
+    <value>Uno de los alumnos seleccionados no está matriculado en este curso.</value>
+  </data>
+  <data name="ErrorCourseNotFound" xml:space="preserve">
+    <value>No se encontró el curso seleccionado.</value>
   </data>
   <data name="ErrorInvalidDate" xml:space="preserve">
     <value>Formato de fecha no válido.</value>

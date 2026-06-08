@@ -27,17 +27,29 @@
 
 @if (!string.IsNullOrEmpty(successMessage))
 {
-    <div class="alert alert-success border-0 shadow-sm mb-3">@successMessage</div>
+    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">@successMessage</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
 {
-    <div class="alert alert-danger border-0 shadow-sm mb-3">@Model.ErrorMessage</div>
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start gap-2 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">@Model.ErrorMessage</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger border-0 shadow-sm mb-3">@errorMessage</div>
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start gap-2 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">@errorMessage</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <!-- MAIN GRID LAYOUT -->

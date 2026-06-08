@@ -70,11 +70,9 @@ public static class StatisticsChartDataBuilder
                 .Select(s => s.RealAttendancePercentage)
                 .ToArray(),
             AtRiskLabels = atRiskRankings
-                .Where(r => r.RealAttendancePercentage >= 75)
                 .Select(r => r.FullName)
                 .ToArray(),
             AtRiskValues = atRiskRankings
-                .Where(r => r.RealAttendancePercentage >= 75)
                 .Select(r => r.RealAttendancePercentage)
                 .ToArray()
         };

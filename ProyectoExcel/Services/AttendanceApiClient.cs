@@ -115,7 +115,8 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body);
+            var message = ApiErrorHelper.ExtractMessage(body);
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
         }
     }
 
@@ -275,7 +276,8 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body);
+            var message = ApiErrorHelper.ExtractMessage(body);
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
         }
 
         return await response.Content.ReadFromJsonAsync<SeedAttendanceResultDto>(cancellationToken);
@@ -357,7 +359,8 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body);
+            var message = ApiErrorHelper.ExtractMessage(body);
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
         }
 
         return await response.Content.ReadFromJsonAsync<CalendarUploadResultDto>(cancellationToken);
@@ -378,7 +381,8 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new HttpRequestException(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body);
+            var message = ApiErrorHelper.ExtractMessage(body);
+            throw new HttpRequestException(string.IsNullOrWhiteSpace(message) ? response.ReasonPhrase : message);
         }
 
         return await response.Content.ReadFromJsonAsync<CalendarUploadResultDto>(cancellationToken);

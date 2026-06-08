@@ -521,7 +521,8 @@ tr.row-risk-warning85 { background-color: var(--ta-warn85-row) !important; }
 /* ── Sticky table header ───────────────────────────────── */
 .ta-table-sticky thead th {
   position:sticky; top:0; z-index:2;
-  background:var(--bs-body-bg); box-shadow:0 1px 0 var(--ta-border);
+  background:var(--ta-surface-raised); color:var(--bs-body-color);
+  box-shadow:0 1px 0 var(--ta-border);
 }
 
 /* ── Hero ──────────────────────────────────────────────── */

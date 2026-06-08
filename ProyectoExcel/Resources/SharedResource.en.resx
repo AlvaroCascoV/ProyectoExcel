@@ -328,7 +328,19 @@
     <value>Attendance saved for {0}.</value>
   </data>
   <data name="ErrorCouldNotSave" xml:space="preserve">
-    <value>Could not save attendance: {0}</value>
+    <value>Could not save attendance. {0}</value>
+  </data>
+  <data name="ErrorNotLectiveDay" xml:space="preserve">
+    <value>{0} is not a lective day for this course. Please choose another date on the calendar.</value>
+  </data>
+  <data name="ErrorPastLectiveDaysOnly" xml:space="preserve">
+    <value>Attendance can only be recorded for today or past lective days.</value>
+  </data>
+  <data name="ErrorStudentNotEnrolled" xml:space="preserve">
+    <value>One of the selected students is not enrolled in this course.</value>
+  </data>
+  <data name="ErrorCourseNotFound" xml:space="preserve">
+    <value>The selected course could not be found.</value>
   </data>
   <data name="ErrorInvalidDate" xml:space="preserve">
     <value>Invalid date format.</value>
