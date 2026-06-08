@@ -9,11 +9,11 @@ Coding and agent rules: [AGENTS_Alvaro.md](AGENTS_Alvaro.md).
 
 ## Solution layout
 
-| Project | Folder | Role | Port |
-|---------|--------|------|------|
-| **ApiProyectoExcel** | `ApiProyectoExcel/` | REST API, JWT authentication, OpenAPI + Scalar docs | `5180` |
-| **MvcProyectoExcel** | `ProyectoExcel/` | ASP.NET Core MVC frontend, cookie authentication | `5162` |
-| **Attendance.Infrastructure** | `Attendance.Infrastructure/` | Shared class library: EF Core, entities, DTOs, services | — |
+| Project                       | Folder                       | Role                                                    | Port   |
+| ----------------------------- | ---------------------------- | ------------------------------------------------------- | ------ |
+| **ApiProyectoExcel**          | `ApiProyectoExcel/`          | REST API, JWT authentication, OpenAPI + Scalar docs     | `5180` |
+| **MvcProyectoExcel**          | `ProyectoExcel/`             | ASP.NET Core MVC frontend, cookie authentication        | `5162` |
+| **Attendance.Infrastructure** | `Attendance.Infrastructure/` | Shared class library: EF Core, entities, DTOs, services | —      |
 
 Both web projects reference `Attendance.Infrastructure`. The MVC app never touches the database directly — it calls the API over HTTP.
 
@@ -64,6 +64,11 @@ All entities live in `Attendance.Infrastructure/Entities/`:
 | `CourseEnrollment` | `CURSOSUSUARIOSTAJAMAR` | Many-to-many join |
 | `AttendanceRecord` | `ASISTENCIATAJAMAR` | One record per student per course per day |
 | `CourseCalendarEntry` | `CALENDARIOCURSO` | Dynamic course academic calendar dates (EF-managed) |
+| `Device` | `DISPOSITIVOSTAJAMAR` | Classroom machine identified by cookie GUID |
+| `Position` | `POSICIONESTAJAMAR` | Classroom seat codes (e.g. T38/W19) |
+| `DevicePositionAssignment` | `DISPOSITIVOPOSICIONTAJAMAR` | Device-to-position mapping with history |
+| `PositionUserAssignment` | `POSICIONUSUARIOSTAJAMAR` | Position-to-student mapping with history |
+| `CheckInRecord` | `CHECKINSTAJAMAR` | Timestamped student check-in at a position |
 | `AttendanceStatus` | *(enum)* | See enum table below |
 | `ApplicationUser` | ASP.NET Identity tables | Extends `IdentityUser` with `TajamarUserId` FK |
 
@@ -86,7 +91,7 @@ Entity properties use English names; SQL column mapping is done via `.HasColumnN
 ## Data access
 
 - **DbContext:** `ApplicationDbContext` extends `IdentityDbContext<ApplicationUser>`. Configured in `Attendance.Infrastructure/Data/ApplicationDbContext.cs`.
-- **Legacy tables** use `ExcludeFromMigrations()` — EF Core reads/writes them but never alters their schema. Only ASP.NET Identity tables and `CALENDARIOCURSO` are managed by migrations.
+- **Legacy tables** use `ExcludeFromMigrations()` — EF Core reads/writes them but never alters their schema. ASP.NET Identity tables, `CALENDARIOCURSO`, and check-in tables are managed by migrations or `script.sql` for fresh dev setups.
 - **No repository layer.** Services inject `ApplicationDbContext` directly and query with LINQ.
 - **DbInitializer** (`Attendance.Infrastructure/Data/DbInitializer.cs`): runs migrations on API startup, seeds Identity roles and user accounts from the legacy `USUARIOSTAJAMAR` table.
 
@@ -102,6 +107,7 @@ All services live in `Attendance.Infrastructure/Services/` with interface + impl
 | `CourseService` | Course listing, student roster |
 | `AttendanceService` | Session CRUD, student records/summaries, dev seeding |
 | `StatisticsService` | Course-level stats, rankings, filtering |
+| `CheckInService` | Device registration, position resolution, student check-in |
 | `AttendanceMetricsCalculator` | Pure calc: attendance %, diploma eligibility (≥80%), warning (<85%), drop risk (<75%) |
 | `LectiveDayCalendar` | Weekday-only academic calendar, 156 lective days/year (fallback when no custom calendar) |
 | `CalendarParserService` | Parses uploaded calendar Excel spreadsheets (.xlsx) using ClosedXML |
@@ -152,6 +158,14 @@ DI registration is centralized in `Attendance.Infrastructure/Extensions/ServiceC
 | GET | `/api/courses/{id}/calendar/dates` | List of lective dates in calendar | Teacher, Admin, Student |
 | GET | `/api/courses/{id}/calendar/entries` | Detailed calendar entry list | Teacher, Admin |
 | GET | `/api/courses/{id}/calendar/status` | Course calendar upload status | Teacher, Admin |
+| POST | `/api/devices/register` | Register or refresh device cookie | Authenticated |
+| GET | `/api/devices` | List devices (admin) | Teacher, Admin |
+| POST | `/api/devices/{id}/assign-position` | Assign device to position | Teacher, Admin |
+| GET | `/api/positions` | List positions (admin) | Teacher, Admin |
+| POST | `/api/positions/{id}/assign-user` | Assign position to student | Teacher, Admin |
+| POST | `/api/positions/seed` | Seed position codes | Teacher, Admin |
+| GET | `/api/checkins/context` | Check-in context for current device | Student |
+| POST | `/api/checkins` | Record student check-in | Student |
 
 Export endpoints accept optional `?culture=es|en` to localize generated file content (see Export & localization below).
 
@@ -255,10 +269,9 @@ flowchart LR
 - Visual risk alerts — color-coded rows, pulsing badges, dismissible banners at 85% warning threshold
 - Visual UI redesign with custom design tokens (`--ta-*` namespace), stat cards, progress bars, and polished student list / dashboard views
 - Micro-animations: form submit loading overlay spinner, async double-submit prevention, and tooltip auto-initialization
+- Device-based student check-in (cookie GUID + IP audit, device/position admin UI)
 
 ### Planned — Phase 2
-- Secure check-in tied to physical classroom device (TW17, TW18…)
-- Seat assignment table in DB (student ↔ device ↔ date)
 - Rotating seat assignment between students
 
 ### Discarded

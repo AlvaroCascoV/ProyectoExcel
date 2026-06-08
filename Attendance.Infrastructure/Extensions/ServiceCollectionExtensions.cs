@@ -67,6 +67,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddScoped<IStatisticsService, StatisticsService>();
+        services.AddScoped<ICheckInService, CheckInService>();
         services.AddSingleton<IPdfExportService, PdfExportService>();
         services.AddSingleton<IExcelExportService, ExcelExportService>();
         services.AddScoped<ICalendarParserService, CalendarParserService>();

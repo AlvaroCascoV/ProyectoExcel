@@ -17,6 +17,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CourseEnrollment> CourseEnrollments => Set<CourseEnrollment>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
     public DbSet<CourseCalendarEntry> CourseCalendarEntries => Set<CourseCalendarEntry>();
+    public DbSet<Device> Devices => Set<Device>();
+    public DbSet<Position> Positions => Set<Position>();
+    public DbSet<DevicePositionAssignment> DevicePositionAssignments => Set<DevicePositionAssignment>();
+    public DbSet<PositionUserAssignment> PositionUserAssignments => Set<PositionUserAssignment>();
+    public DbSet<CheckInRecord> CheckInRecords => Set<CheckInRecord>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -115,6 +120,118 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        builder.Entity<Device>(entity =>
+        {
+            entity.ToTable("DISPOSITIVOSTAJAMAR");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("IDDISPOSITIVO");
+            entity.Property(e => e.DeviceIdentifier).HasColumnName("DEVICEIDENTIFIER").HasMaxLength(64).IsRequired();
+            entity.Property(e => e.FirstSeenAtUtc).HasColumnName("FIRSTSEENATUTC");
+            entity.Property(e => e.LastSeenAtUtc).HasColumnName("LASTSEENATUTC");
+            entity.Property(e => e.LastSeenIp).HasColumnName("LASTSEENIP").HasMaxLength(64);
+            entity.Property(e => e.LastSeenUserAgent).HasColumnName("LASTSEENUSERAGENT").HasMaxLength(512);
+            entity.Property(e => e.FriendlyName).HasColumnName("FRIENDLYNAME").HasMaxLength(200);
+            entity.Property(e => e.IsActive).HasColumnName("ISACTIVE");
+            entity.HasIndex(e => e.DeviceIdentifier).IsUnique();
+        });
+
+        builder.Entity<Position>(entity =>
+        {
+            entity.ToTable("POSICIONESTAJAMAR");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("IDPOSICION");
+            entity.Property(e => e.ClassCode).HasColumnName("CLASSCODE").HasMaxLength(16).IsRequired();
+            entity.Property(e => e.DeviceCode).HasColumnName("DEVICECODE").HasMaxLength(16).IsRequired();
+            entity.Property(e => e.IsActive).HasColumnName("ISACTIVE");
+            entity.HasIndex(e => new { e.ClassCode, e.DeviceCode }).IsUnique();
+        });
+
+        builder.Entity<DevicePositionAssignment>(entity =>
+        {
+            entity.ToTable("DISPOSITIVOPOSICIONTAJAMAR");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("IDDISPOSITIVOPOSICION");
+            entity.Property(e => e.DeviceId).HasColumnName("IDDISPOSITIVO");
+            entity.Property(e => e.PositionId).HasColumnName("IDPOSICION");
+            entity.Property(e => e.AssignedAtUtc).HasColumnName("ASSIGNEDATUTC");
+            entity.Property(e => e.UnassignedAtUtc).HasColumnName("UNASSIGNEDATUTC");
+            entity.Property(e => e.IsCurrent).HasColumnName("ISCURRENT");
+
+            entity.HasIndex(e => new { e.DeviceId, e.IsCurrent })
+                .IsUnique()
+                .HasFilter("[ISCURRENT] = 1");
+
+            entity.HasOne(e => e.Device)
+                .WithMany(d => d.PositionAssignments)
+                .HasForeignKey(e => e.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Position)
+                .WithMany(p => p.DeviceAssignments)
+                .HasForeignKey(e => e.PositionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<PositionUserAssignment>(entity =>
+        {
+            entity.ToTable("POSICIONUSUARIOSTAJAMAR");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("IDPOSICIONUSUARIO");
+            entity.Property(e => e.PositionId).HasColumnName("IDPOSICION");
+            entity.Property(e => e.TajamarUserId).HasColumnName("IDUSUARIO");
+            entity.Property(e => e.AssignedAtUtc).HasColumnName("ASSIGNEDATUTC");
+            entity.Property(e => e.UnassignedAtUtc).HasColumnName("UNASSIGNEDATUTC");
+            entity.Property(e => e.IsCurrent).HasColumnName("ISCURRENT");
+
+            entity.HasIndex(e => new { e.PositionId, e.IsCurrent })
+                .IsUnique()
+                .HasFilter("[ISCURRENT] = 1");
+
+            entity.HasIndex(e => new { e.TajamarUserId, e.IsCurrent })
+                .HasFilter("[ISCURRENT] = 1");
+
+            entity.HasOne(e => e.Position)
+                .WithMany(p => p.UserAssignments)
+                .HasForeignKey(e => e.PositionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.TajamarUser)
+                .WithMany()
+                .HasForeignKey(e => e.TajamarUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<CheckInRecord>(entity =>
+        {
+            entity.ToTable("CHECKINSTAJAMAR");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("IDCHECKIN");
+            entity.Property(e => e.TajamarUserId).HasColumnName("IDUSUARIO");
+            entity.Property(e => e.DeviceId).HasColumnName("IDDISPOSITIVO");
+            entity.Property(e => e.PositionId).HasColumnName("IDPOSICION");
+            entity.Property(e => e.CheckedInAtUtc).HasColumnName("FECHACHECKINUTC");
+            entity.Property(e => e.ObservedIp).HasColumnName("OBSERVEDIP").HasMaxLength(64);
+
+            entity.HasIndex(e => new { e.TajamarUserId, e.CheckedInAtUtc });
+            entity.HasIndex(e => new { e.DeviceId, e.CheckedInAtUtc });
+            entity.HasIndex(e => new { e.PositionId, e.CheckedInAtUtc });
+
+            entity.HasOne(e => e.TajamarUser)
+                .WithMany()
+                .HasForeignKey(e => e.TajamarUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Device)
+                .WithMany(d => d.CheckIns)
+                .HasForeignKey(e => e.DeviceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Position)
+                .WithMany(p => p.CheckIns)
+                .HasForeignKey(e => e.PositionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         builder.Entity<CourseCalendarEntry>(entity =>
         {
             entity.ToTable("CALENDARIOCURSO");
@@ -135,6 +252,5 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(e => e.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
     }
 }

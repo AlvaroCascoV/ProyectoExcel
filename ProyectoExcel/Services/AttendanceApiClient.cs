@@ -42,6 +42,15 @@ public interface IAttendanceApiClient
     Task<IReadOnlyList<DateOnly>> GetCourseLectiveDatesAsync(int courseId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CourseCalendarEntryDto>> GetCourseCalendarEntriesAsync(int courseId, CancellationToken cancellationToken = default);
     Task<CourseCalendarStatusDto?> GetCourseCalendarStatusAsync(int courseId, CancellationToken cancellationToken = default);
+    Task<RegisterDeviceResponse?> RegisterDeviceAsync(CancellationToken cancellationToken = default);
+    Task<CheckInContextResponse?> GetCheckInContextAsync(CancellationToken cancellationToken = default);
+    Task<CheckInResponse?> CheckInAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<DeviceAdminDto>> GetDevicesAdminAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<PositionAdminDto>> GetPositionsAdminAsync(CancellationToken cancellationToken = default);
+    Task AssignDeviceToPositionAsync(int deviceId, int positionId, CancellationToken cancellationToken = default);
+    Task AssignPositionToUserAsync(int positionId, int tajamarUserId, CancellationToken cancellationToken = default);
+    Task SeedPositionsAsync(string classCode, int from, int to, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<StudentDto>> GetAllStudentsAdminAsync(CancellationToken cancellationToken = default);
 }
 
 public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
@@ -397,6 +406,80 @@ public class AttendanceApiClient(HttpClient httpClient) : IAttendanceApiClient
         }
         await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
         return await response.Content.ReadFromJsonAsync<CourseCalendarStatusDto>(cancellationToken);
+    }
+
+    public async Task<RegisterDeviceResponse?> RegisterDeviceAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync("api/devices/register", null, cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<RegisterDeviceResponse>(cancellationToken);
+    }
+
+    public async Task<CheckInContextResponse?> GetCheckInContextAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync("api/checkins/context", cancellationToken);
+        if (response.StatusCode == HttpStatusCode.NotFound || response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            return null;
+        }
+
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CheckInContextResponse>(cancellationToken);
+    }
+
+    public async Task<CheckInResponse?> CheckInAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync("api/checkins", null, cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<CheckInResponse>(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DeviceAdminDto>> GetDevicesAdminAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync("api/devices", cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<List<DeviceAdminDto>>(cancellationToken) ?? [];
+    }
+
+    public async Task<IReadOnlyList<PositionAdminDto>> GetPositionsAdminAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync("api/positions", cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<List<PositionAdminDto>>(cancellationToken) ?? [];
+    }
+
+    public async Task AssignDeviceToPositionAsync(int deviceId, int positionId, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync(
+            $"api/devices/{deviceId}/assign-position",
+            new AssignDeviceToPositionRequest(positionId),
+            cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+    }
+
+    public async Task AssignPositionToUserAsync(int positionId, int tajamarUserId, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync(
+            $"api/positions/{positionId}/assign-user",
+            new AssignPositionToUserRequest(tajamarUserId),
+            cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+    }
+
+    public async Task SeedPositionsAsync(string classCode, int from, int to, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync(
+            $"api/positions/seed?classCode={Uri.EscapeDataString(classCode)}&from={from}&to={to}",
+            null,
+            cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<StudentDto>> GetAllStudentsAdminAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.GetAsync("api/students", cancellationToken);
+        await ApiErrorHelper.EnsureSuccessOrThrowAsync(response, cancellationToken);
+        return await response.Content.ReadFromJsonAsync<List<StudentDto>>(cancellationToken) ?? [];
     }
 }
 

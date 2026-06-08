@@ -9,6 +9,7 @@ public interface ICourseService
     Task<IReadOnlyList<CourseDto>> GetCoursesAsync(bool activeOnly = true, CancellationToken cancellationToken = default);
     Task<CourseDto?> GetCourseAsync(int courseId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<StudentDto>> GetStudentsByCourseAsync(int courseId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<StudentDto>> GetStudentsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CourseDto>> GetCoursesForUserAsync(int userId, CancellationToken cancellationToken = default);
 }
 
@@ -77,6 +78,24 @@ public class CourseService(ApplicationDbContext dbContext) : ICourseService
                 e.User.Email,
                 e.User.IsActive == true,
                 e.User.ImageUrl))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<StudentDto>> GetStudentsAsync(CancellationToken cancellationToken = default)
+    {
+        return await dbContext.TajamarUsers
+            .AsNoTracking()
+            .Where(u => u.RoleId == 2 && u.Email != null)
+            .OrderBy(u => u.LastName)
+            .ThenBy(u => u.FirstName)
+            .Select(u => new StudentDto(
+                u.Id,
+                u.FirstName ?? string.Empty,
+                u.LastName ?? string.Empty,
+                ((u.FirstName ?? string.Empty) + " " + (u.LastName ?? string.Empty)).Trim(),
+                u.Email,
+                u.IsActive == true,
+                u.ImageUrl))
             .ToListAsync(cancellationToken);
     }
 
