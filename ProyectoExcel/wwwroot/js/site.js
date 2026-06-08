@@ -56,20 +56,22 @@
 		}, 5000);
 	});
 
-	// Show loading overlay on any form submit
-	document.addEventListener('submit', function () {
-		var o = document.getElementById('loadingOverlay');
-		if (o) o.classList.remove('d-none');
+	// Show loading overlay and prevent double submit on successful form submission
+	document.addEventListener('submit', function (e) {
+		setTimeout(function () {
+			if (e.defaultPrevented) return;
+
+			var o = document.getElementById('loadingOverlay');
+			if (o) o.classList.remove('d-none');
+
+			var btn = e.target.querySelector('[type="submit"]:not([data-allow-multi])');
+			if (btn) btn.disabled = true;
+		}, 0);
 	});
 	// Bootstrap tooltip initialization
 	document.addEventListener('DOMContentLoaded', function () {
 		document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
 			new bootstrap.Tooltip(el);
 		});
-	});
-	// Prevent double submit
-	document.addEventListener('submit', function (e) {
-		var btn = e.target.querySelector('[type="submit"]:not([data-allow-multi])');
-		if (btn) setTimeout(function(){ btn.disabled = true; }, 0);
 	});
 })();

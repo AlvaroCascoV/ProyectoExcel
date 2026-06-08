@@ -13,6 +13,11 @@
         ["realPercent"] = SharedLocalizer["ChartLabelRealPercent"].Value
     });
     var confirmSeedTestDataJson = JsonSerializer.Serialize(SharedLocalizer["ConfirmSeedTestData"].Value);
+    var searchLabelsJson = JsonSerializer.Serialize(new Dictionary<string, string>
+    {
+        ["resultSingular"] = SharedLocalizer["SearchResultsCountSingular"].Value,
+        ["resultPlural"] = SharedLocalizer["SearchResultsCountPlural"].Value
+    });
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
@@ -404,22 +409,38 @@
     <script>
         (function () {
             'use strict';
-            var input   = document.getElementById('statsSearch');
-            var countEl = document.getElementById('statsSearchCount');
-            var tbody   = document.querySelector('.ta-table-sticky tbody');
+            var input        = document.getElementById('statsSearch');
+            var countEl      = document.getElementById('statsSearchCount');
+            var tbody        = document.querySelector('.ta-table-sticky tbody');
+            var searchLabels = @Html.Raw(searchLabelsJson);
             if (!input || !tbody) return;
+
+            function normalizeText(value) {
+                return (value || '')
+                    .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .trim();
+            }
+
+            function formatResultCount(count) {
+                var template = count === 1 ? searchLabels.resultSingular : searchLabels.resultPlural;
+                return template.replace('{0}', count);
+            }
+
             input.addEventListener('input', function () {
-                var q = input.value.trim().toLowerCase();
+                var q = normalizeText(input.value);
                 var rows = tbody.querySelectorAll('tr');
                 var n = 0;
                 rows.forEach(function (row) {
-                    var name = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+                    var name = row.cells[1] ? normalizeText(row.cells[1].textContent) : '';
                     var show = !q || name.includes(q);
                     row.style.display = show ? '' : 'none';
                     if (show) n++;
                 });
                 if (countEl) {
-                    countEl.textContent = q ? n + ' resultado' + (n !== 1 ? 's' : '') : '';
+                    countEl.textContent = q ? formatResultCount(n) : '';
                     countEl.classList.toggle('d-none', !q);
                 }
             });

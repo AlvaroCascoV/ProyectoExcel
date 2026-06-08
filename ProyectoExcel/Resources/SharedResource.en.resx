@@ -75,6 +75,12 @@
   <data name="SearchStudents" xml:space="preserve">
     <value>Search student...</value>
   </data>
+  <data name="SearchResultsCountSingular" xml:space="preserve">
+    <value>{0} result</value>
+  </data>
+  <data name="SearchResultsCountPlural" xml:space="preserve">
+    <value>{0} results</value>
+  </data>
   <data name="CourseLabel" xml:space="preserve">
     <value>Course</value>
   </data>

@@ -107,15 +107,27 @@ else
 
 @section Scripts {
     <script>
-        (function(){
-            var i=document.getElementById('studentsSearch');
-            var t=document.querySelector('table tbody');
-            if(!i||!t) return;
-            i.addEventListener('input',function(){
-                var q=i.value.trim().toLowerCase();
-                t.querySelectorAll('tr').forEach(function(r){
-                    var n=r.cells[1]?r.cells[1].textContent.toLowerCase():'';
-                    r.style.display=!q||n.includes(q)?'':'none';
+        (function () {
+            var input = document.getElementById('studentsSearch');
+            var tbody = document.querySelector('table tbody');
+            if (!input || !tbody) return;
+
+            function normalizeText(value) {
+                return (value || '')
+                    .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .trim();
+            }
+
+            input.addEventListener('input', function () {
+                var q = normalizeText(input.value);
+                tbody.querySelectorAll('tr').forEach(function (row) {
+                    var name = row.cells[1] ? normalizeText(row.cells[1].textContent) : '';
+                    var email = row.cells[2] ? normalizeText(row.cells[2].textContent) : '';
+                    var haystack = (name + ' ' + email).trim();
+                    row.style.display = !q || haystack.includes(q) ? '' : 'none';
                 });
             });
         })();
