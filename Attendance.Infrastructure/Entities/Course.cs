@@ -10,4 +10,5 @@ public class Course
 
     public ICollection<CourseEnrollment> Enrollments { get; set; } = [];
     public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = [];
+    public ICollection<CourseCalendarEntry> CalendarEntries { get; set; } = [];
 }

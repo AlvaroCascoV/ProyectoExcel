@@ -13,6 +13,9 @@ public class AttendancePassListViewModel
     public IReadOnlyList<DateOnly> PreviousDates { get; set; } = [];
     public string? ErrorMessage { get; set; }
     public string? SuccessMessage { get; set; }
+    public bool HasCalendar { get; set; }
+    public int LectiveDaysCount { get; set; }
+    public string? CalendarJson { get; set; }
 }
 
 public class AttendanceRowViewModel

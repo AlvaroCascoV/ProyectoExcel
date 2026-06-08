@@ -61,4 +61,5 @@ public record AttendanceSummaryDto(
     decimal AttendancePercentage,
     decimal RealAttendancePercentage,
     bool DiplomaEligible,
+    bool BelowDiplomaWarning,
     bool AtRiskDrop);

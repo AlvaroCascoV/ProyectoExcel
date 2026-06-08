@@ -186,6 +186,50 @@ namespace Attendance.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Attendance.Infrastructure.Entities.CourseCalendarEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("DayType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsLective")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Module")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Room")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Teacher")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId", "Date")
+                        .IsUnique();
+
+                    b.ToTable("CALENDARIOCURSO", (string)null);
+                });
+
             modelBuilder.Entity("Attendance.Infrastructure.Entities.CourseEnrollment", b =>
                 {
                     b.Property<int>("Id")
@@ -451,6 +495,17 @@ namespace Attendance.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Attendance.Infrastructure.Entities.CourseCalendarEntry", b =>
+                {
+                    b.HasOne("Attendance.Infrastructure.Entities.Course", "Course")
+                        .WithMany("CalendarEntries")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("Attendance.Infrastructure.Entities.CourseEnrollment", b =>
                 {
                     b.HasOne("Attendance.Infrastructure.Entities.Course", "Course")
@@ -529,6 +584,8 @@ namespace Attendance.Infrastructure.Migrations
             modelBuilder.Entity("Attendance.Infrastructure.Entities.Course", b =>
                 {
                     b.Navigation("AttendanceRecords");
+
+                    b.Navigation("CalendarEntries");
 
                     b.Navigation("Enrollments");
                 });

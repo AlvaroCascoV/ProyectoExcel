@@ -1,0 +1,32 @@
+@* Replace existing foreach <tr> block in Students/Index.cshtml *@
+@{
+    var idx = 1;
+    foreach (var student in Model.Students)
+    {
+        var parts    = student.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var initials = string.Concat(parts.Take(2).Select(w => char.ToUpper(w[0])));
+        var hue      = (student.FullName.Length > 0 ? (int)student.FullName[0] % 8 : 0).ToString();
+        var rowCss   = student.IsActive ? "" : "ta-row-inactive";
+        <tr class="@rowCss">
+            <td class="text-muted small">@idx</td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="ta-avatar" data-hue="@hue" aria-hidden="true">@initials</span>
+                    <span class="fw-medium">@student.FullName</span>
+                </div>
+            </td>
+            <td class="small text-muted">@student.Email</td>
+            <td>
+                @if (student.IsActive)
+                {
+                    <span class="badge text-bg-success">@SharedLocalizer["StatusActive"]</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-secondary">@SharedLocalizer["StatusInactive"]</span>
+                }
+            </td>
+        </tr>
+        idx++;
+    }
+}

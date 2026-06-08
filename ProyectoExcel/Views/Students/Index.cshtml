@@ -40,19 +40,11 @@ else
         <p class="text-muted">@SharedLocalizer["CourseText"] <strong>@Model.SelectedCourseName</strong></p>
     }
 
-    <div class="row g-2 align-items-center mb-3">
-        <div class="col-12 col-md-6">
-            <div class="input-group">
-                <input id="studentSearchInput"
-                       type="text"
-                       class="form-control"
-                       placeholder="@SharedLocalizer["SearchStudents"]"
-                       autocomplete="off" />
-                <button id="studentSearchClear" class="btn btn-outline-secondary" type="button" aria-label="Clear">
-                    &times;
-                </button>
-            </div>
-            <div id="studentSearchCount" class="small text-muted mt-1 d-none"></div>
+    <div class="mb-3">
+        <div class="ta-search-wrap">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="text" id="studentsSearch" class="form-control form-control-sm"
+                   placeholder="@SharedLocalizer["SearchStudents"]" autocomplete="off" />
         </div>
     </div>
 
@@ -69,19 +61,31 @@ else
             <tbody>
                 @if (Model.Students.Count == 0)
                 {
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">@SharedLocalizer["NoStudentsEnrolled"]</td>
-                    </tr>
+                    <tr><td colspan="4">
+                        <div class="ta-empty">
+                            <i class="bi bi-inbox" aria-hidden="true"></i>
+                            @SharedLocalizer["NoStudentsEnrolled"]
+                        </div>
+                    </td></tr>
                 }
                 else
                 {
-                    var index = 1;
+                    var idx = 1;
                     foreach (var student in Model.Students)
                     {
-                        <tr>
-                            <td>@index</td>
-                            <td>@student.FullName</td>
-                            <td>@student.Email</td>
+                        var parts    = student.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        var initials = string.Concat(parts.Take(2).Select(w => char.ToUpper(w[0])));
+                        var hue      = (student.FullName.Length > 0 ? (int)student.FullName[0] % 8 : 0).ToString();
+                        var rowCss   = student.IsActive ? "" : "ta-row-inactive";
+                        <tr class="@rowCss">
+                            <td class="text-muted small">@idx</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="ta-avatar" data-hue="@hue" aria-hidden="true">@initials</span>
+                                    <span class="fw-medium">@student.FullName</span>
+                                </div>
+                            </td>
+                            <td class="small text-muted">@student.Email</td>
                             <td>
                                 @if (student.IsActive)
                                 {
@@ -93,7 +97,7 @@ else
                                 }
                             </td>
                         </tr>
-                        index++;
+                        idx++;
                     }
                 }
             </tbody>
@@ -104,15 +108,9 @@ else
 @section Scripts {
     <script>
         (function () {
-            const input = document.getElementById('studentSearchInput');
-            const clearBtn = document.getElementById('studentSearchClear');
-            const countEl = document.getElementById('studentSearchCount');
-            const table = document.querySelector('table');
-            const tbody = table ? table.querySelector('tbody') : null;
-
-            if (!input || !clearBtn || !countEl || !tbody) return;
-
-            const allRows = Array.from(tbody.querySelectorAll('tr'));
+            var input = document.getElementById('studentsSearch');
+            var tbody = document.querySelector('table tbody');
+            if (!input || !tbody) return;
 
             function normalizeText(value) {
                 return (value || '')
@@ -123,42 +121,17 @@ else
                     .trim();
             }
 
-            function update() {
-                const q = normalizeText(input.value);
-                let visible = 0;
+            input.addEventListener('input', function () {
+                var q = normalizeText(input.value);
+                tbody.querySelectorAll('tr').forEach(function (row) {
+                    if (row.cells.length < 3) return;
 
-                for (const row of allRows) {
-                    const cells = row.querySelectorAll('td');
-                    const nameCell = cells.length > 1 ? cells[1] : null; // column index 1
-                    const emailCell = cells.length > 2 ? cells[2] : null; // column index 2
-
-                    const name = normalizeText(nameCell ? nameCell.textContent : '');
-                    const email = normalizeText(emailCell ? emailCell.textContent : '');
-                    const haystack = `${name} ${email}`.trim();
-
-                    const show = q.length === 0 || haystack.includes(q);
-                    row.classList.toggle('d-none', !show);
-                    if (show) visible++;
-                }
-
-                if (q.length === 0) {
-                    countEl.classList.add('d-none');
-                    countEl.textContent = '';
-                    return;
-                }
-
-                countEl.classList.remove('d-none');
-                countEl.textContent = `${visible} / ${allRows.length}`;
-            }
-
-            input.addEventListener('input', update);
-            clearBtn.addEventListener('click', function () {
-                input.value = '';
-                update();
-                input.focus();
+                    var name = normalizeText(row.cells[1].textContent);
+                    var email = normalizeText(row.cells[2].textContent);
+                    var haystack = (name + ' ' + email).trim();
+                    row.style.display = !q || haystack.includes(q) ? '' : 'none';
+                });
             });
-
-            update();
         })();
     </script>
 }

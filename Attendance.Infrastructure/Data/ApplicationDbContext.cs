@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<TajamarUser> TajamarUsers => Set<TajamarUser>();
     public DbSet<CourseEnrollment> CourseEnrollments => Set<CourseEnrollment>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+    public DbSet<CourseCalendarEntry> CourseCalendarEntries => Set<CourseCalendarEntry>();
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<Position> Positions => Set<Position>();
     public DbSet<DevicePositionAssignment> DevicePositionAssignments => Set<DevicePositionAssignment>();
@@ -231,5 +232,25 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        builder.Entity<CourseCalendarEntry>(entity =>
+        {
+            entity.ToTable("CALENDARIOCURSO");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CourseId).IsRequired();
+            entity.Property(e => e.Date).IsRequired();
+            entity.Property(e => e.IsLective).IsRequired();
+            entity.Property(e => e.DayType).HasMaxLength(50);
+            entity.Property(e => e.Module).HasMaxLength(500);
+            entity.Property(e => e.Teacher).HasMaxLength(200);
+            entity.Property(e => e.Room).HasMaxLength(50);
+            entity.Property(e => e.UploadedAt).IsRequired();
+
+            entity.HasIndex(e => new { e.CourseId, e.Date }).IsUnique();
+
+            entity.HasOne(e => e.Course)
+                .WithMany(c => c.CalendarEntries)
+                .HasForeignKey(e => e.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
