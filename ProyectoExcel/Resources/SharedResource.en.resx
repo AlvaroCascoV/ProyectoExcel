@@ -75,6 +75,12 @@
   <data name="SearchStudents" xml:space="preserve">
     <value>Search student...</value>
   </data>
+  <data name="SearchResultsCountSingular" xml:space="preserve">
+    <value>{0} result</value>
+  </data>
+  <data name="SearchResultsCountPlural" xml:space="preserve">
+    <value>{0} results</value>
+  </data>
   <data name="CourseLabel" xml:space="preserve">
     <value>Course</value>
   </data>
@@ -328,7 +334,19 @@
     <value>Attendance saved for {0}.</value>
   </data>
   <data name="ErrorCouldNotSave" xml:space="preserve">
-    <value>Could not save attendance: {0}</value>
+    <value>Could not save attendance. {0}</value>
+  </data>
+  <data name="ErrorNotLectiveDay" xml:space="preserve">
+    <value>{0} is not a lective day for this course. Please choose another date on the calendar.</value>
+  </data>
+  <data name="ErrorPastLectiveDaysOnly" xml:space="preserve">
+    <value>Attendance can only be recorded for today or past lective days.</value>
+  </data>
+  <data name="ErrorStudentNotEnrolled" xml:space="preserve">
+    <value>One of the selected students is not enrolled in this course.</value>
+  </data>
+  <data name="ErrorCourseNotFound" xml:space="preserve">
+    <value>The selected course could not be found.</value>
   </data>
   <data name="ErrorInvalidDate" xml:space="preserve">
     <value>Invalid date format.</value>
@@ -485,5 +503,17 @@
   </data>
   <data name="AlertDiplomaMessage" xml:space="preserve">
     <value>There are {0} student(s) below the 85% warning threshold.</value>
+  </data>
+  <data name="StudentsAtRiskAlert" xml:space="preserve">
+    <value>students at drop risk</value>
+  </data>
+  <data name="StudentsAtRiskAlertDetail" xml:space="preserve">
+    <value>— real attendance below 75%.</value>
+  </data>
+  <data name="StudentsBelowDiplomaAlert" xml:space="preserve">
+    <value>students below 80% — at risk of losing the diploma.</value>
+  </data>
+  <data name="DiplomaWarning" xml:space="preserve">
+    <value>Real attendance below 85% (warning threshold).</value>
   </data>
 </root>

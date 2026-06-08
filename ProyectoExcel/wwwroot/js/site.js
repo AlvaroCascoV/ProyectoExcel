@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
 	'use strict';
 
 	// --- Dark mode toggle ---
@@ -55,4 +55,59 @@
 			}, 500);
 		}, 5000);
 	});
+
+	window.showLoadingOverlay = function () {
+		var o = document.getElementById('loadingOverlay');
+		if (!o) return;
+
+		var status = o.querySelector('[data-loading-status]');
+		var text = o.getAttribute('data-loading-text') || 'Loading...';
+		if (status) {
+			status.textContent = '';
+			status.textContent = text;
+		}
+
+		o.classList.remove('d-none');
+		o.setAttribute('aria-hidden', 'false');
+		document.body.setAttribute('aria-busy', 'true');
+	};
+
+	window.hideLoadingOverlay = function () {
+		var o = document.getElementById('loadingOverlay');
+		if (!o) return;
+
+		o.classList.add('d-none');
+		o.setAttribute('aria-hidden', 'true');
+		document.body.removeAttribute('aria-busy');
+	};
+
+	// Show loading overlay and prevent double submit on successful form submission
+	document.addEventListener('submit', function (e) {
+		setTimeout(function () {
+			if (e.defaultPrevented) return;
+
+			showLoadingOverlay();
+
+			var submitter = e.submitter;
+			if (submitter) {
+				if (!submitter.hasAttribute('data-allow-multi')) {
+					submitter.disabled = true;
+				}
+			} else if (e.target && typeof e.target.querySelector === 'function') {
+				var btn = e.target.querySelector('[type="submit"]:not([data-allow-multi])');
+				if (btn) btn.disabled = true;
+			}
+		}, 0);
+	});
+	function initTooltips() {
+		if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+		document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+			if (!bootstrap.Tooltip.getInstance(el)) {
+				new bootstrap.Tooltip(el);
+			}
+		});
+	}
+
+	window.initTooltips = initTooltips;
+	document.addEventListener('DOMContentLoaded', initTooltips);
 })();

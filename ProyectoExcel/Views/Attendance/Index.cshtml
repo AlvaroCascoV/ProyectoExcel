@@ -27,17 +27,29 @@
 
 @if (!string.IsNullOrEmpty(successMessage))
 {
-    <div class="alert alert-success border-0 shadow-sm mb-3">@successMessage</div>
+    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">@successMessage</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
 {
-    <div class="alert alert-danger border-0 shadow-sm mb-3">@Model.ErrorMessage</div>
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start gap-2 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">@Model.ErrorMessage</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger border-0 shadow-sm mb-3">@errorMessage</div>
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start gap-2 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+        <div class="flex-grow-1">@errorMessage</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 }
 
 <!-- MAIN GRID LAYOUT -->
@@ -284,22 +296,6 @@
         }
     </div>
 </div>
-
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay" class="loading-overlay d-none">
-    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">@SharedLocalizer["Loading"]</span>
-    </div>
-</div>
-
-<script>
-    function showLoadingOverlay() {
-        const overlay = document.getElementById("loadingOverlay");
-        if (overlay) {
-            overlay.classList.remove("d-none");
-        }
-    }
-</script>
 
 @if (Model.SelectedCourseId.HasValue)
 {
@@ -554,8 +550,8 @@
                                 }
                                 
                                 // Re-inicializar tooltips y eventos
-                                if (typeof initTooltipsAndOverlay === "function") {
-                                    initTooltipsAndOverlay();
+                                if (typeof initTooltips === "function") {
+                                    initTooltips();
                                 }
                             })
                             .catch(err => {
@@ -586,14 +582,8 @@
                 calendarDays.appendChild(cell);
             }
 
-            // Initialize tooltips for dynamically created calendar cells safely
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                const dynamicTooltips = calendarDays.querySelectorAll('[data-bs-toggle="tooltip"]');
-                dynamicTooltips.forEach(el => {
-                    if (!bootstrap.Tooltip.getInstance(el)) {
-                        new bootstrap.Tooltip(el);
-                    }
-                });
+            if (typeof initTooltips === 'function') {
+                initTooltips();
             }
         }
 
@@ -757,8 +747,7 @@
                         window.location.reload();
                     }, 800);
                 } else {
-                    const overlay = document.getElementById("loadingOverlay");
-                    if (overlay) overlay.classList.add("d-none");
+                    hideLoadingOverlay();
                     confirmUploadBtn.disabled = false;
                     confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${i18n.confirmAndSave}`;
                     cancelUploadBtn.disabled = false;
@@ -766,39 +755,12 @@
                 }
             })
             .catch(err => {
-                const overlay = document.getElementById("loadingOverlay");
-                if (overlay) overlay.classList.add("d-none");
+                hideLoadingOverlay();
                 confirmUploadBtn.disabled = false;
                 confirmUploadBtn.innerHTML = `<i class="bi bi-check-circle me-1"></i> ${i18n.confirmAndSave}`;
                 cancelUploadBtn.disabled = false;
                 alert(i18n.errorUploadFailedNetwork);
             });
         });
-
-        // Initialize tooltips and attach to attendanceForm submission safely
-        function initTooltipsAndOverlay() {
-            // Bootstrap Tooltips
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltipTriggerList.forEach(el => {
-                if (!bootstrap.Tooltip.getInstance(el)) {
-                    new bootstrap.Tooltip(el);
-                }
-            });
-
-            // Form Submit Overlay
-            const attendanceForm = document.getElementById("attendanceForm");
-            if (attendanceForm && !attendanceForm.dataset.submitAttached) {
-                attendanceForm.addEventListener("submit", () => {
-                    showLoadingOverlay();
-                });
-                attendanceForm.dataset.submitAttached = "true";
-            }
-        }
-
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", initTooltipsAndOverlay);
-        } else {
-            initTooltipsAndOverlay();
-        }
     </script>
 }

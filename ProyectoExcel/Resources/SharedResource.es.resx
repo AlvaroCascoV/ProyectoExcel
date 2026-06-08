@@ -75,6 +75,12 @@
   <data name="SearchStudents" xml:space="preserve">
     <value>Buscar alumno...</value>
   </data>
+  <data name="SearchResultsCountSingular" xml:space="preserve">
+    <value>{0} resultado</value>
+  </data>
+  <data name="SearchResultsCountPlural" xml:space="preserve">
+    <value>{0} resultados</value>
+  </data>
   <data name="CourseLabel" xml:space="preserve">
     <value>Curso</value>
   </data>
@@ -328,7 +334,19 @@
     <value>Asistencia guardada para {0}.</value>
   </data>
   <data name="ErrorCouldNotSave" xml:space="preserve">
-    <value>No se pudo guardar la asistencia: {0}</value>
+    <value>No se pudo guardar la asistencia. {0}</value>
+  </data>
+  <data name="ErrorNotLectiveDay" xml:space="preserve">
+    <value>El {0} no es un día lectivo para este curso. Selecciona otra fecha en el calendario.</value>
+  </data>
+  <data name="ErrorPastLectiveDaysOnly" xml:space="preserve">
+    <value>Solo se puede registrar asistencia para hoy o días lectivos pasados.</value>
+  </data>
+  <data name="ErrorStudentNotEnrolled" xml:space="preserve">
+    <value>Uno de los alumnos seleccionados no está matriculado en este curso.</value>
+  </data>
+  <data name="ErrorCourseNotFound" xml:space="preserve">
+    <value>No se encontró el curso seleccionado.</value>
   </data>
   <data name="ErrorInvalidDate" xml:space="preserve">
     <value>Formato de fecha no válido.</value>
@@ -485,5 +503,17 @@
   </data>
   <data name="AlertDiplomaMessage" xml:space="preserve">
     <value>Hay {0} alumno(s) por debajo del umbral de advertencia (85%).</value>
+  </data>
+  <data name="StudentsAtRiskAlert" xml:space="preserve">
+    <value>alumnos en riesgo de abandono</value>
+  </data>
+  <data name="StudentsAtRiskAlertDetail" xml:space="preserve">
+    <value>— asistencia real por debajo del 75%.</value>
+  </data>
+  <data name="StudentsBelowDiplomaAlert" xml:space="preserve">
+    <value>alumnos por debajo del 80% — riesgo de perder el diploma.</value>
+  </data>
+  <data name="DiplomaWarning" xml:space="preserve">
+    <value>Asistencia por debajo del 85% (umbral de advertencia).</value>
   </data>
 </root>

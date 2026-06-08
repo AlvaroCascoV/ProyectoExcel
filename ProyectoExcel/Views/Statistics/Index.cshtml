@@ -13,6 +13,11 @@
         ["realPercent"] = SharedLocalizer["ChartLabelRealPercent"].Value
     });
     var confirmSeedTestDataJson = JsonSerializer.Serialize(SharedLocalizer["ConfirmSeedTestData"].Value);
+    var searchLabelsJson = JsonSerializer.Serialize(new Dictionary<string, string>
+    {
+        ["resultSingular"] = SharedLocalizer["SearchResultsCountSingular"].Value,
+        ["resultPlural"] = SharedLocalizer["SearchResultsCountPlural"].Value
+    });
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
@@ -204,47 +209,33 @@
 
     @if (stats.BelowDropThresholdCount > 0)
     {
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center gap-2 mb-3 animate__animated animate__fadeIn" role="alert">
-            <i class="bi bi-exclamation-octagon-fill fs-5"></i>
-            <div>
-                <strong>@SharedLocalizer["AlertDropTitle"]:</strong>
-                @string.Format(SharedLocalizer["AlertDropMessage"].Value, stats.BelowDropThresholdCount)
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+            <div><strong>@stats.BelowDropThresholdCount @SharedLocalizer["StudentsAtRiskAlert"]</strong> @SharedLocalizer["StudentsAtRiskAlertDetail"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
     }
-
-    @if (stats.AtRiskCount > 0)
+    else if (stats.AtRiskCount > 0)
     {
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm d-flex align-items-center gap-2 mb-3 animate__animated animate__fadeIn" role="alert">
-            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-            <div>
-                <strong>@SharedLocalizer["AlertDiplomaTitle"]:</strong>
-                @string.Format(SharedLocalizer["AlertDiplomaMessage"].Value, stats.AtRiskCount)
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-info-circle-fill fs-5 flex-shrink-0"></i>
+            <div>@stats.AtRiskCount @SharedLocalizer["StudentsBelowDiplomaAlert"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="row g-2 align-items-center mb-3">
-        <div class="col-12 col-md-6">
-            <div class="input-group">
-                <input id="studentSearchInput"
-                       type="text"
-                       class="form-control"
-                       placeholder="@SharedLocalizer["SearchStudents"]"
-                       autocomplete="off" />
-                <button id="studentSearchClear" class="btn btn-outline-secondary" type="button" aria-label="Clear">
-                    &times;
-                </button>
-            </div>
-            <div id="studentSearchCount" class="small text-muted mt-1 d-none"></div>
+    <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="ta-search-wrap">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="text" id="statsSearch" class="form-control form-control-sm"
+                   placeholder="@SharedLocalizer["SearchStudents"]" autocomplete="off" />
         </div>
+        <span id="statsSearchCount" class="small text-muted d-none"></span>
     </div>
 
     <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle">
-            <thead class="table-light">
+        <table class="table table-striped table-hover align-middle ta-table-sticky">
+            <thead>
                 <tr>
                     <th>@SharedLocalizer["TableNum"]</th>
                     <th>@SharedLocalizer["TableStudent"]</th>
@@ -261,16 +252,11 @@
             <tbody>
                 @foreach (var student in stats.Students)
                 {
-                    var rowClass = "";
-                    if (student.AtRiskDrop)
-                    {
-                        rowClass = "row-risk-danger";
-                    }
-                    else if (student.BelowDiplomaWarning)
-                    {
-                        rowClass = "row-risk-warning";
-                    }
-                    <tr class="@rowClass">
+                    var rowCss = student.AtRiskDrop ? "row-risk-danger"
+                                  : !student.DiplomaEligible ? "row-risk-warning"
+                                  : student.RealAttendancePercentage < 85 ? "row-risk-warning85"
+                                  : "";
+                    <tr class="@rowCss">
                         <td>@student.Rank</td>
                         <td>@student.FullName</td>
                         <td>@student.AbsentCount</td>
@@ -363,7 +349,7 @@
         const topValues = chartData.topStudentValues ?? [];
         if (topLabels.length > 0) {
             const lowestTop = Math.min(...topValues);
-            const topAxisMin = Math.max(75, Math.min(95, Math.floor(lowestTop - 1)));
+            const topAxisMin = Math.max(70, Math.min(95, Math.floor(lowestTop - 1)));
 
             initChart('topChart', {
                 type: 'bar',
@@ -404,7 +390,7 @@
                     indexAxis: 'y',
                     scales: {
                         x: {
-                            min: 75,
+                            min: 70,
                             max: 100,
                             ticks: { stepSize: 1 }
                         }
@@ -422,15 +408,12 @@
     </script>
     <script>
         (function () {
-            const input = document.getElementById('studentSearchInput');
-            const clearBtn = document.getElementById('studentSearchClear');
-            const countEl = document.getElementById('studentSearchCount');
-            const table = document.querySelector('table');
-            const tbody = table ? table.querySelector('tbody') : null;
-
-            if (!input || !clearBtn || !countEl || !tbody) return;
-
-            const allRows = Array.from(tbody.querySelectorAll('tr'));
+            'use strict';
+            var input        = document.getElementById('statsSearch');
+            var countEl      = document.getElementById('statsSearchCount');
+            var tbody        = document.querySelector('.ta-table-sticky tbody');
+            var searchLabels = @Html.Raw(searchLabelsJson);
+            if (!input || !tbody) return;
 
             function normalizeText(value) {
                 return (value || '')
@@ -441,38 +424,26 @@
                     .trim();
             }
 
-            function update() {
-                const q = normalizeText(input.value);
-                let visible = 0;
-
-                for (const row of allRows) {
-                    const cells = row.querySelectorAll('td');
-                    const nameCell = cells.length > 1 ? cells[1] : null; // column index 1
-                    const name = normalizeText(nameCell ? nameCell.textContent : '');
-
-                    const show = q.length === 0 || name.includes(q);
-                    row.classList.toggle('d-none', !show);
-                    if (show) visible++;
-                }
-
-                if (q.length === 0) {
-                    countEl.classList.add('d-none');
-                    countEl.textContent = '';
-                    return;
-                }
-
-                countEl.classList.remove('d-none');
-                countEl.textContent = `${visible} / ${allRows.length}`;
+            function formatResultCount(count) {
+                var template = count === 1 ? searchLabels.resultSingular : searchLabels.resultPlural;
+                return template.replace('{0}', count);
             }
 
-            input.addEventListener('input', update);
-            clearBtn.addEventListener('click', function () {
-                input.value = '';
-                update();
-                input.focus();
+            input.addEventListener('input', function () {
+                var q = normalizeText(input.value);
+                var rows = tbody.querySelectorAll('tr');
+                var n = 0;
+                rows.forEach(function (row) {
+                    var name = row.cells[1] ? normalizeText(row.cells[1].textContent) : '';
+                    var show = !q || name.includes(q);
+                    row.style.display = show ? '' : 'none';
+                    if (show) n++;
+                });
+                if (countEl) {
+                    countEl.textContent = q ? formatResultCount(n) : '';
+                    countEl.classList.toggle('d-none', !q);
+                }
             });
-
-            update();
         })();
     </script>
 }

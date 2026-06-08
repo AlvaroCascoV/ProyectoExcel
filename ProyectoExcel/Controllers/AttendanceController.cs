@@ -1,3 +1,4 @@
+using System.Globalization;
 using Attendance.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,9 +109,42 @@ public class AttendanceController(
         }
         catch (HttpRequestException ex)
         {
-            model.ErrorMessage = string.Format(localizer["ErrorCouldNotSave"], ex.Message);
+            model.ErrorMessage = LocalizeAttendanceSaveError(ex.Message, model.SelectedDate);
             return await ReloadIndexView(model, cancellationToken);
         }
+    }
+
+    private string LocalizeAttendanceSaveError(string apiMessage, DateOnly selectedDate)
+    {
+        var message = ApiErrorHelper.ExtractMessage(apiMessage);
+        var formattedDate = selectedDate.ToString("d", CultureInfo.CurrentCulture);
+
+        if (message.Contains("not a lective day", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Format(localizer["ErrorNotLectiveDay"], formattedDate);
+        }
+
+        if (message.Contains("today or past lective days", StringComparison.OrdinalIgnoreCase))
+        {
+            return localizer["ErrorPastLectiveDaysOnly"];
+        }
+
+        if (message.Contains("At least one attendance entry", StringComparison.OrdinalIgnoreCase))
+        {
+            return localizer["ErrorNoRowsSubmitted"];
+        }
+
+        if (message.Contains("not enrolled", StringComparison.OrdinalIgnoreCase))
+        {
+            return localizer["ErrorStudentNotEnrolled"];
+        }
+
+        if (message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+        {
+            return localizer["ErrorCourseNotFound"];
+        }
+
+        return string.Format(localizer["ErrorCouldNotSave"], message);
     }
 
     [HttpGet]

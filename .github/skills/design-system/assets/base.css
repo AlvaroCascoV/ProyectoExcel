@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════
+   BASE COMPONENT CLASSES
+   APPEND to bottom of site.css (after all existing rules)
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Stat card ─────────────────────────────────────────── */
+.ta-stat-card {
+  background: var(--ta-surface);
+  border: 1px solid var(--ta-border);
+  border-radius: var(--ta-radius-lg);
+  padding: 1.5rem; text-align: center;
+  box-shadow: var(--ta-shadow-sm);
+  transition: box-shadow var(--ta-ease), transform var(--ta-ease);
+}
+.ta-stat-card:hover { box-shadow: var(--ta-shadow-md); transform: translateY(-2px); }
+.ta-stat-value {
+  font-size: clamp(1.75rem,4vw,2.5rem);
+  font-weight: 700; line-height: 1; letter-spacing: -.02em;
+}
+.ta-stat-label {
+  font-size: .75rem; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--bs-secondary-color); margin-top: .35rem;
+}
+
+/* ── Progress bar ──────────────────────────────────────── */
+.ta-progress { height:8px; border-radius:99px; background:var(--ta-surface-inset); overflow:hidden; }
+.ta-progress-bar { height:100%; border-radius:99px; transition:width .6s cubic-bezier(.4,0,.2,1); }
+
+/* ── Diploma banner ────────────────────────────────────── */
+.ta-diploma-banner {
+  background: var(--ta-surface);
+  border: 1px solid var(--ta-border); border-left-width: 4px;
+  border-radius: var(--ta-radius-md);
+  padding: 1.25rem 1.5rem; box-shadow: var(--ta-shadow-sm); margin-bottom: 1.5rem;
+}
+
+/* ── 85% warning row (new tier) ────────────────────────── */
+tr.row-risk-warning85 { background-color: var(--ta-warn85-row) !important; }
+[data-bs-theme="dark"] tr.row-risk-warning85 { background-color: rgba(255,152,0,.12) !important; }
+
+/* ── Sticky table header ───────────────────────────────── */
+.ta-table-sticky thead th {
+  position:sticky; top:0; z-index:2;
+  background:var(--bs-body-bg); box-shadow:0 1px 0 var(--ta-border);
+}
+
+/* ── Hero ──────────────────────────────────────────────── */
+.ta-hero {
+  background: linear-gradient(135deg,rgba(13,110,253,.05),transparent 70%);
+  border-radius: var(--ta-radius-xl); padding: 4rem 2rem;
+}
+[data-bs-theme="dark"] .ta-hero {
+  background: linear-gradient(135deg,rgba(13,110,253,.10),transparent 70%);
+}
+.ta-hero-badge {
+  display:inline-flex; align-items:center;
+  font-size:.78rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--bs-primary); background:rgba(13,110,253,.10);
+  border-radius:99px; padding:.3rem .85rem; margin-bottom:1rem;
+}
+
+/* ── Feature card ──────────────────────────────────────── */
+.ta-feature-card {
+  background:var(--ta-surface); border:1px solid var(--ta-border);
+  border-radius:var(--ta-radius-lg); padding:1.75rem;
+  box-shadow:var(--ta-shadow-sm);
+  transition:box-shadow var(--ta-ease),transform var(--ta-ease);
+}
+.ta-feature-card:hover { box-shadow:var(--ta-shadow-md); transform:translateY(-3px); }
+.ta-feature-icon {
+  width:48px; height:48px; border-radius:var(--ta-radius-md);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.35rem; margin-bottom:1rem;
+}
+
+/* ── Stats strip ───────────────────────────────────────── */
+.ta-stats-strip {
+  display:flex; align-items:center;
+  background:var(--ta-surface-raised); border:1px solid var(--ta-border);
+  border-radius:var(--ta-radius-lg); padding:1.5rem; box-shadow:var(--ta-shadow-sm);
+}
+.ta-strip-item { flex:1; text-align:center; }
+.ta-strip-value { font-size:1.75rem; font-weight:700; color:var(--bs-primary); }
+.ta-strip-label { font-size:.75rem; color:var(--bs-secondary-color); text-transform:uppercase; }
+.ta-strip-divider { width:1px; height:3rem; background:var(--ta-border); flex-shrink:0; }
+@media (max-width:576px) {
+  .ta-stats-strip { flex-direction:column; gap:1rem; }
+  .ta-strip-divider { width:100%; height:1px; }
+}
+
+/* ── Avatar initials ───────────────────────────────────── */
+.ta-avatar {
+  width:32px; height:32px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:.7rem; font-weight:700; color:#fff; flex-shrink:0;
+}
+.ta-avatar[data-hue="0"]{background:#e74c3c}
+.ta-avatar[data-hue="1"]{background:#e67e22}
+.ta-avatar[data-hue="2"]{background:#f1c40f;color:#333}
+.ta-avatar[data-hue="3"]{background:#2ecc71}
+.ta-avatar[data-hue="4"]{background:#1abc9c}
+.ta-avatar[data-hue="5"]{background:#3498db}
+.ta-avatar[data-hue="6"]{background:#9b59b6}
+.ta-avatar[data-hue="7"]{background:#e91e8c}
+
+/* Inactive student row */
+tr.ta-row-inactive { opacity:.6; transition:opacity .15s ease; }
+tr.ta-row-inactive:hover { opacity:.85; }
+
+/* ── Search input ──────────────────────────────────────── */
+.ta-search-wrap { position:relative; max-width:300px; }
+.ta-search-wrap .bi-search {
+  position:absolute; left:.75rem; top:50%;
+  transform:translateY(-50%); color:var(--bs-secondary-color); pointer-events:none;
+}
+.ta-search-wrap input { padding-left:2.2rem; }
+
+/* ── Empty state ───────────────────────────────────────── */
+.ta-empty { padding:3rem 1rem; text-align:center; color:var(--bs-secondary-color); }
+.ta-empty i { font-size:2.5rem; display:block; margin-bottom:.75rem; }
+
+/* ── Navbar active page link ───────────────────────────── */
+.navbar .nav-link.active-page { font-weight:600; color:var(--bs-primary) !important; }
+
+/* ── Page fade-in (reduced-motion safe) ────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ta-fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  main { animation: ta-fadein .22s ease both; }
+  @keyframes ta-card-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .ta-stat-card:nth-child(1){animation:ta-card-in .3s .05s ease both}
+  .ta-stat-card:nth-child(2){animation:ta-card-in .3s .10s ease both}
+  .ta-stat-card:nth-child(3){animation:ta-card-in .3s .15s ease both}
+  .ta-stat-card:nth-child(4){animation:ta-card-in .3s .20s ease both}
+}
